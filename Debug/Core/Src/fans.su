@@ -1,2 +1,0 @@
-../Core/Src/fans.c:9:5:fan_init	24	static
-../Core/Src/fans.c:16:5:set_fan_percent	16	static
