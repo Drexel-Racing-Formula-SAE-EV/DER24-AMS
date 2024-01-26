@@ -75,10 +75,26 @@ void Error_Handler(void);
 #define IMD_PWM_MCU_GPIO_Port GPIOA
 #define C_SENSE_H_MCU_Pin GPIO_PIN_1
 #define C_SENSE_H_MCU_GPIO_Port GPIOA
+#define FAN_ZONE8_Pin GPIO_PIN_6
+#define FAN_ZONE8_GPIO_Port GPIOA
+#define FAN_ZONE7_Pin GPIO_PIN_7
+#define FAN_ZONE7_GPIO_Port GPIOA
 #define C_SENSE_L_MCU_Pin GPIO_PIN_4
 #define C_SENSE_L_MCU_GPIO_Port GPIOC
+#define FAN_ZONE6_Pin GPIO_PIN_0
+#define FAN_ZONE6_GPIO_Port GPIOB
+#define FAN_ZONE5_Pin GPIO_PIN_1
+#define FAN_ZONE5_GPIO_Port GPIOB
 #define BOOT1_Pin GPIO_PIN_2
 #define BOOT1_GPIO_Port GPIOB
+#define FAN_ZONE4_Pin GPIO_PIN_9
+#define FAN_ZONE4_GPIO_Port GPIOE
+#define FAN_ZONE3_Pin GPIO_PIN_11
+#define FAN_ZONE3_GPIO_Port GPIOE
+#define FAN_ZONE1_Pin GPIO_PIN_13
+#define FAN_ZONE1_GPIO_Port GPIOE
+#define FAN_ZONE2_Pin GPIO_PIN_14
+#define FAN_ZONE2_GPIO_Port GPIOE
 #define BMS_SAFETY_OUT_Pin GPIO_PIN_11
 #define BMS_SAFETY_OUT_GPIO_Port GPIOD
 #define SWDIO_Pin GPIO_PIN_13
@@ -99,6 +115,10 @@ void Error_Handler(void);
 #define IMD_STATUS_MCU_GPIO_Port GPIOD
 #define AIR_CONTROL_MCU_Pin GPIO_PIN_7
 #define AIR_CONTROL_MCU_GPIO_Port GPIOD
+#define FAN_ZONE9_Pin GPIO_PIN_8
+#define FAN_ZONE9_GPIO_Port GPIOB
+#define FAN_ZONE10_Pin GPIO_PIN_9
+#define FAN_ZONE10_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
