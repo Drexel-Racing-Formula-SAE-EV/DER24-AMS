@@ -59,8 +59,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define CS_I2C_SPI_Pin GPIO_PIN_3
-#define CS_I2C_SPI_GPIO_Port GPIOE
 #define PC14_OSC32_IN_Pin GPIO_PIN_14
 #define PC14_OSC32_IN_GPIO_Port GPIOC
 #define PC15_OSC32_OUT_Pin GPIO_PIN_15
@@ -69,14 +67,38 @@ void Error_Handler(void);
 #define PH0_OSC_IN_GPIO_Port GPIOH
 #define PH1_OSC_OUT_Pin GPIO_PIN_1
 #define PH1_OSC_OUT_GPIO_Port GPIOH
+#define STRINGA_CS_Pin GPIO_PIN_0
+#define STRINGA_CS_GPIO_Port GPIOC
+#define STRINGB_CS_Pin GPIO_PIN_1
+#define STRINGB_CS_GPIO_Port GPIOC
+#define IMD_PWM_MCU_Pin GPIO_PIN_0
+#define IMD_PWM_MCU_GPIO_Port GPIOA
+#define C_SENSE_H_MCU_Pin GPIO_PIN_1
+#define C_SENSE_H_MCU_GPIO_Port GPIOA
+#define C_SENSE_L_MCU_Pin GPIO_PIN_4
+#define C_SENSE_L_MCU_GPIO_Port GPIOC
 #define BOOT1_Pin GPIO_PIN_2
 #define BOOT1_GPIO_Port GPIOB
+#define BMS_SAFETY_OUT_Pin GPIO_PIN_11
+#define BMS_SAFETY_OUT_GPIO_Port GPIOD
 #define SWDIO_Pin GPIO_PIN_13
 #define SWDIO_GPIO_Port GPIOA
 #define SWCLK_Pin GPIO_PIN_14
 #define SWCLK_GPIO_Port GPIOA
-#define MEMS_INT2_Pin GPIO_PIN_1
-#define MEMS_INT2_GPIO_Port GPIOE
+#define SCLKB_Pin GPIO_PIN_10
+#define SCLKB_GPIO_Port GPIOC
+#define MISOB_Pin GPIO_PIN_11
+#define MISOB_GPIO_Port GPIOC
+#define MOSIB_Pin GPIO_PIN_12
+#define MOSIB_GPIO_Port GPIOC
+#define CAN_MCU_N_Pin GPIO_PIN_0
+#define CAN_MCU_N_GPIO_Port GPIOD
+#define CAN_MCU_P_Pin GPIO_PIN_1
+#define CAN_MCU_P_GPIO_Port GPIOD
+#define IMD_STATUS_MCU_Pin GPIO_PIN_6
+#define IMD_STATUS_MCU_GPIO_Port GPIOD
+#define AIR_CONTROL_MCU_Pin GPIO_PIN_7
+#define AIR_CONTROL_MCU_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 
