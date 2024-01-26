@@ -7,6 +7,8 @@
 
 #ifndef INC_FANS_H_
 #define INC_FANS_H_
+#include <stdint.h>
+#include "stm32f4xx_hal.h"
 
 typedef struct
 {

@@ -64,8 +64,8 @@ all: main-build
 main-build: DER24-AMS.elf secondary-outputs
 
 # Tool invocations
-DER24-AMS.elf DER24-AMS.map: $(OBJS) $(USER_OBJS) C:\Users\cole\proj\DER24-AMS\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "DER24-AMS.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\cole\proj\DER24-AMS\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="DER24-AMS.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+DER24-AMS.elf DER24-AMS.map: $(OBJS) $(USER_OBJS) C:\Users\Cassius\ Garcia\Documents\School\Drexel\ Electric\ Racing\AMS\DER24-AMS\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "DER24-AMS.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Cassius Garcia\Documents\School\Drexel Electric Racing\AMS\DER24-AMS\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="DER24-AMS.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
