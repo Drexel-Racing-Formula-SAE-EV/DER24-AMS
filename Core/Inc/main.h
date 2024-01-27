@@ -115,6 +115,12 @@ void Error_Handler(void);
 #define IMD_STATUS_MCU_GPIO_Port GPIOD
 #define AIR_CONTROL_MCU_Pin GPIO_PIN_7
 #define AIR_CONTROL_MCU_GPIO_Port GPIOD
+#define SCLKA_Pin GPIO_PIN_3
+#define SCLKA_GPIO_Port GPIOB
+#define MISOA_Pin GPIO_PIN_4
+#define MISOA_GPIO_Port GPIOB
+#define MOSIA_Pin GPIO_PIN_5
+#define MOSIA_GPIO_Port GPIOB
 #define FAN_ZONE9_Pin GPIO_PIN_8
 #define FAN_ZONE9_GPIO_Port GPIOB
 #define FAN_ZONE10_Pin GPIO_PIN_9
