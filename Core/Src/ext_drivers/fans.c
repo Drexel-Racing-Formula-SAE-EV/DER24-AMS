@@ -4,7 +4,7 @@
  *  Created on: Jan 22, 2024
  *      Author: Cassius Garcia
  */
-#include "fans.h"
+#include "ext_drivers/fans.h"
 
 int fan_init(fan_t *fan, TIM_TypeDef *timer, uint64_t max_timer_val, volatile uint32_t *CCR){
 	fan->timer = timer;
