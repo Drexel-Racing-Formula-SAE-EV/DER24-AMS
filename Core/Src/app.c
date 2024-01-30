@@ -24,4 +24,6 @@ void app_create()
 	app_data.max_voltage = 0.0;
 	app_data.min_voltage = 0.0;
 	app_data.current = 0.0;
+
+	board_init(&app_data.board);
 }

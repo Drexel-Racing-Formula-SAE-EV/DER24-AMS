@@ -11,6 +11,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "board.h"
+
 typedef enum
 {
 	STATE_NULL,
@@ -38,7 +40,7 @@ typedef struct
 	float current;
 
 	// accumulator_t acc;
-	// board_t board;
+	board_t board;
 } app_data_t;
 
 void app_create();
