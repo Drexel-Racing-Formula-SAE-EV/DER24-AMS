@@ -6,11 +6,10 @@
  */
 
 #include "board.h"
-#include "stm32f407g.h"
 
 void board_init(board_t *board)
 {
-	// todo init stm
+	stm32f407g_init(&board->stm32f407g);
 
 	// todo: add values
 	fan_init(&board->fans[0], NULL, 65535, NULL);
