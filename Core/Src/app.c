@@ -8,7 +8,7 @@
 #include "app.h"
 
 app_data_t app_data = {0};
-
+// accumulator_t acc;
 void app_create()
 {
 	app_data.hardFault = false;
@@ -26,4 +26,5 @@ void app_create()
 	app_data.current = 0.0;
 
 	board_init(&app_data.board);
+	accumulator_init(&app_data.accumulator);
 }

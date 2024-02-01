@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 #include "board.h"
+#include "ext_drivers/accumulator.h"
 
 typedef enum
 {
@@ -39,8 +40,8 @@ typedef struct
 	float min_voltage;
 	float current;
 
-	// accumulator_t acc;
 	board_t board;
+	accumulator_t accumulator;
 } app_data_t;
 
 void app_create();
