@@ -10,6 +10,8 @@ int fan_init(fan_t *fan, TIM_TypeDef *timer, uint64_t max_timer_val, volatile ui
 	fan->timer = timer;
 	fan->max_timer_val = max_timer_val;
 	fan->CCR = CCR;
+
+	set_fan_percent(fan, 0.0);
 	return 0;
 }
 
