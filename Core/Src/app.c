@@ -8,7 +8,7 @@
 #include "app.h"
 
 app_data_t app_data = {0};
-// accumulator_t acc;
+
 void app_create()
 {
 	app_data.hardFault = false;

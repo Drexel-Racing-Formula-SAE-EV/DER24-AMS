@@ -17,9 +17,9 @@ typedef struct
 {
 	bool valid;
 
-	// ltc device here too!
+	// todo: ltc device here too!
 
-	float volts[NMEAS];
+	float volts[NMEAS];	// accumulator_t acc;
 	float temps[NMEAS];
 
 	float max_temp;
