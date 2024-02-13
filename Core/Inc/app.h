@@ -14,7 +14,6 @@
 #include "main.h"
 #include "board.h"
 #include "ext_drivers/accumulator.h"
-//#include "tasks/fan_task.h"
 
 typedef enum
 {
