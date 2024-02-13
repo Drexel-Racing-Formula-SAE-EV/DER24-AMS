@@ -5,9 +5,15 @@
  *      Author: Cassius Garcia
  */
 #include "tasks/fan_task.h"
-#include "cmsis_os.h"
-#include "app.h"
+//#include "main.h"
 
+void fan_task_fn(void *argument);
+
+TaskHandle_t fan_task_start(app_data_t *data){
+	TaskHandle_t handle;
+	xTaskCreate(fan_task_fn, "fan task", 128, (void *)data, 7, &handle);
+	return handle;
+}
 
 void fan_task_fn(void *argument)
 {
@@ -17,11 +23,11 @@ void fan_task_fn(void *argument)
 		set_fan_percent(&app_data->board.fans[i],25.0);
 	}
 
-
-
   for(;;)
   {
     osDelay(1);
   }
 }
+
+
 

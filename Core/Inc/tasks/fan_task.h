@@ -8,6 +8,9 @@
 #ifndef INC_TASKS_FAN_TASK_H_
 #define INC_TASKS_FAN_TASK_H_
 
-void fan_task_fn(void *argument);
+#include "app.h"
+#include "cmsis_os.h"
+
+TaskHandle_t fan_task_start(app_data_t *data);
 
 #endif /* INC_TASKS_FAN_TASK_H_ */

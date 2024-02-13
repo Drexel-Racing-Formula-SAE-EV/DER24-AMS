@@ -7,6 +7,9 @@
 
 #include "app.h"
 
+#include "cmsis_os.h"
+#include "tasks/fan_task.h"
+
 app_data_t app_data = {0};
 
 void app_create()
@@ -27,4 +30,6 @@ void app_create()
 
 	board_init(&app_data.board);
 	accumulator_init(&app_data.accumulator);
+
+	assert(app_data.fan_task = fan_task_start(&app_data));
 }

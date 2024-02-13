@@ -57,12 +57,12 @@ TIM_HandleTypeDef htim5;
 
 UART_HandleTypeDef huart2;
 
-/* Definitions for fan_task */
-osThreadId_t fan_taskHandle;
-const osThreadAttr_t fan_task_attributes = {
-  .name = "fan_task",
+/* Definitions for null_task */
+osThreadId_t null_taskHandle;
+const osThreadAttr_t null_task_attributes = {
+  .name = "null_task",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* USER CODE BEGIN PV */
 
@@ -81,7 +81,7 @@ static void MX_SPI3_Init(void);
 static void MX_TIM5_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_SPI1_Init(void);
-void fan_task_fn(void *argument);
+void null_task_fn(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -99,7 +99,6 @@ void fan_task_fn(void *argument);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	extern app_data_t app_data;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -154,8 +153,8 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of fan_task */
-  fan_taskHandle = osThreadNew(fan_task_fn, (void*) &app_data, &fan_task_attributes);
+  /* creation of null_task */
+  null_taskHandle = osThreadNew(null_task_fn, NULL, &null_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -773,14 +772,14 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_fan_task_fn */
+/* USER CODE BEGIN Header_null_task_fn */
 /**
-  * @brief  Function implementing the fan_task thread.
+  * @brief  Function implementing the null_task thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_fan_task_fn */
-__weak void fan_task_fn(void *argument)
+/* USER CODE END Header_null_task_fn */
+__weak void null_task_fn(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
