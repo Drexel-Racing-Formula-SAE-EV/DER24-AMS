@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "main.h"
 #include "board.h"
 #include "ext_drivers/accumulator.h"
 
@@ -42,6 +43,8 @@ typedef struct
 
 	board_t board;
 	accumulator_t accumulator;
+
+	TaskHandle_t fan_task;
 } app_data_t;
 
 void app_create();
