@@ -109,9 +109,9 @@ typedef struct
 {
   ic_register config;
   ic_register configb;
-  cv  cells;
-  ax  aux;
-  st  stat;
+  cv cells;
+  ax aux;
+  st stat;
   ic_register com;
   ic_register pwm;
   ic_register pwmb;
@@ -199,7 +199,9 @@ typedef struct
 	SPI_HandleTypeDef hspi[2];
 	GPIO_TypeDef *cs_port[2];
 	uint16_t cs_pin[2];
-} ltc681x_t;
+	uint8_t num_ics;
+	cell_asic *ic_arr;
+} ltc681x_driver_t;
 
 /*!
  Wake isoSPI up from IDlE state and enters the READY state
