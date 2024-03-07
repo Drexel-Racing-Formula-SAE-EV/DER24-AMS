@@ -10,6 +10,7 @@
 
 #include "ext_drivers/fans.h"
 #include "ext_drivers/stm32f407g.h"
+#include "ext_drivers/accumulator.h"
 
 #define NFANS 10
 

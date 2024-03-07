@@ -9,35 +9,20 @@
 #define INC_EXT_DRIVERS_ACCUMULATOR_H_
 
 #include <stdbool.h>
+#include "ext_drivers/LTC6813.h"
 
 #define NSEGS 5
 #define NMEAS 14
 
 typedef struct
 {
-	bool valid;
-
-	// todo: ltc device here too!
-
-	float volts[NMEAS];	// accumulator_t acc;
-	float temps[NMEAS];
-
-	float max_temp;
-	float max_volt;
-	float min_volt;
-} segment_t;
-
-typedef struct
-{
-	segment_t segments[NSEGS];
+	ltc681x_driver_t ltc681x_driver;
+	cell_asic ic_arr[NSEGS];
 
 	float max_temp;
 	float max_volt;
 	float min_volt;
 } accumulator_t;
-
-void segment_init(segment_t *seg, float default_val);
-int segment_read(segment_t *seg);
 
 void accumulator_init(accumulator_t *acc);
 int accumulator_read(accumulator_t *acc);

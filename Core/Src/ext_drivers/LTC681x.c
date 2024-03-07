@@ -45,46 +45,27 @@
 #include <stdint.h>
 #include "ext_drivers/LTC681x.h"
 
-uint8_t blank_data[100];
+uint8_t blank_data[100] = {0xFF};
 
-/* Wake isoSPI up from IDlE state and enters the READY state */
-void wakeup_idle(uint8_t total_ic) //Number of ICs in the system
+/* Wake isoSPI up from IDLE state and enters the READY state */
+void wakeup_idle(ltc681x_driver_t *dev) //Number of ICs in the system
 {
-	for (int i =0; i<total_ic; i++)
+	for(int i = 0; i < dev->num_ics; i++)
 	{
-		if(a_d->ltcstring == 1){
-		   LTC_6813B_CS_RESET//change to defines in help.h - set to be interchangeable depending on spi bus
-		   spi_read_byte(0xFF);//Guarantees the isoSPI will be in ready mode
-		   LTC_6813B_CS_SET
-		}
-		else{
-		   LTC_6813_CS_RESET//change to defines in help.h - set to be interchangeable depending on spi bus
-		   spi_read_byte(0xFF);//Guarantees the isoSPI will be in ready mode
-		   LTC_6813_CS_SET
-		}
+		spi_read_byte(dev, 0xFF);
 	}
 }
 
 /* Generic wakeup command to wake the LTC681x from sleep state */
-void wakeup_sleep(uint8_t total_ic) //Number of ICs in the system
+void wakeup_sleep(ltc681x_driver_t *dev) //Number of ICs in the system
 {
-	for (int i =0; i<total_ic; i++)
+	for(int i = 0; i < dev->num_ics; i++)
 	{
-	   //printf("made it in\r\n");
-		if(a_d->ltcstring == 1){
-		   LTC_6813B_CS_RESET
-		   u_sleep(300); // Guarantees the LTC681x will be in standby
-		   //printf("stuck\r\n");
-		   LTC_6813B_CS_SET
-		   u_sleep(10);
-		}
-		else{
-		   LTC_6813_CS_RESET
-		   u_sleep(300); // Guarantees the LTC681x will be in standby
-		   //printf("stuck\r\n");
-		   LTC_6813_CS_SET
-		   u_sleep(10);
-		}
+		// TODO: check delays. original was 300uS and 10uS
+		LTC861x_set_cs(dev, 0);
+		HAL_Delay(1);
+		LTC861x_set_cs(dev, 1);
+		HAL_Delay(1);
 	}
 }
 
@@ -2357,20 +2338,21 @@ void spi_write_read(uint8_t tx_Data[],//array of data to be written on SPI port
 }
 
 
-uint8_t spi_read_byte(uint8_t tx_dat)
+uint8_t spi_read_byte(ltc681x_driver_t *dev, uint8_t tx_dat)
 {
   uint8_t data;
   uint8_t blank_data[1]={tx_dat};
-  //data = (uint8_t)SPI.transfer(0xFF);
-  if(a_d->ltcstring == 1){
-	  HAL_SPI_TransmitReceive(a_d->hspi2,blank_data, data,1,100);
-  }
-  else{
-	  HAL_SPI_TransmitReceive(a_d->hspi1,blank_data, data,1,100);
-  }
-  //HAL_SPI_Transmit(a_d->hspi1,blank_data, 1,100);
-  //printf("%x\r\n",data);
-  return(data);
+
+  LTC681x_set_cs(dev, 0);
+  HAL_SPI_TransmitReceive(dev->hspi[dev->string], blank_data, data,1,100);
+  LTC681x_set_cs(dev, 1);
+
+  return data;
+}
+
+int LTC681x_set_cs(ltc681x_driver_t *dev, int state)
+{
+	HAL_GPIO_WritePin(dev->cs_port[dev->string], dev->cs_pin[dev->string], state);
 }
 
 void init_app_data_681x(app_data *app_data_init)

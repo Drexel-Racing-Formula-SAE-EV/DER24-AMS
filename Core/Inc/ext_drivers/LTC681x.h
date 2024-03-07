@@ -207,13 +207,13 @@ typedef struct
  Wake isoSPI up from IDlE state and enters the READY state
  @return void
  */
-void wakeup_idle(uint8_t total_ic);//!< Number of ICs in the daisy chain
+void wakeup_idle(ltc681x_driver_t *dev);//!< Number of ICs in the daisy chain
 
 /*!
  Wake the LTC681x from the sleep state
  @return void
  */
-void wakeup_sleep(uint8_t total_ic); //!< Number of ICs in the daisy chain
+void wakeup_sleep(ltc681x_driver_t *dev); //!< Number of ICs in the daisy chain
 
 /*!
  Sends a command to the BMS IC. This code will calculate the PEC code for the transmitted command
@@ -800,7 +800,9 @@ void spi_write_read(uint8_t tx_Data[],//array of data to be written on SPI port
                     uint8_t rx_len //Option: number of bytes to be read from the SPI port
                    );
 
-uint8_t spi_read_byte(uint8_t tx_dat);//name conflicts with linduino also needs to take a byte as a parameter
+uint8_t spi_read_byte(ltc681x_driver_t *dev, uint8_t tx_dat);//name conflicts with linduino also needs to take a byte as a parameter
+
+int LTC681x_set_cs(ltc681x_driver_t *dev, int state);
 
 void init_app_data_681x(app_data *app_data_init);
 
