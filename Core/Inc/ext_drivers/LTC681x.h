@@ -219,7 +219,7 @@ void wakeup_sleep(ltc681x_driver_t *dev); //!< Number of ICs in the daisy chain
  Sends a command to the BMS IC. This code will calculate the PEC code for the transmitted command
  @return void
  */
-void cmd_68(uint8_t tx_cmd[2]); //!< 2 byte array containing the BMS command to be sent
+void cmd_68(ltc681x_driver_t *dev, uint8_t tx_cmd[2]); //!< 2 byte array containing the BMS command to be sent
 
 /*!
  Writes an array of data to the daisy chain
@@ -294,7 +294,8 @@ int8_t LTC681x_rdcfgb(uint8_t total_ic, //!< Number of ICs in the system
  The type of ADC conversion executed can be changed by setting the following parameters:
  @return void
  */
-void LTC681x_adcv(uint8_t MD, //!< ADC conversion Mode
+void LTC681x_adcv(ltc681x_driver_t *dev, // device driver
+				  uint8_t MD, //!< ADC conversion Mode
                   uint8_t DCP, //!< Controls if Discharge is permitted during conversion
                   uint8_t CH //!< Sets which Cell channels are converted
                  );
@@ -303,7 +304,8 @@ void LTC681x_adcv(uint8_t MD, //!< ADC conversion Mode
  Start a GPIO and Vref2 Conversion
  @return void
  */
-void LTC681x_adax( uint8_t MD, //!< ADC Conversion Mode
+void LTC681x_adax( ltc681x_driver_t *dev, // device driver
+					uint8_t MD, //!< ADC Conversion Mode
 				  uint8_t CHG //!< Sets which GPIO channels are converted
 				);
 
@@ -311,7 +313,8 @@ void LTC681x_adax( uint8_t MD, //!< ADC Conversion Mode
  Start a Status ADC Conversion
  @return void
  */
-void LTC681x_adstat(uint8_t MD, //!< ADC Conversion Mode
+void LTC681x_adstat(ltc681x_driver_t *dev, // device driver
+					uint8_t MD, //!< ADC Conversion Mode
 					  uint8_t CHST //!< Sets which Stat channels are converted
 					);
 
@@ -319,7 +322,8 @@ void LTC681x_adstat(uint8_t MD, //!< ADC Conversion Mode
  Starts cell voltage  and GPIO 1&2 conversion
  @return void
  */
-void LTC681x_adcvax( uint8_t MD, //!< ADC Conversion Mode
+void LTC681x_adcvax( ltc681x_driver_t *dev, // device driver
+						uint8_t MD, //!< ADC Conversion Mode
 					  uint8_t DCP //!< Controls if Discharge is permitted during conversion
 					);
 
@@ -327,7 +331,8 @@ void LTC681x_adcvax( uint8_t MD, //!< ADC Conversion Mode
  Starts cell voltage and SOC conversion
  @return void
  */
-void LTC681x_adcvsc(uint8_t MD, //!< ADC Conversion Mode
+void LTC681x_adcvsc(ltc681x_driver_t *dev, // device driver
+					uint8_t MD, //!< ADC Conversion Mode
 					  uint8_t DCP //!< Controls if Discharge is permitted during conversion
 					);
 
@@ -374,7 +379,8 @@ int8_t LTC681x_rdstat(uint8_t reg, //!< Determines which Stat  register is read 
  Reads the raw cell voltage register data
  @return void
  */
-void LTC681x_rdcv_reg(uint8_t reg, //!< Determines which cell voltage register is read back
+void LTC681x_rdcv_reg(ltc681x_driver_t *dev, // device driver
+					uint8_t reg, //!< Determines which cell voltage register is read back
                       uint8_t total_ic, //!< The number of ICs in the
                       uint8_t *data //!< An array of the unparsed cell codes
                      );
@@ -385,7 +391,8 @@ void LTC681x_rdcv_reg(uint8_t reg, //!< Determines which cell voltage register i
  This function is rarely used outside of the LTC681x_rdaux() command.
  @return void
  */
-void LTC681x_rdaux_reg(  uint8_t reg, //!< Determines which GPIO voltage register is read back
+void LTC681x_rdaux_reg(  ltc681x_driver_t *dev, // device driver
+						uint8_t reg, //!< Determines which GPIO voltage register is read back
                          uint8_t total_ic, //!< The number of ICs in the system
                          uint8_t *data //!< Array of the unparsed auxiliary codes
                       );
@@ -396,7 +403,8 @@ void LTC681x_rdaux_reg(  uint8_t reg, //!< Determines which GPIO voltage registe
  This function is rarely used outside of the LTC681x_rdstat() command.
  @return void
  */
-void LTC681x_rdstat_reg(uint8_t reg, //!< Determines which stat register is read back
+void LTC681x_rdstat_reg(ltc681x_driver_t *dev, // device driver
+						uint8_t reg, //!< Determines which stat register is read back
                         uint8_t total_ic, //!< The number of ICs in the system
                         uint8_t *data //!< Array of the unparsed stat codes
                        );
@@ -432,7 +440,7 @@ uint32_t LTC681x_pollAdc();
  The register will read back hexadecimal 0xFF after the command is sent.
  @return void
  */
-void LTC681x_clrcell();
+void LTC681x_clrcell(ltc681x_driver_t *dev);
 
 /*!
  Clears the LTC681x Auxiliary registers
@@ -440,7 +448,7 @@ void LTC681x_clrcell();
  The register will read back hexadecimal 0xFF after the command is sent.
  @return void
  */
-void LTC681x_clraux();
+void LTC681x_clraux(ltc681x_driver_t *dev);
 
 /*!
  Clears the LTC681x Stat registers
@@ -448,7 +456,7 @@ void LTC681x_clraux();
  The register will read back hexadecimal 0xFF after the command is sent.
  @return void
  */
-void LTC681x_clrstat();
+void LTC681x_clrstat(ltc681x_driver_t *dev);
 
 /*!
  Starts the Mux Decoder diagnostic self test
@@ -457,13 +465,14 @@ void LTC681x_clrstat();
  the bit will be set to 1 for a failure and 0 if the test has been passed.
  @return void
  */
-void LTC681x_diagn();
+void LTC681x_diagn(ltc681x_driver_t *dev);
 
 /*!
  Starts cell voltage self test conversion
  @return void
  */
-void LTC681x_cvst(uint8_t MD, //!< ADC Conversion Mode
+void LTC681x_cvst(ltc681x_driver_t *dev,
+				uint8_t MD, //!< ADC Conversion Mode
 				  uint8_t ST //!<  Sets if self test 1 or 2 is run
 				);
 
@@ -471,7 +480,8 @@ void LTC681x_cvst(uint8_t MD, //!< ADC Conversion Mode
  Start an Auxiliary Register Self Test Conversion
  @return void
  */
-void LTC681x_axst(uint8_t MD, //!< ADC Conversion Mode
+void LTC681x_axst(ltc681x_driver_t *dev,
+					uint8_t MD, //!< ADC Conversion Mode
 				  uint8_t ST //!< Sets if self test 1 or 2 is run
 				);
 
@@ -479,7 +489,8 @@ void LTC681x_axst(uint8_t MD, //!< ADC Conversion Mode
  Start a Status Register Self Test Conversion
  @return void
  */
-void LTC681x_statst( uint8_t MD, //!< ADC Conversion Mode
+void LTC681x_statst( ltc681x_driver_t *dev,
+						uint8_t MD, //!< ADC Conversion Mode
 					  uint8_t ST //!< Sets if self test 1 or 2 is run
 					);
 
@@ -487,7 +498,8 @@ void LTC681x_statst( uint8_t MD, //!< ADC Conversion Mode
  Starts cell voltage overlap conversion
  @return void
  */
-void LTC681x_adol(uint8_t MD, //!< ADC Conversion Mode
+void LTC681x_adol(ltc681x_driver_t *dev,
+				uint8_t MD, //!< ADC Conversion Mode
 				  uint8_t DCP //!< Discharge permitted during conversion
 				);
 
@@ -495,7 +507,8 @@ void LTC681x_adol(uint8_t MD, //!< ADC Conversion Mode
  Start an GPIO Redundancy test
  @return void
  */
-void LTC681x_adaxd(uint8_t MD, //!< ADC Conversion Mode
+void LTC681x_adaxd(ltc681x_driver_t *dev,
+					uint8_t MD, //!< ADC Conversion Mode
 				  uint8_t CHG //!< Sets which GPIO channels are converted
 				);
 
@@ -561,7 +574,8 @@ void LTC681x_adow(uint8_t MD, //!< ADC Conversion Mode
  Start GPIOs open wire ADC conversion
  @return void
  */
-void LTC681x_axow(uint8_t MD, //!< ADC Mode
+void LTC681x_axow(ltc681x_driver_t *dev,
+				uint8_t MD, //!< ADC Mode
 				  uint8_t PUP //!<Pull up/Pull down current
 				 );
 
@@ -644,7 +658,7 @@ int8_t LTC681x_rdsctrl(uint8_t total_ic, //!< Number of ICs in the daisy chain
  This command will start the sctrl pulse communication over the spins
  @return void
  */
-void LTC681x_stsctrl();
+void LTC681x_stsctrl(ltc681x_driver_t *dev);
 
 /*!
  Clears the LTC681x SCTRL registers
@@ -652,7 +666,7 @@ void LTC681x_stsctrl();
  The register will read back hexadecimal 0x00 after the command is sent.
  @return void
  */
-void LTC681x_clrsctrl();
+void LTC681x_clrsctrl(ltc681x_driver_t *dev);
 
 /*!
  Write the LTC681x COMM register
@@ -678,7 +692,8 @@ int8_t LTC681x_rdcomm(uint8_t total_ic, //!< Number of ICs in the system
  Issues a stcomm command and clocks data out of the COMM register
  @return void
  */
-void LTC681x_stcomm(uint8_t len //!< Length of data to be transmitted
+void LTC681x_stcomm(ltc681x_driver_t *dev,
+					uint8_t len //!< Length of data to be transmitted
 					);
 
 /*!
@@ -786,7 +801,8 @@ void LTC681x_set_cfgr_ov(uint8_t nIC, //!< Current IC
 /*
 Writes an array of bytes out of the SPI port
 */
-void spi_write_array(uint8_t len, // Option: Number of bytes to be written on the SPI port
+void spi_write_array(ltc681x_driver_t *dev, // DEVICE DRIVER
+					uint8_t len, // Option: Number of bytes to be written on the SPI port
                      uint8_t data[] //Array of bytes to be written on the SPI port
                     );
 /*
