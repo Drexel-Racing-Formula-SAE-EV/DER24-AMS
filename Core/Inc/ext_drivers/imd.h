@@ -43,6 +43,8 @@ typedef enum
 *   - Will be another status if OK_HS is 0
 *   - Update based on frequency
 *
+* timer: a TIM_TypeDef pointer representing the associated timer of the IMD
+*
 * frequency: a float representing the data out PWM signal on the high side
 *   - Corresponds to pin 5 M_HS on IR151-3204, pin 6 on IR151-3203
 *   - Tells us what state the IMD is in
@@ -53,6 +55,7 @@ typedef struct
 {
     bool OK_HS;
     imd_status_t status;
+    TIM_TypeDef *timer;
     float frequency;
     float duty_cycle;
 } imd_t;
@@ -64,14 +67,6 @@ typedef struct
 * imd: a pointer to and imd_t we want to initialize
 */
 void imd_init(imd_t* imd);
-
-/*
-* function: calculate_imd_duty_cycle
-* ------------------------------
-*
-* imd: a pointer to an imd_t we want to update
-*/
-void calculate_imd_duty_cycle(imd_t* imd);
 
 /*
 * function: set_imd_status_signal
