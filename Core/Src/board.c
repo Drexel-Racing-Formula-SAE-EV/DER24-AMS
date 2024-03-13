@@ -23,5 +23,7 @@ void board_init(board_t *board)
 	fan_init(&board->fans[8], NULL, 65535, NULL);
 	fan_init(&board->fans[9], NULL, 65535, NULL);
 
+	imd_init(&board->imd);
+
 	return;
 }
