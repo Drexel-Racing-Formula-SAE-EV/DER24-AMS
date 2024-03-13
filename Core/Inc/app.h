@@ -28,9 +28,7 @@ typedef struct
 	bool hardFault;
 	bool softFault;
 
-	bool IMD_fault;
-	float IMD_freq; // maybe move enum IMD_code_t
-	float IMD_duty;
+	TaskHandle_t imd_task;
 
 	state_t state;
 

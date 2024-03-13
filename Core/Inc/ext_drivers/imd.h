@@ -76,12 +76,4 @@ void imd_init(imd_t* imd);
 */
 void set_imd_status_signal(imd_t* imd);
 
-/*
-* function: HAL_TIM_IC_CaptureCallback
-* ------------------------------------
-*
-* 
-*/
-void HAL_TIM_IC_CaptureCallback(imd_t* imd, TIM_HandleTypeDef *htim);
-
 #endif

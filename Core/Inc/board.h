@@ -10,6 +10,7 @@
 
 #include "ext_drivers/fans.h"
 #include "ext_drivers/stm32f407g.h"
+#include "ext_drivers/imd.h"
 
 #define NFANS 10
 
@@ -18,6 +19,7 @@ typedef struct
 	stm32f407g_t stm32f407g;
 	// todo: change actual fan struct org. this is a demo
 	fan_t fans[NFANS];
+	imd_t imd;
 } board_t;
 
 void board_init(board_t *board);
