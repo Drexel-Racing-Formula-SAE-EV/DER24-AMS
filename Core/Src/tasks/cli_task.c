@@ -25,14 +25,9 @@ void cli_handle_cmd(int argc, char *argv[]);
 void cmd_not_found(int argc, char *argv[]);
 
 int help(int argc, char *argv[]);
-int get_throttle(int argc, char *argv[]);
-int get_brakelight(int argc, char *argv[]);
-int get_brake(int argc, char *argv[]);
-int get_time(int argc, char *argv[]);
-int set_time(int argc, char *argv[]);
 int get_faults(int argc, char *argv[]);
 
-char line[256];
+char outline[CLI_LINESZ];
 app_data_t *data;
 cli_device_t *cli;
 command_t cmds[] =
@@ -53,7 +48,7 @@ void cli_task_fn(void *arg)
     data = (app_data_t *)arg;
     cli = &data->board.cli;
     uint32_t entry;
-    char buf[CLI_LINE_SIZE] = {0};
+    char buf[CLI_LINESZ] = {0};
     char *tokens[MAXTOKS];
     int n;
 	
@@ -86,7 +81,7 @@ void cli_handle_cmd(int argc, char *argv[])
 
 	for(i = 0; i < num_cmds; i++)
 	{
-		if(!strncmp(cmds[i].name, argv[0], CLI_LINE_SIZE))
+		if(!strncmp(cmds[i].name, argv[0], CLI_LINESZ))
 		{
 			data->board.cli.ret = cmds[i].func(argc, argv);
 			cli->msg_valid++;
@@ -99,8 +94,8 @@ void cli_handle_cmd(int argc, char *argv[])
 
 void cmd_not_found(int argc, char *argv[])
 {
-	snprintf(line, 256, "Command not found: \'%s\'", argv[0]);
-	cli_printline(cli, line);
+	snprintf(outline, CLI_LINESZ, "Command not found: \'%s\'", argv[0]);
+	cli_printline(cli, outline);
 	cli_printline(cli, "Type 'help' for list of commands");
 }
 
@@ -113,8 +108,8 @@ int help(int argc, char *argv[])
 	num_cmds = sizeof(cmds) / sizeof(command_t);
 	for(i = 0; i < num_cmds; i++)
 	{
-		snprintf(line, 256, "%s - %s", cmds[i].name, cmds[i].desc);
-		cli_printline(cli, line);
+		snprintf(outline, CLI_LINESZ, "%s - %s", cmds[i].name, cmds[i].desc);
+		cli_printline(cli, outline);
 	}
 	return 0;
 }
@@ -122,10 +117,14 @@ int help(int argc, char *argv[])
 int get_faults(int argc, char *argv[])
 {
 	cli_printline(cli, "System faults:");
-	snprintf(line, 256, "hard:   %d", data->hard_fault);
-	cli_printline(cli, line);
-	snprintf(line, 256, "soft:   %d", data->soft_fault);
-	cli_printline(cli, line);
+	snprintf(outline, CLI_LINESZ, "hard:   %d", data->hard_fault);
+	cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "soft:   %d", data->soft_fault);
+	cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "  cli:   %d", data->cli_fault);
+	cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "  fan:   %d", data->fan_fault);
+	cli_printline(cli, outline);
 	return 0;
 }
 

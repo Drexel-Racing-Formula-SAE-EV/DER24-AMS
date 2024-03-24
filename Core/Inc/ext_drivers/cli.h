@@ -17,8 +17,8 @@
 
 #include "stm32f4xx_hal.h"
 
-#define CLI_LINE_SIZE 128
-#define MAXTOKS (CLI_LINE_SIZE / 2)
+#define CLI_LINESZ 128
+#define MAXTOKS (CLI_LINESZ / 2)
 
 typedef struct {
     uint8_t c;
@@ -28,7 +28,7 @@ typedef struct {
     unsigned int msg_count;
     unsigned int msg_proc;
     unsigned int msg_valid;
-    char line[CLI_LINE_SIZE];
+    char line[CLI_LINESZ];
     int ret;
 } cli_device_t;
 
