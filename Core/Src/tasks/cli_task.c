@@ -53,7 +53,8 @@ void cli_task_fn(void *arg)
     int n;
     int ret = 0;
 	
-	cli_printline(cli, "~~~~~~~~~~ DER ECU FW V0.1~~~~~~~~~~");
+    snprintf(outline, CLI_LINESZ, "~~~~~~~~~~ DER AMS FW V%d.%d ~~~~~~~~~~", VER_MAJOR, VER_MINOR);
+	cli_printline(cli, outline);
 	cli_printline(cli, "Type 'help' for list of commands");
 
 	for(;;)

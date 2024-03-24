@@ -15,6 +15,9 @@
 #include "board.h"
 #include "ext_drivers/accumulator.h"
 
+#define VER_MAJOR 0
+#define VER_MINOR 1
+
 #define CLI_FREQ 20
 
 typedef enum
