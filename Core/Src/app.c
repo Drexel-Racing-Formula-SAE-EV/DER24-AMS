@@ -10,26 +10,31 @@
 #include "cmsis_os.h"
 #include "tasks/fan_task.h"
 
-app_data_t app_data = {0};
+app_data_t app = {0};
 
 void app_create()
 {
-	app_data.hardFault = false;
-	app_data.softFault = false;
-	app_data.IMD_fault = false;
-	app_data.IMD_freq = 0.0;
-	app_data.IMD_duty = 0.0;
+	app.hard_fault = false;
+	app.soft_fault = false;
+	app.fan_fault = false;
+	app.cli_fault = false;
 
-	app_data.state = STATE_START;
+	// TODO: revise app data struct
 
-	app_data.max_temp = 0.0;
-	app_data.avg_temp = 0.0;
-	app_data.max_voltage = 0.0;
-	app_data.min_voltage = 0.0;
-	app_data.current = 0.0;
+	app.IMD_fault = false;
+	app.IMD_freq = 0.0;
+	app.IMD_duty = 0.0;
 
-	board_init(&app_data.board);
-	accumulator_init(&app_data.accumulator);
+	app.state = STATE_START;
 
-	assert(app_data.fan_task = fan_task_start(&app_data));
+	app.max_temp = 0.0;
+	app.avg_temp = 0.0;
+	app.max_voltage = 0.0;
+	app.min_voltage = 0.0;
+	app.current = 0.0;
+
+	board_init(&app.board);
+	accumulator_init(&app.accumulator);
+
+	assert(app.fan_task = fan_task_start(&app));
 }

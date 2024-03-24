@@ -15,6 +15,8 @@
 #include "board.h"
 #include "ext_drivers/accumulator.h"
 
+#define CLI_FREQ 20
+
 typedef enum
 {
 	STATE_NULL,
@@ -26,8 +28,11 @@ typedef enum
 
 typedef struct
 {
-	bool hardFault;
-	bool softFault;
+	bool hard_fault;
+	bool soft_fault;
+
+	bool fan_fault;
+	bool cli_fault;
 
 	bool IMD_fault;
 	float IMD_freq; // maybe move enum IMD_code_t

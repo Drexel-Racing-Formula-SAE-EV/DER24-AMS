@@ -6,12 +6,14 @@
  */
 
 #include "board.h"
+#include "main.h"
 
 #define FAN_MAX 3360
 
 void board_init(board_t *board)
 {
 	stm32f407g_init(&board->stm32f407g);
+	HAL_GPIO_WritePin(BMS_SAFETY_OUT_GPIO_Port, BMS_SAFETY_OUT_Pin, 1);
 
 	fan_init(&board->fans[0], TIM1, &board->stm32f407g.htim1, FAN_MAX, &TIM1->CCR3, 3);
 	fan_init(&board->fans[1], TIM1, &board->stm32f407g.htim1, FAN_MAX, &TIM1->CCR4, 4);
@@ -23,6 +25,8 @@ void board_init(board_t *board)
 	fan_init(&board->fans[7], TIM3, &board->stm32f407g.htim3, FAN_MAX, &TIM3->CCR1, 1);
 	fan_init(&board->fans[8], TIM4, &board->stm32f407g.htim4, FAN_MAX, &TIM4->CCR3, 3);
 	fan_init(&board->fans[9], TIM4, &board->stm32f407g.htim4, FAN_MAX, &TIM4->CCR4, 4);
+
+	cli_device_init(&board->cli, &board->stm32f407g.huart2);
 
 	return;
 }
