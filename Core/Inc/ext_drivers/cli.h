@@ -29,7 +29,7 @@ typedef struct {
     unsigned int msg_proc;
     unsigned int msg_valid;
     char line[CLI_LINESZ];
-    int ret;
+    HAL_StatusTypeDef ret;
 } cli_device_t;
 
 typedef struct {
