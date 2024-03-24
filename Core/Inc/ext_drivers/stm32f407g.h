@@ -30,7 +30,7 @@ typedef struct
 } stm32f407g_t;
 
 void stm32f407g_init(stm32f407g_t * dev);
-uint16_t stm32f767_adc_read(ADC_HandleTypeDef *hadc);
-HAL_StatusTypeDef stm32f767_adc_switch_channel(ADC_HandleTypeDef *hadc, uint32_t channel);
+uint16_t stm32f407g_adc_read(ADC_HandleTypeDef *hadc);
+HAL_StatusTypeDef stm32f407g_adc_switch_channel(ADC_HandleTypeDef *hadc, uint32_t channel);
 
 #endif /* INC_EXT_DRIVERS_STM32F407G_H_ */
