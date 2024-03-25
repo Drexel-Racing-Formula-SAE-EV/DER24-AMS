@@ -10,6 +10,7 @@
 #include "cmsis_os.h"
 #include "tasks/fan_task.h"
 #include "tasks/cli_task.h"
+#include "tasks/canbus_task.h"
 
 app_data_t app = {0};
 
@@ -19,10 +20,13 @@ void app_create()
 	app.soft_fault = false;
 	app.fan_fault = false;
 	app.cli_fault = false;
+	app.canbus_fault = false;
+
+	app.air_state = false;
 
 	// TODO: revise app data struct
 
-	app.IMD_fault = false;
+	app.imd_state = false;
 	app.IMD_freq = 0.0;
 	app.IMD_duty = 0.0;
 
@@ -43,6 +47,7 @@ void app_create()
 
 	assert(app.cli_task = cli_task_start(&app));
 	assert(app.fan_task = fan_task_start(&app));
+	assert(app.canbus_task = canbus_task_start(&app));
 }
 
 void set_bms(bool state)

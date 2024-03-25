@@ -133,9 +133,11 @@ int get_faults(int argc, char *argv[])
 	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "soft:   %d", data->soft_fault);
 	ret |= cli_printline(cli, outline);
-	snprintf(outline, CLI_LINESZ, "  cli:   %d", data->cli_fault);
+	snprintf(outline, CLI_LINESZ, "  cli:    %d", data->cli_fault);
 	ret |= cli_printline(cli, outline);
-	snprintf(outline, CLI_LINESZ, "  fan:   %d", data->fan_fault);
+	snprintf(outline, CLI_LINESZ, "  fan:    %d", data->fan_fault);
+	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "  canbus: %d", data->canbus_fault);
 	ret |= cli_printline(cli, outline);
 	return ret;
 }

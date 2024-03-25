@@ -19,6 +19,12 @@
 #define VER_MINOR 1
 
 #define CLI_FREQ 20
+#define CAN_FREQ 10
+
+#define ECU_CANBUS_ID 0x420
+
+#define TO_LSB16(x) (x & 0xff)
+#define TO_MSB16(x) ((x & 0xffff) >> 8) & 0xff
 
 typedef enum
 {
@@ -36,8 +42,11 @@ typedef struct
 
 	bool fan_fault;
 	bool cli_fault;
+	bool canbus_fault;
 
-	bool IMD_fault;
+	bool air_state;
+
+	bool imd_state; // TODO: replace with IDM enum from Brendan
 	float IMD_freq; // maybe move enum IMD_code_t
 	float IMD_duty;
 
@@ -54,6 +63,7 @@ typedef struct
 
 	TaskHandle_t fan_task;
 	TaskHandle_t cli_task;
+	TaskHandle_t canbus_task;
 } app_data_t;
 
 void app_create();
