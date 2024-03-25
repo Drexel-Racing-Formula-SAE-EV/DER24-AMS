@@ -9,6 +9,7 @@
 
 #include "cmsis_os.h"
 #include "tasks/fan_task.h"
+#include "tasks/cli_task.h"
 
 app_data_t app = {0};
 
@@ -36,5 +37,8 @@ void app_create()
 	board_init(&app.board);
 	accumulator_init(&app.accumulator);
 
+	HAL_UART_Receive_IT(app.board.cli.huart, &app.board.cli.c, 1);
+
+	assert(app.cli_task = cli_task_start(&app));
 	assert(app.fan_task = fan_task_start(&app));
 }

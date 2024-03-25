@@ -53,6 +53,7 @@ typedef struct
 	accumulator_t accumulator;
 
 	TaskHandle_t fan_task;
+	TaskHandle_t cli_task;
 } app_data_t;
 
 void app_create();
