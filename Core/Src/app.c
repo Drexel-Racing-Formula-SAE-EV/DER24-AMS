@@ -39,6 +39,13 @@ void app_create()
 
 	HAL_UART_Receive_IT(app.board.cli.huart, &app.board.cli.c, 1);
 
+	set_bms(1);
+
 	assert(app.cli_task = cli_task_start(&app));
 	assert(app.fan_task = fan_task_start(&app));
+}
+
+void set_bms(bool state)
+{
+	HAL_GPIO_WritePin(BMS_SAFETY_OUT_GPIO_Port, BMS_SAFETY_OUT_Pin, state);
 }

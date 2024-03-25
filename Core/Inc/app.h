@@ -57,5 +57,6 @@ typedef struct
 } app_data_t;
 
 void app_create();
+void set_bms(bool state);
 
 #endif /* INC_APP_H_ */

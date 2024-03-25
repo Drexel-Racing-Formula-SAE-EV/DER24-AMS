@@ -26,6 +26,7 @@ int cmd_not_found(int argc, char *argv[]);
 
 int help(int argc, char *argv[]);
 int get_faults(int argc, char *argv[]);
+int get_version(int argc, char *argv[]);
 
 char outline[CLI_LINESZ];
 app_data_t *data;
@@ -33,7 +34,8 @@ cli_device_t *cli;
 command_t cmds[] =
 {
 	{"help", &help, "print help menu"},
-	{"fault", &get_faults, "gets the faults of the system"}
+	{"fault", &get_faults, "gets the faults of the system"},
+	{"ver", &get_version, "gets the firmware version"}
 };
 
 TaskHandle_t cli_task_start(app_data_t *data)
@@ -134,6 +136,14 @@ int get_faults(int argc, char *argv[])
 	snprintf(outline, CLI_LINESZ, "  cli:   %d", data->cli_fault);
 	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "  fan:   %d", data->fan_fault);
+	ret |= cli_printline(cli, outline);
+	return ret;
+}
+
+int get_version(int argc, char *argv[])
+{
+	int ret = 0;
+	snprintf(outline, CLI_LINESZ, "v%d.%d", VER_MAJOR, VER_MINOR);
 	ret |= cli_printline(cli, outline);
 	return ret;
 }
