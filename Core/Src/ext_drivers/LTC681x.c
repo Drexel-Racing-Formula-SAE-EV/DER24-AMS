@@ -1343,7 +1343,7 @@ uint16_t LTC681x_st_lookup(uint8_t MD, //ADC Mode
 
 /* Start an open wire Conversion */
 void LTC681x_adow(ltc681x_driver_t *dev,
-					uint8_t MD, //ADC Mode
+				  uint8_t MD, //ADC Mode
 				  uint8_t PUP,//Pull up/Pull down current
 				  uint8_t CH, //Channels
 				  uint8_t DCP//Discharge Permit
@@ -1378,65 +1378,63 @@ void LTC681x_axow(ltc681x_driver_t *dev,
 }
 
 /* Runs the data sheet algorithm for open wire for single cell detection */
-void LTC681x_run_openwire_single(uint8_t total_ic, // Number of ICs in the daisy chain
-								cell_asic ic[] // A two dimensional array that will store the data
-								)
+void LTC681x_run_openwire_single(ltc681x_driver_t *dev)
 {
 	uint16_t OPENWIRE_THRESHOLD = 4000;
-	const uint8_t  N_CHANNELS = ic[0].ic_reg.cell_channels;
+	const uint8_t  N_CHANNELS = dev->ic_arr[0].ic_reg.cell_channels;
 
-	uint16_t pullUp[total_ic][N_CHANNELS];
-	uint16_t pullDwn[total_ic][N_CHANNELS];
-	int16_t openWire_delta[total_ic][N_CHANNELS];
+	uint16_t pullUp[dev->num_ics][N_CHANNELS];
+	uint16_t pullDwn[dev->num_ics][N_CHANNELS];
+	int16_t openWire_delta[dev->num_ics][N_CHANNELS];
 
 	int8_t error;
 	int8_t i;
 	uint32_t conv_time=0;
 
-	wakeup_sleep(total_ic);
-	LTC681x_clrcell();
+	wakeup_sleep(dev);
+	LTC681x_clrcell(dev);
 
 	// Pull Ups
 	for (i = 0; i < 3; i++)
 	{
-	  wakeup_idle(total_ic);
-	  LTC681x_adow(MD_26HZ_2KHZ,PULL_UP_CURRENT,CELL_CH_ALL,DCP_DISABLED);
-	  conv_time =LTC681x_pollAdc();
+	  wakeup_idle(dev);
+	  LTC681x_adow(dev, MD_26HZ_2KHZ,PULL_UP_CURRENT,CELL_CH_ALL,DCP_DISABLED);
+	  conv_time =LTC681x_pollAdc(dev);
 	}
 
-	wakeup_idle(total_ic);
-	error=LTC681x_rdcv(0, total_ic,ic);
+	wakeup_idle(dev);
+	error=LTC681x_rdcv(dev, 0);
 
-	for (int cic=0; cic<total_ic; cic++)
+	for (int cic=0; cic<dev->num_ics; cic++)
 	{
 	    for (int cell=0; cell<N_CHANNELS; cell++)
 		{
-		  pullUp[cic][cell] = ic[cic].cells.c_codes[cell];
+		  pullUp[cic][cell] = dev->ic_arr[cic].cells.c_codes[cell];
 		}
 	}
 
 	// Pull Downs
 	for (i = 0; i < 3; i++)
 	{
-	  wakeup_idle(total_ic);
-	  LTC681x_adow(MD_26HZ_2KHZ,PULL_DOWN_CURRENT,CELL_CH_ALL,DCP_DISABLED);
-	  conv_time =LTC681x_pollAdc();
+	  wakeup_idle(dev);
+	  LTC681x_adow(dev, MD_26HZ_2KHZ,PULL_DOWN_CURRENT,CELL_CH_ALL,DCP_DISABLED);
+	  conv_time =LTC681x_pollAdc(dev);
 	}
 
-	wakeup_idle(total_ic);
-	error=LTC681x_rdcv(0, total_ic,ic);
+	wakeup_idle(dev);
+	error=LTC681x_rdcv(dev, 0);
 
-	for (int cic=0; cic<total_ic; cic++)
+	for (int cic=0; cic<dev->num_ics; cic++)
 	{
 	    for (int cell=0; cell<N_CHANNELS; cell++)
 		{
-		   pullDwn[cic][cell] = ic[cic].cells.c_codes[cell];
+		   pullDwn[cic][cell] = dev->ic_arr[cic].cells.c_codes[cell];
 		}
 	}
 
-	for (int cic=0; cic<total_ic; cic++)
+	for (int cic=0; cic<dev->num_ics; cic++)
 	{
-	  ic[cic].system_open_wire = 0xFFFF;
+		dev->ic_arr[cic].system_open_wire = 0xFFFF;
 
 		for (int cell=0; cell<N_CHANNELS; cell++)
 		{
@@ -1451,33 +1449,31 @@ void LTC681x_run_openwire_single(uint8_t total_ic, // Number of ICs in the daisy
 
 			if (openWire_delta[cic][cell]>OPENWIRE_THRESHOLD)
 			{
-				ic[cic].system_open_wire = cell+1;
+				dev->ic_arr[cic].system_open_wire = cell+1;
 			}
 		}
 
 		if (pullUp[cic][0] == 0)
 		{
-		  ic[cic].system_open_wire = 0;
+		  dev->ic_arr[cic].system_open_wire = 0;
 		}
 
 		if (pullUp[cic][(N_CHANNELS-1)] == 0)//checking the Pull up value of the top measured channel
 		{
-		  ic[cic].system_open_wire = N_CHANNELS;
+		 dev->ic_arr[cic].system_open_wire = N_CHANNELS;
 		}
 	}
 }
 
 /* Runs the data sheet algorithm for open wire for multiple cell and two consecutive cells detection */
- void LTC681x_run_openwire_multi(uint8_t total_ic, // Number of ICs in the daisy chain
-						  cell_asic ic[] // A two dimensional array that will store the data
-						  )
+void LTC681x_run_openwire_multi(ltc681x_driver_t *dev)
 {
 	uint16_t OPENWIRE_THRESHOLD = 4000;
-	const uint8_t  N_CHANNELS = ic[0].ic_reg.cell_channels;
+	const uint8_t  N_CHANNELS = dev->ic_arr[0].ic_reg.cell_channels;
 
-	uint16_t pullUp[total_ic][N_CHANNELS];
-	uint16_t pullDwn[total_ic][N_CHANNELS];
-	uint16_t openWire_delta[total_ic][N_CHANNELS];
+	uint16_t pullUp[dev->num_ics][N_CHANNELS];
+	uint16_t pullDwn[dev->num_ics][N_CHANNELS];
+	uint16_t openWire_delta[dev->num_ics][N_CHANNELS];
 
 	int8_t error;
 	int8_t opencells[N_CHANNELS];
@@ -1485,48 +1481,48 @@ void LTC681x_run_openwire_single(uint8_t total_ic, // Number of ICs in the daisy
 	int8_t i,j,k;
 	uint32_t conv_time=0;
 
-	wakeup_sleep(total_ic);
-	LTC681x_clrcell();
+	wakeup_sleep(dev->num_ics);
+	LTC681x_clrcell(dev);
 
 	// Pull Ups
 	for (i = 0; i < 5; i++)
 	{
-		wakeup_idle(total_ic);
-		LTC681x_adow(MD_26HZ_2KHZ,PULL_UP_CURRENT,CELL_CH_ALL,DCP_DISABLED);
-		conv_time =LTC681x_pollAdc();
+		wakeup_idle(dev);
+		LTC681x_adow(dev, MD_26HZ_2KHZ,PULL_UP_CURRENT,CELL_CH_ALL,DCP_DISABLED);
+		conv_time =LTC681x_pollAdc(dev);
 	}
 
-	wakeup_idle(total_ic);
-	error = LTC681x_rdcv(0, total_ic,ic);
+	wakeup_idle(dev);
+	error = LTC681x_rdcv(dev, 0);
 
-	for (int cic=0; cic<total_ic; cic++)
+	for (int cic=0; cic<dev->num_ics; cic++)
 	{
 	    for (int cell=0; cell<N_CHANNELS; cell++)
 		{
-		  pullUp[cic][cell] = ic[cic].cells.c_codes[cell];
+		  pullUp[cic][cell] = dev->ic_arr[cic].cells.c_codes[cell];
 		}
 	}
 
 	// Pull Downs
 	for (i = 0; i < 5; i++)
 	{
-	  wakeup_idle(total_ic);
-	  LTC681x_adow(MD_26HZ_2KHZ,PULL_DOWN_CURRENT,CELL_CH_ALL,DCP_DISABLED);
-	  conv_time =   LTC681x_pollAdc();
+	  wakeup_idle(dev);
+	  LTC681x_adow(dev, MD_26HZ_2KHZ,PULL_DOWN_CURRENT,CELL_CH_ALL,DCP_DISABLED);
+	  conv_time = LTC681x_pollAdc(dev);
 	}
 
-	wakeup_idle(total_ic);
-	error = LTC681x_rdcv(0, total_ic,ic);
+	wakeup_idle(dev);
+	error = LTC681x_rdcv(dev, 0);
 
-	for (int cic=0; cic<total_ic; cic++)
+	for (int cic=0; cic<dev->num_ics; cic++)
 	{
 		for (int cell=0; cell<N_CHANNELS; cell++)
 		{
-		   pullDwn[cic][cell] = ic[cic].cells.c_codes[cell];
+		   pullDwn[cic][cell] = dev->ic_arr[cic].cells.c_codes[cell];
 		}
 	}
 
-	for (int cic=0; cic<total_ic; cic++)
+	for (int cic=0; cic<dev->num_ics; cic++)
 	{
 		for (int cell=0; cell<N_CHANNELS; cell++)
 		{
@@ -1541,13 +1537,9 @@ void LTC681x_run_openwire_single(uint8_t total_ic, // Number of ICs in the daisy
 		}
 	}
 
-	for (int cic=0; cic<total_ic; cic++)
+	for (int cic=0; cic<dev->num_ics; cic++)
 	{
 		n=0;
-
-		//Serial.print("IC:");
-		//Serial.println(cic+1, DEC);
-		printf("IC: %d\r\n",cic+1);
 		for (int cell=0; cell<N_CHANNELS; cell++)
 		{
 
@@ -1573,8 +1565,6 @@ void LTC681x_run_openwire_single(uint8_t total_ic, // Number of ICs in the daisy
 		if (pullDwn[cic][0] == 0)
 		{
 		  opencells[n] = 0;
-		  //Serial.println("Cell 0 is Open and multiple open wires maybe possible.");
-		  printf("Cell 0 is Open and multiple open wires maybe possible.");
 		  n++;
 		}
 
@@ -1620,67 +1610,40 @@ void LTC681x_run_openwire_single(uint8_t total_ic, // Number of ICs in the daisy
 				}
 			}
 		}
-
-	//Checking the value of n
-		//Serial.println("Number of Open wires:");
-		//Serial.println(n);
-		printf("Number of Open wires: %d,n");
-
-	//Printing open cell array
-		//Serial.println("OPEN CELLS:");
-		printf("Open Cells:\r\n");
-		if(n==0)
-		{
-			//Serial.println("No Open wires");
-			printf("No Open wires\r\n");
-		}
-		else
-		{
-			for(i=0;i<n;i++)
-			{
-					//Serial.println(opencells[i]);
-				printf("%d",opencells[i]);
-			}
-		}
-	}
-	//Serial.println("\n");
-	printf("\r\n");
 }
 
 /* Runs open wire for GPIOs */
-void LTC681x_run_gpio_openwire(uint8_t total_ic, // Number of ICs in the daisy chain
-								cell_asic ic[] // A two dimensional array that will store the data
-								)
+ void LTC681x_run_gpio_openwire(ltc681x_driver_t *dev)
  {
 	uint16_t OPENWIRE_THRESHOLD = 150;
-	const uint8_t  N_CHANNELS = ic[0].ic_reg.aux_channels +1;
+	const uint8_t  N_CHANNELS = dev->ic_arr[0].ic_reg.aux_channels +1;
 
-	uint16_t aux_val[total_ic][N_CHANNELS];
-	uint16_t pDwn[total_ic][N_CHANNELS];
-	uint16_t ow_delta[total_ic][N_CHANNELS];
+	uint16_t aux_val[dev->num_ics][N_CHANNELS];
+	uint16_t pDwn[dev->num_ics][N_CHANNELS];
+	uint16_t ow_delta[][N_CHANNELS];
 
 	int8_t error;
 	int8_t i;
 	uint32_t conv_time=0;
 
-	wakeup_sleep(total_ic);
-	LTC681x_clraux();
+	wakeup_sleep(dev);
+	LTC681x_clraux(dev);
 
 	for (i = 0; i < 3; i++)
 	{
-	   wakeup_idle(total_ic);
-	   LTC681x_adax(MD_7KHZ_3KHZ, AUX_CH_ALL);
-	   conv_time= LTC681x_pollAdc();
+	   wakeup_idle(dev);
+	   LTC681x_adax(dev, MD_7KHZ_3KHZ, AUX_CH_ALL);
+	   conv_time= LTC681x_pollAdc(dev);
 	}
 
-	wakeup_idle(total_ic);
-	error = LTC681x_rdaux(0, total_ic,ic);
+	wakeup_idle(dev);
+	error = LTC681x_rdaux(dev, 0);
 
-	for (int cic=0; cic<total_ic; cic++)
+	for (int cic=0; cic<dev->ic_arr; cic++)
 	{
 	    for (int channel=0; channel<N_CHANNELS; channel++)
 		{
-			aux_val[cic][channel]=ic[cic].aux.a_codes[channel];
+			aux_val[cic][channel]=dev->ic_arr[cic].aux.a_codes[channel];
 		}
 	}
 	LTC681x_clraux();
@@ -1688,25 +1651,25 @@ void LTC681x_run_gpio_openwire(uint8_t total_ic, // Number of ICs in the daisy c
 	// pull downs
 	for (i = 0; i < 3; i++)
 	{
-	   wakeup_idle(total_ic);
-	   LTC681x_axow(MD_7KHZ_3KHZ,PULL_DOWN_CURRENT);
-	   conv_time =LTC681x_pollAdc();
+	   wakeup_idle(dev);
+	   LTC681x_axow(dev, MD_7KHZ_3KHZ,PULL_DOWN_CURRENT);
+	   conv_time =LTC681x_pollAdc(dev);
 	}
 
-	wakeup_idle(total_ic);
-	error = LTC681x_rdaux(0, total_ic,ic);
+	wakeup_idle(dev);
+	error = LTC681x_rdaux(dev, 0);
 
-	for (int cic=0; cic<total_ic; cic++)
+	for (int cic=0; cic<dev->num_ics; cic++)
 	{
 	   for (int channel=0; channel<N_CHANNELS; channel++)
 		{
-			pDwn[cic][channel]=ic[cic].aux.a_codes[channel] ;
+			pDwn[cic][channel]=dev->ic_arr[cic].aux.a_codes[channel] ;
 		}
 	}
 
-	for (int cic=0; cic<total_ic; cic++)
+	for (int cic=0; cic<dev->num_ics; cic++)
 	{
-		ic[cic].system_open_wire = 0xFFFF;
+		dev->ic_arr[cic].system_open_wire = 0xFFFF;
 
 		for (int channel=0; channel<N_CHANNELS; channel++)
 		{
@@ -1723,7 +1686,7 @@ void LTC681x_run_gpio_openwire(uint8_t total_ic, // Number of ICs in the daisy c
 			{
 				if (ow_delta[cic][channel] > OPENWIRE_THRESHOLD)
 				{
-					ic[cic].system_open_wire= channel+1;
+					dev->ic_arr[cic].system_open_wire= channel+1;
 
 				}
 			}
@@ -1731,7 +1694,7 @@ void LTC681x_run_gpio_openwire(uint8_t total_ic, // Number of ICs in the daisy c
 			{
 				if (ow_delta[cic][channel] > OPENWIRE_THRESHOLD)
 				{
-					ic[cic].system_open_wire= channel;
+					dev->ic_arr[cic].system_open_wire= channel;
 
 				}
 			}
@@ -1740,23 +1703,20 @@ void LTC681x_run_gpio_openwire(uint8_t total_ic, // Number of ICs in the daisy c
 }
 
 /* Clears all of the DCC bits in the configuration registers */
-void LTC681x_clear_discharge(uint8_t total_ic, // Number of ICs in the daisy chain
-							 cell_asic *ic // A two dimensional array that will store the data
-							 )
+void LTC681x_clear_discharge(ltc681x_driver_t *dev)
 {
-	for (int i=0; i<total_ic; i++)
+	for (int i=0; i<dev->num_ics; i++)
 	{
-	   ic[i].config.tx_data[4] = 0;
-	   ic[i].config.tx_data[5] =ic[i].config.tx_data[5]&(0xF0);
-	   ic[i].configb.tx_data[0]=ic[i].configb.tx_data[0]&(0x0F);
-	   ic[i].configb.tx_data[1]=ic[i].configb.tx_data[1]&(0xF0);
+	   dev->ic_arr[i].config.tx_data[4] = 0;
+	   dev->ic_arr[i].config.tx_data[5] = dev->ic_arr[i].config.tx_data[5]&(0xF0);
+	   dev->ic_arr[i].configb.tx_data[0]= dev->ic_arr[i].configb.tx_data[0]&(0x0F);
+	   dev->ic_arr[i].configb.tx_data[1]= dev->ic_arr[i].configb.tx_data[1]&(0xF0);
 	}
 }
 
 /* Writes the pwm register */
-void LTC681x_wrpwm(uint8_t total_ic, // Number of ICs in the daisy chain
-                   uint8_t pwmReg, // The PWM Register to be written A or B
-                   cell_asic ic[] // A two dimensional array that stores the data to be written
+void LTC681x_wrpwm(ltc681x_driver_t *dev,
+                   uint8_t pwmReg  //!< The PWM Register to be written
                   )
 {
 	uint8_t cmd[2];
@@ -1774,31 +1734,30 @@ void LTC681x_wrpwm(uint8_t total_ic, // Number of ICs in the daisy chain
 	cmd[1] = 0x1C;
 	}
 
-	for (uint8_t current_ic = 0; current_ic<total_ic; current_ic++)
+	for (uint8_t current_ic = 0; current_ic<dev->num_ics; current_ic++)
 	{
-		if (ic->isospi_reverse == 0)
+		if (dev->ic_arr->isospi_reverse == 0)
 		{
 			c_ic = current_ic;
 		}
 		else
 		{
-			c_ic = total_ic - current_ic - 1;
+			c_ic = dev->num_ics - current_ic - 1;
 		}
 
 		for (uint8_t data = 0; data<6; data++)
 		{
-			write_buffer[write_count] = ic[c_ic].pwm.tx_data[data];
+			write_buffer[write_count] = dev->ic_arr[c_ic].pwm.tx_data[data];
 			write_count++;
 		}
 	}
-	write_68(total_ic, cmd, write_buffer);
+	write_68(dev->num_ics, cmd, write_buffer);
 }
 
 
 /* Reads pwm registers of a LTC681x daisy chain */
-int8_t LTC681x_rdpwm(uint8_t total_ic, //Number of ICs in the system
-                     uint8_t pwmReg, // The PWM Register to be written A or B
-                     cell_asic ic[] // A two dimensional array that will store the data
+int8_t LTC681x_rdpwm(ltc681x_driver_t *dev,
+                     uint8_t pwmReg //!< The PWM Register to be written A or B
                     )
 {
 	const uint8_t BYTES_IN_REG = 8;
@@ -1820,38 +1779,34 @@ int8_t LTC681x_rdpwm(uint8_t total_ic, //Number of ICs in the system
 		cmd[1] = 0x1E;
 	}
 
-	pec_error = read_68(total_ic, cmd, read_buffer);
-	for (uint8_t current_ic =0; current_ic<total_ic; current_ic++)
+	pec_error = read_68(dev->num_ics, cmd, read_buffer);
+	for (uint8_t current_ic =0; current_ic<dev->num_ics; current_ic++)
 	{
-		if (ic->isospi_reverse == 0)
+		if (dev->ic_arr->isospi_reverse == 0)
 		{
 			c_ic = current_ic;
 		}
 		else
 		{
-			c_ic = total_ic - current_ic - 1;
+			c_ic = dev->num_ics - current_ic - 1;
 		}
 
 		for (int byte=0; byte<8; byte++)
 		{
-			ic[c_ic].pwm.rx_data[byte] = read_buffer[byte+(8*current_ic)];
+			dev->ic-arr[c_ic].pwm.rx_data[byte] = read_buffer[byte+(8*current_ic)];
 		}
 
 		calc_pec = pec15_calc(6,&read_buffer[8*current_ic]);
 		data_pec = read_buffer[7+(8*current_ic)] | (read_buffer[6+(8*current_ic)]<<8);
-		if (calc_pec != data_pec )
-		{
-			ic[c_ic].pwm.rx_pec_match = 1;
-		}
-		else ic[c_ic].pwm.rx_pec_match = 0;
+		if (calc_pec != data_pec ) dev->ic_arr[c_ic].pwm.rx_pec_match = 1;
+		else dev->ic_arr[c_ic].pwm.rx_pec_match = 0;
 	}
 	return(pec_error);
 }
 
 /*  Write the LTC681x Sctrl register */
-void LTC681x_wrsctrl(uint8_t total_ic, // Number of ICs in the daisy chain
-                     uint8_t sctrl_reg, // The Sctrl Register to be written A or B
-                     cell_asic *ic  // A two dimensional array that stores the data to be written
+void LTC681x_wrsctrl(ltc681x_driver_t *dev,
+                     uint8_t sctrl_reg //!< The Sctrl Register to be written A or B
                     )
 {
 	uint8_t cmd[2];
@@ -1869,25 +1824,24 @@ void LTC681x_wrsctrl(uint8_t total_ic, // Number of ICs in the daisy chain
       cmd[1] = 0x1C;
     }
 
-    for(uint8_t current_ic = 0; current_ic<total_ic;current_ic++)
+    for(uint8_t current_ic = 0; current_ic<dev->num_ics;current_ic++)
     {
-        if(ic->isospi_reverse == 0){c_ic = current_ic;}
-        else{c_ic = total_ic - current_ic - 1;}
+        if(dev->ic_arr->isospi_reverse == 0){c_ic = current_ic;}
+        else{c_ic = dev->num_ics - current_ic - 1;}
 
 
         for(uint8_t data = 0; data<6;data++)
         {
-            write_buffer[write_count] = ic[c_ic].sctrl.tx_data[data];
+            write_buffer[write_count] = dev->ic_arr[c_ic].sctrl.tx_data[data];
             write_count++;
         }
     }
-    write_68(total_ic, cmd, write_buffer);
+    write_68(dev, cmd, write_buffer);
 }
 
 /*  Reads sctrl registers of a LTC681x daisy chain */
-int8_t LTC681x_rdsctrl(uint8_t total_ic, // Number of ICs in the daisy chain
-                       uint8_t sctrl_reg, // The Sctrl Register to be written A or B
-                       cell_asic *ic // A two dimensional array that the function stores the read data
+int8_t LTC681x_rdsctrl(ltc681x_driver_t *dev,
+                       uint8_t sctrl_reg //!< The Sctrl Register to be written A or B
                       )
 {
     uint8_t cmd[4];
@@ -1908,26 +1862,23 @@ int8_t LTC681x_rdsctrl(uint8_t total_ic, // Number of ICs in the daisy chain
       cmd[1] = 0x1E;
 	}
 
-    pec_error = read_68(total_ic, cmd, read_buffer);
+    pec_error = read_68(dev->num_ics, cmd, read_buffer);
 
-    for(uint8_t current_ic =0; current_ic<total_ic; current_ic++)
+    for(uint8_t current_ic =0; current_ic<dev->num_ics; current_ic++)
     {
-        if(ic->isospi_reverse == 0){c_ic = current_ic;}
-        else{c_ic = total_ic - current_ic - 1;}
+        if(dev->ic_arr->isospi_reverse == 0){c_ic = current_ic;}
+        else{c_ic = dev->num_ics - current_ic - 1;}
 
 
         for(int byte=0; byte<8;byte++)
         {
-            ic[c_ic].sctrl.rx_data[byte] = read_buffer[byte+(8*current_ic)];
+            dev->ic_arr[c_ic].sctrl.rx_data[byte] = read_buffer[byte+(8*current_ic)];
         }
 
         calc_pec = pec15_calc(6,&read_buffer[8*current_ic]);
         data_pec = read_buffer[7+(8*current_ic)] | (read_buffer[6+(8*current_ic)]<<8);
-        if(calc_pec != data_pec )
-        {
-            ic[c_ic].sctrl.rx_pec_match = 1;
-        }
-        else ic[c_ic].sctrl.rx_pec_match = 0;
+        if(calc_pec != data_pec ) dev->ic_arr[c_ic].sctrl.rx_pec_match = 1;
+        else dev->ic_arr[c_ic].sctrl.rx_pec_match = 0;
 
     }
     return(pec_error);
@@ -1992,9 +1943,7 @@ void LTC681x_wrcomm(uint8_t total_ic, //The number of ICs being written to
 }
 
 /* Reads COMM registers of a LTC681x daisy chain */
-int8_t LTC681x_rdcomm(uint8_t total_ic, //Number of ICs in the system
-                      cell_asic ic[] //A two dimensional array that stores the read data
-                     )
+int8_t LTC681x_rdcomm(ltc681x_driver_t *dev)
 {
 	uint8_t cmd[2]= {0x07 , 0x22};
 	uint8_t read_buffer[256];
@@ -2003,38 +1952,37 @@ int8_t LTC681x_rdcomm(uint8_t total_ic, //Number of ICs in the system
 	uint16_t calc_pec;
 	uint8_t c_ic=0;
 
-	pec_error = read_68(total_ic, cmd, read_buffer);
+	pec_error = read_68(dev->num_ics, cmd, read_buffer);
 
-	for (uint8_t current_ic = 0; current_ic<total_ic; current_ic++)
+	for (uint8_t current_ic = 0; current_ic<dev->num_ics; current_ic++)
 	{
-		if (ic->isospi_reverse == 0)
+		if (dev->ic_arr->isospi_reverse == 0)
 		{
 			c_ic = current_ic;
 		}
 		else
 		{
-			c_ic = total_ic - current_ic - 1;
+			c_ic = dev->num_ics - current_ic - 1;
 		}
 
 		for (int byte=0; byte<8; byte++)
 		{
-			ic[c_ic].com.rx_data[byte] = read_buffer[byte+(8*current_ic)];
+			dev->ic_arr[c_ic].com.rx_data[byte] = read_buffer[byte+(8*current_ic)];
 		}
 
 		calc_pec = pec15_calc(6,&read_buffer[8*current_ic]);
 		data_pec = read_buffer[7+(8*current_ic)] | (read_buffer[6+(8*current_ic)]<<8);
-		if (calc_pec != data_pec )
-		{
-			ic[c_ic].com.rx_pec_match = 1;
-		}
-		else ic[c_ic].com.rx_pec_match = 0;
+		if (calc_pec != data_pec ) dev->ic_arr[c_ic].com.rx_pec_match = 1;
+		else dev->ic_arr[c_ic].com.rx_pec_match = 0;
 	}
 
     return(pec_error);
 }
 
 /* Shifts data in COMM register out over LTC681x SPI/I2C port */
-void LTC681x_stcomm(ltc681x_driver_t *dev, uint8_t len) //Length of data to be transmitted
+void LTC681x_stcomm(ltc681x_driver_t *dev,
+					uint8_t len //!< Length of data to be transmitted
+					)
 {
 	uint8_t cmd[4];
 	uint16_t cmd_pec;
@@ -2045,213 +1993,210 @@ void LTC681x_stcomm(ltc681x_driver_t *dev, uint8_t len) //Length of data to be t
 	cmd[2] = (uint8_t)(cmd_pec >> 8);
 	cmd[3] = (uint8_t)(cmd_pec);
 
-	if(a_d->ltcstring == 1){
-		LTC_6813B_CS_RESET
-		spi_write_array(4,cmd);
-		for (int i = 0; i<len*3; i++)
-		{
-		  spi_read_byte(0xFF);
-		}
-		//u_sleep(75);//maybe remove?
-		LTC_6813B_CS_SET
-	}
-	else{
-		LTC_6813_CS_RESET
-		spi_write_array(4,cmd);
-		for (int i = 0; i<len*3; i++)
-		{
-		  spi_read_byte(0xFF);
-		}
-		//u_sleep(75);//maybe remove?
-		LTC_6813_CS_SET
-	}
+	LTC681x_set_cs(dev, 0);
+	spi_write_array(dev, 4, cmd);
+	for (int i = 0; i < len * 3; i++) spi_read_byte(dev, 0xFF);
+	LTC681x_set_cs(dev, 1);
 }
 
 /* Helper function that increments PEC counters */
-void LTC681x_check_pec(uint8_t total_ic, //Number of ICs in the system
-					   uint8_t reg, //Type of Register
-					   cell_asic *ic //A two dimensional array that stores the data
+void LTC681x_check_pec(ltc681x_driver_t *dev,
+                       uint8_t reg //!< Type of register
 					   )
 {
 	switch (reg)
 	{
 		case CFGRR:
-		  for (int current_ic = 0 ; current_ic < total_ic; current_ic++)
-		  {
-			ic[current_ic].crc_count.pec_count = ic[current_ic].crc_count.pec_count + ic[current_ic].config.rx_pec_match;
-			ic[current_ic].crc_count.cfgr_pec = ic[current_ic].crc_count.cfgr_pec + ic[current_ic].config.rx_pec_match;
-		  }
-		break;
-
+			for (int current_ic = 0 ; current_ic < dev->num_ics; current_ic++)
+			{
+				dev->ic_arr[current_ic].crc_count.pec_count = dev->ic_arr[current_ic].crc_count.pec_count + dev->ic_arr[current_ic].config.rx_pec_match;
+				dev->ic_arr[current_ic].crc_count.cfgr_pec = dev->ic_arr[current_ic].crc_count.cfgr_pec + dev->ic_arr[current_ic].config.rx_pec_match;
+			}
+			break;
 		case CFGRB:
-		  for (int current_ic = 0 ; current_ic < total_ic; current_ic++)
-		  {
-			ic[current_ic].crc_count.pec_count = ic[current_ic].crc_count.pec_count + ic[current_ic].configb.rx_pec_match;
-			ic[current_ic].crc_count.cfgr_pec = ic[current_ic].crc_count.cfgr_pec + ic[current_ic].configb.rx_pec_match;
-		  }
-		break;
+			for (int current_ic = 0 ; current_ic < dev->num_ics; current_ic++)
+			{
+				dev->ic_arr[current_ic].crc_count.pec_count = dev->ic_arr[current_ic].crc_count.pec_count + dev->ic_arr[current_ic].configb.rx_pec_match;
+				dev->ic_arr[current_ic].crc_count.cfgr_pec = dev->ic_arr[current_ic].crc_count.cfgr_pec + dev->ic_arr[current_ic].configb.rx_pec_match;
+			}
+			break;
 		case CELL:
-		  for (int current_ic = 0 ; current_ic < total_ic; current_ic++)
-		  {
-			for (int i=0; i<ic[0].ic_reg.num_cv_reg; i++)
+			for (int current_ic = 0 ; current_ic < dev->num_ics; current_ic++)
 			{
-			  ic[current_ic].crc_count.pec_count = ic[current_ic].crc_count.pec_count + ic[current_ic].cells.pec_match[i];
-			  ic[current_ic].crc_count.cell_pec[i] = ic[current_ic].crc_count.cell_pec[i] + ic[current_ic].cells.pec_match[i];
+				for (int i = 0; i < dev->ic_arr[0].ic_reg.num_cv_reg; i++)
+				{
+					dev->ic_arr[current_ic].crc_count.pec_count = dev->ic_arr[current_ic].crc_count.pec_count + dev->ic_arr[current_ic].cells.pec_match[i];
+					dev->ic_arr[current_ic].crc_count.cell_pec[i] = dev->ic_arr[current_ic].crc_count.cell_pec[i] + dev->ic_arr[current_ic].cells.pec_match[i];
+				}
 			}
-		  }
-		break;
+			break;
 		case AUX:
-		  for (int current_ic = 0 ; current_ic < total_ic; current_ic++)
-		  {
-			for (int i=0; i<ic[0].ic_reg.num_gpio_reg; i++)
+			for (int current_ic = 0 ; current_ic < dev->num_ics; current_ic++)
 			{
-			  ic[current_ic].crc_count.pec_count = ic[current_ic].crc_count.pec_count + (ic[current_ic].aux.pec_match[i]);
-			  ic[current_ic].crc_count.aux_pec[i] = ic[current_ic].crc_count.aux_pec[i] + (ic[current_ic].aux.pec_match[i]);
+				for (int i = 0; i < dev->ic_arr[0].ic_reg.num_gpio_reg; i++)
+				{
+					dev->ic_arr[current_ic].crc_count.pec_count = dev->ic_arr[current_ic].crc_count.pec_count + (dev->ic_arr[current_ic].aux.pec_match[i]);
+					dev->ic_arr[current_ic].crc_count.aux_pec[i] = dev->ic_arr[current_ic].crc_count.aux_pec[i] + (dev->ic_arr[current_ic].aux.pec_match[i]);
+				}
 			}
-		  }
-
-		break;
+			break;
 		case STAT:
-		  for (int current_ic = 0 ; current_ic < total_ic; current_ic++)
-		  {
-
-			for (int i=0; i<ic[0].ic_reg.num_stat_reg-1; i++)
+			for (int current_ic = 0 ; current_ic < dev->num_ics; current_ic++)
 			{
-			  ic[current_ic].crc_count.pec_count = ic[current_ic].crc_count.pec_count + ic[current_ic].stat.pec_match[i];
-			  ic[current_ic].crc_count.stat_pec[i] = ic[current_ic].crc_count.stat_pec[i] + ic[current_ic].stat.pec_match[i];
+				for (int i = 0; i < dev->ic_arr[0].ic_reg.num_stat_reg-1; i++)
+				{
+					dev->ic_arr[current_ic].crc_count.pec_count = dev->ic_arr[current_ic].crc_count.pec_count + dev->ic_arr[current_ic].stat.pec_match[i];
+					dev->ic_arr[current_ic].crc_count.stat_pec[i] = dev->ic_arr[current_ic].crc_count.stat_pec[i] + dev->ic_arr[current_ic].stat.pec_match[i];
+				}
 			}
-		  }
-		break;
+			break;
 		default:
-		break;
+			break;
 	}
 }
 
 /* Helper Function to reset PEC counters */
-void LTC681x_reset_crc_count(uint8_t total_ic, //Number of ICs in the system
-							 cell_asic *ic //A two dimensional array that stores the data
-							 )
+void LTC681x_reset_crc_count(ltc681x_driver_t *dev)
 {
-	for (int current_ic = 0 ; current_ic < total_ic; current_ic++)
+	for (int current_ic = 0 ; current_ic < dev->num_ics; current_ic++)
 	{
-		ic[current_ic].crc_count.pec_count = 0;
-		ic[current_ic].crc_count.cfgr_pec = 0;
+		dev->ic_arr[current_ic].crc_count.pec_count = 0;
+		dev->ic_arr[current_ic].crc_count.cfgr_pec = 0;
 		for (int i=0; i<6; i++)
 		{
-			ic[current_ic].crc_count.cell_pec[i]=0;
+			dev->ic_arr[current_ic].crc_count.cell_pec[i]=0;
 
 		}
 		for (int i=0; i<4; i++)
 		{
-			ic[current_ic].crc_count.aux_pec[i]=0;
+			dev->ic_arr[current_ic].crc_count.aux_pec[i]=0;
 		}
 		for (int i=0; i<2; i++)
 		{
-			ic[current_ic].crc_count.stat_pec[i]=0;
+			dev->ic_arr[current_ic].crc_count.stat_pec[i]=0;
 		}
 	}
 }
 
 /* Helper function to initialize CFG variables */
-void LTC681x_init_cfg(uint8_t total_ic, //Number of ICs in the system
-					  cell_asic *ic //A two dimensional array that stores the data
-					  )
+void LTC681x_init_cfg(ltc681x_driver_t *dev)
 {
-	for (uint8_t current_ic = 0; current_ic<total_ic;current_ic++)
+	for(uint8_t current_ic = 0; current_ic < dev->num_ics ; current_ic++)
 	{
-		for (int j =0; j<6; j++)
+		for(int j = 0; j < 6; j++)
 		{
-		  ic[current_ic].config.tx_data[j] = 0;
+			dev->ic_arr[current_ic].config.tx_data[j] = 0;
 		}
 	}
 }
 
 /* Helper function to set CFGR variable */
-void LTC681x_set_cfgr(uint8_t nIC, // Current IC
-					 cell_asic *ic, // A two dimensional array that stores the data
-					 uint8_t refon, // The REFON bit
-					 uint8_t adcopt, // The ADCOPT bit
-					 uint8_t gpio[5], // The GPIO bits
-					 uint8_t dcc[12], // The DCC bits
-					 uint8_t dcto[4], // The Dcto bits
-					 uint16_t uv, // The UV value
-					 uint16_t  ov // The OV value
-					 )
+void LTC681x_set_cfgr(ltc681x_driver_t *dev,
+					  uint8_t nIC, //!< Current IC
+                      uint8_t refon,  //!< The REFON bit
+					  uint8_t adcopt, //!< The ADCOPT bit
+					  uint8_t gpio[5],//!< The GPIO bits
+					  uint8_t dcc[12],//!< The DCC bits
+					  uint8_t dcto[4],//!< The Dcto bits
+					  uint16_t uv, //!< The UV value
+					  uint16_t ov  //!< The OV value
+					  )
 {
-	LTC681x_set_cfgr_refon(nIC,ic,refon);
-	LTC681x_set_cfgr_adcopt(nIC,ic,adcopt);
-	LTC681x_set_cfgr_gpio(nIC,ic,gpio);
-	LTC681x_set_cfgr_dis(nIC,ic,dcc);
-	LTC681x_set_cfgr_dcto(nIC,ic,dcto);
-	LTC681x_set_cfgr_uv(nIC, ic, uv);
-	LTC681x_set_cfgr_ov(nIC, ic, ov);
+	LTC681x_set_cfgr_refon(dev, nIC, refon);
+	LTC681x_set_cfgr_adcopt(dev, nIC, adcopt);
+	LTC681x_set_cfgr_gpio(dev, nIC, gpio);
+	LTC681x_set_cfgr_disd(dev, nIC, dcc);
+	LTC681x_set_cfgr_dcto(dev, nIC, dcto);
+	LTC681x_set_cfgr_uv(dev, nIC, uv);
+	LTC681x_set_cfgr_ov(dev, nIC, ov);
 }
 
 /* Helper function to set the REFON bit */
-void LTC681x_set_cfgr_refon(uint8_t nIC, cell_asic *ic, uint8_t refon)
+void LTC681x_set_cfgr_refon(ltc681x_driver_t *dev,
+							uint8_t nIC, //!< Current IC
+							uint8_t refon //!< The REFON bit
+							)
 {
-	if (refon) ic[nIC].config.tx_data[0] = ic[nIC].config.tx_data[0]|0x04;
-	else ic[nIC].config.tx_data[0] = ic[nIC].config.tx_data[0]&0xFB;
+	if (refon) dev->ic_arr[nIC].config.tx_data[0] = dev->ic_arr[nIC].config.tx_data[0]|0x04;
+	else dev->ic_arr[nIC].config.tx_data[0] = dev->ic_arr[nIC].config.tx_data[0]&0xFB;
 }
 
 /* Helper function to set the ADCOPT bit */
-void LTC681x_set_cfgr_adcopt(uint8_t nIC, cell_asic *ic, uint8_t adcopt)
+void LTC681x_set_cfgr_adcopt(ltc681x_driver_t *dev,
+							 uint8_t nIC, //!< Current IC
+							 uint8_t adcopt //!< The ADCOPT bit
+							 )
 {
-	if (adcopt) ic[nIC].config.tx_data[0] = ic[nIC].config.tx_data[0]|0x01;
-	else ic[nIC].config.tx_data[0] = ic[nIC].config.tx_data[0]&0xFE;
+	if (adcopt) dev->ic_arr[nIC].config.tx_data[0] = dev->ic_arr[nIC].config.tx_data[0]|0x01;
+	else dev->ic_arr[nIC].config.tx_data[0] = dev->ic_arr[nIC].config.tx_data[0]&0xFE;
 }
 
 /* Helper function to set GPIO bits */
-void LTC681x_set_cfgr_gpio(uint8_t nIC, cell_asic *ic,uint8_t gpio[5])
+void LTC681x_set_cfgr_gpio(ltc681x_driver_t *dev,
+						   uint8_t nIC, //!< Current IC
+						   uint8_t gpio[] //!< The GPIO bits
+						   )
 {
 	for (int i =0; i<5; i++)
 	{
-		if (gpio[i])ic[nIC].config.tx_data[0] = ic[nIC].config.tx_data[0]|(0x01<<(i+3));
-		else ic[nIC].config.tx_data[0] = ic[nIC].config.tx_data[0]&(~(0x01<<(i+3)));
+		if (gpio[i])dev->ic_arr[nIC].config.tx_data[0] = dev->ic_arr[nIC].config.tx_data[0]|(0x01<<(i+3));
+		else dev->ic_arr[nIC].config.tx_data[0] = dev->ic_arr[nIC].config.tx_data[0]&(~(0x01<<(i+3)));
 	}
 }
 
 /* Helper function to control discharge */
-void LTC681x_set_cfgr_dis(uint8_t nIC, cell_asic *ic,uint8_t dcc[12])
+void LTC681x_set_cfgr_dis(ltc681x_driver_t *dev,
+						  uint8_t nIC, //!< Current IC
+						  uint8_t dcc[] //!< The DCC bits
+						  )
 {
 	for (int i =0; i<8; i++)
 	{
-		if (dcc[i])ic[nIC].config.tx_data[4] = ic[nIC].config.tx_data[4]|(0x01<<i);
-		else ic[nIC].config.tx_data[4] = ic[nIC].config.tx_data[4]& (~(0x01<<i));
+		if (dcc[i])dev->ic_arr[nIC].config.tx_data[4] = dev->ic_arr[nIC].config.tx_data[4]|(0x01<<i);
+		else dev->ic_arr[nIC].config.tx_data[4] = dev->ic_arr[nIC].config.tx_data[4]& (~(0x01<<i));
 	}
 	for (int i =0; i<4; i++)
 	{
-		if (dcc[i+8])ic[nIC].config.tx_data[5] = ic[nIC].config.tx_data[5]|(0x01<<i);
-		else ic[nIC].config.tx_data[5] = ic[nIC].config.tx_data[5]&(~(0x01<<i));
+		if (dcc[i+8])dev->ic_arr[nIC].config.tx_data[5] = dev->ic_arr[nIC].config.tx_data[5]|(0x01<<i);
+		else dev->ic_arr[nIC].config.tx_data[5] = dev->ic_arr[nIC].config.tx_data[5]&(~(0x01<<i));
 	}
 }
 
 /* Helper function to control discharge time value */
-void LTC681x_set_cfgr_dcto(uint8_t nIC, cell_asic *ic,uint8_t dcto[4])
+void LTC681x_set_cfgr_dcto(ltc681x_driver_t *dev,
+						   uint8_t nIC,  //!< Current IC
+						   uint8_t dcto[] //!< The Dcto bits
+						   )
 {
 	for(int i =0;i<4;i++)
 	{
-		if(dcto[i])ic[nIC].config.tx_data[5] = ic[nIC].config.tx_data[5]|(0x01<<(i+4));
-		else ic[nIC].config.tx_data[5] = ic[nIC].config.tx_data[5]&(~(0x01<<(i+4)));
+		if(dcto[i]) dev->ic_arr[nIC].config.tx_data[5] = dev->ic_arr[nIC].config.tx_data[5]|(0x01<<(i+4));
+		else dev->ic_arr[nIC].config.tx_data[5] = dev->ic_arr[nIC].config.tx_data[5]&(~(0x01<<(i+4)));
 	}
 }
 
 /* Helper Function to set UV value in CFG register */
-void LTC681x_set_cfgr_uv(uint8_t nIC, cell_asic *ic,uint16_t uv)
+void LTC681x_set_cfgr_uv(ltc681x_driver_t *dev,
+						 uint8_t nIC, //!< Current IC
+                         uint16_t uv //!< The UV value
+						 )
 {
 	uint16_t tmp = (uv/16)-1;
-	ic[nIC].config.tx_data[1] = 0x00FF & tmp;
-	ic[nIC].config.tx_data[2] = ic[nIC].config.tx_data[2]&0xF0;
-	ic[nIC].config.tx_data[2] = ic[nIC].config.tx_data[2]|((0x0F00 & tmp)>>8);
+	dev->ic_arr[nIC].config.tx_data[1] = 0x00FF & tmp;
+	dev->ic_arr[nIC].config.tx_data[2] = dev->ic_arr[nIC].config.tx_data[2]&0xF0;
+	dev->ic_arr[nIC].config.tx_data[2] = dev->ic_arr[nIC].config.tx_data[2]|((0x0F00 & tmp)>>8);
 }
 
 /* Helper function to set OV value in CFG register */
-void LTC681x_set_cfgr_ov(uint8_t nIC, cell_asic *ic,uint16_t ov)
+void LTC681x_set_cfgr_ov(ltc681x_driver_t *dev,
+						 uint8_t nIC, //!< Current IC
+                         uint16_t ov //!< The OV value
+						 )
 {
 	uint16_t tmp = (ov/16);
-	ic[nIC].config.tx_data[3] = 0x00FF & (tmp>>4);
-	ic[nIC].config.tx_data[2] = ic[nIC].config.tx_data[2]&0x0F;
-	ic[nIC].config.tx_data[2] = ic[nIC].config.tx_data[2]|((0x000F & tmp)<<4);
+	dev->ic_arr[nIC].config.tx_data[3] = 0x00FF & (tmp>>4);
+	dev->ic_arr[nIC].config.tx_data[2] = dev->ic_arr[nIC].config.tx_data[2]&0x0F;
+	dev->ic_arr[nIC].config.tx_data[2] = dev->ic_arr[nIC].config.tx_data[2]|((0x000F & tmp)<<4);
 }
 
 /*
@@ -2262,7 +2207,6 @@ void spi_write_array(ltc681x_driver_t *dev, // Device pointer
                      uint8_t data[] //Array of bytes to be written on the SPI port
                     )
 {
-
 	LTC681x_set_cs(dev, 0);
 	HAL_SPI_Transmit(dev->hspi[dev->string], data,len,100);
 	LTC681x_set_cs(dev, 1);
@@ -2273,20 +2217,17 @@ void spi_write_array(ltc681x_driver_t *dev, // Device pointer
 
 */
 
-void spi_write_read(uint8_t tx_Data[],//array of data to be written on SPI port
+void spi_write_read(ltc681x_driver_t *dev,
+					uint8_t tx_Data[],//array of data to be written on SPI port
                     uint8_t tx_len, //length of the tx data arry
                     uint8_t *rx_data,//Input: array that will store the data read by the SPI port
                     uint8_t rx_len //Option: number of bytes to be read from the SPI port
                    )
 {
-	if(a_d->ltcstring == 1){
-		HAL_SPI_Transmit(a_d->hspi2, tx_Data,tx_len,100);
-		HAL_SPI_TransmitReceive(a_d->hspi2, blank_data, rx_data,rx_len,100);
-	}
-	else{
-		HAL_SPI_Transmit(a_d->hspi1, tx_Data,tx_len,100);
-		HAL_SPI_TransmitReceive(a_d->hspi1, blank_data, rx_data,rx_len,100);
-	}
+	LTC681x_set_cs(dev, 0);
+	HAL_SPI_Transmit(dev->hspi[dev->string], tx_Data, tx_len, 100)
+	HAL_SPI_TransmitRecieve(dev->hspi[dev->string], blank_data, rx_data, rx_len, 100);;
+	LTC681x_set_cs(dev, 1);
 }
 
 
@@ -2305,26 +2246,4 @@ uint8_t spi_read_byte(ltc681x_driver_t *dev, uint8_t tx_dat)
 int LTC681x_set_cs(ltc681x_driver_t *dev, int state)
 {
 	HAL_GPIO_WritePin(dev->cs_port[dev->string], dev->cs_pin[dev->string], state);
-}
-
-void init_app_data_681x(app_data *app_data_init)
-{
-	a_d = app_data_init;
-	for (uint8_t i = 0; i < 100; i++)
-	{
-	  blank_data[i]=0xFF;
-	}
-	if(a_d->debug==1){
-		printf("\r\nDebugging init_app_data_681x\r\n");
-		uint8_t data[3],sent[3];
-		sent[0]=0;
-		while (sent[0]<3){
-			sent[0] +=1;
-			LTC_6813_CS_RESET
-			HAL_SPI_TransmitReceive(a_d->hspi1, (uint8_t *) sent,(uint8_t *) data,1,100);
-			printf("data sent %d :: data in init: %d \r\n",sent[0],data[0]);
-			LTC_6813_CS_SET
-			HAL_Delay(1000);
-		}
-	}
 }
