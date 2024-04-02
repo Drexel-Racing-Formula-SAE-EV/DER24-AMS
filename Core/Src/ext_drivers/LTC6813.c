@@ -63,11 +63,10 @@
 #include "ext_drivers/LTC6813.h"
 
 /* Helper function to initialize register limits. */
-void LTC6813_init_reg_limits(uint8_t total_ic, //Number of ICs in the system
-							 cell_asic *ic // A two dimensional array that will store the data
-							 )
+void LTC6813_init_reg_limits(ltc6813_driver_t *dev)
 {
-    for(uint8_t cic=0; cic<total_ic; cic++)
+	cell_asic *ic = dev->ic_arr;
+    for(uint8_t cic=0; cic<dev->num_ics; cic++)
     {
         ic[cic].ic_reg.cell_channels=18;
         ic[cic].ic_reg.stat_channels=4;
@@ -83,11 +82,9 @@ This command will write the configuration registers of the LTC6813-1s
 connected in a daisy chain stack. The configuration is written in descending
 order so the last device's configuration is written first.
 */
-void LTC6813_wrcfg(uint8_t total_ic, //The number of ICs being written to
-                     cell_asic *ic //A two dimensional array of the configuration data that will be written
-                    )
+void LTC6813_wrcfg(ltc6813_driver_t *dev)
 {
-	LTC681x_wrcfg(total_ic,ic);
+	LTC681x_wrcfg(dev);
 }
 
 /*
@@ -95,82 +92,80 @@ This command will write the configuration b registers of the LTC6813-1s
 connected in a daisy chain stack. The configuration is written in descending
 order so the last device's configuration is written first.
 */
-void LTC6813_wrcfgb(uint8_t total_ic, //The number of ICs being written to
-                    cell_asic *ic //A two dimensional array of the configuration data that will be written
-                   )
+void LTC6813_wrcfgb(ltc6813_driver_t *dev)
 {
-    LTC681x_wrcfgb(total_ic,ic);
+    LTC681x_wrcfgb(dev);
 }
 
 /* Reads configuration registers of a LTC6813 daisy chain */
-int8_t LTC6813_rdcfg(uint8_t total_ic, //Number of ICs in the system
-				   cell_asic *ic //A two dimensional array that the function stores the read configuration data.
-				  )
+int8_t LTC6813_rdcfg(ltc6813_driver_t *dev)
 {
 	int8_t pec_error = 0;
-	pec_error = LTC681x_rdcfg(total_ic,ic);
+	pec_error = LTC681x_rdcfg(dev);
 	return(pec_error);
 }
 
 /* Reads configuration b registers of a LTC6813 daisy chain */
-int8_t LTC6813_rdcfgb(uint8_t total_ic, //Number of ICs in the system
-                   cell_asic *ic //A two dimensional array that the function stores the read configuration data.
-                  )
+int8_t LTC6813_rdcfgb(ltc6813_driver_t *dev)
 {
     int8_t pec_error = 0;
-    pec_error = LTC681x_rdcfgb(total_ic,ic);
+    pec_error = LTC681x_rdcfgb(dev);
     return(pec_error);
 }
 
 /* Starts cell voltage conversion */
-void LTC6813_adcv(uint8_t MD, //ADC Mode
-				  uint8_t DCP, //Discharge Permit
-				  uint8_t CH //Cell Channels to be measured
-				 )
+void LTC6813_adcv(ltc6813_driver_t *dev,
+		          uint8_t MD, //!< ADC Conversion Mode
+                  uint8_t DCP, //!< Controls if Discharge is permitted during conversion
+                  uint8_t CH //!< Sets which Cell channels are converted
+                 )
 {
-    LTC681x_adcv(MD,DCP,CH);
+    LTC681x_adcv(dev, MD, DCP, CH);
 }
 
 /* Start a GPIO and Vref2 Conversion */
-void LTC6813_adax(uint8_t MD, //ADC Mode
-				  uint8_t CHG //GPIO Channels to be measured)
-                 )
+void LTC6813_adax(ltc6813_driver_t *dev,
+		          uint8_t MD, //!< ADC Conversion Mode
+				  uint8_t CHG //!< Sets which GPIO channels are converted
+                  )
 {
-	LTC681x_adax(MD,CHG);
+	LTC681x_adax(dev, MD, CHG);
 }
 
 /* Start a Status ADC Conversion */
-void LTC6813_adstat(uint8_t MD, //ADC Mode
-					uint8_t CHST //Stat Channels to be measured
-)
+void LTC6813_adstat(ltc6813_driver_t *dev,
+		            uint8_t MD, //!< ADC Conversion Mode
+					uint8_t CHST //!< Sets which Stat channels are converted
+					)
 {
-	LTC681x_adstat(MD,CHST);
+	LTC681x_adstat(dev, MD, CHST);
 }
 
 /* Starts cell voltage and GPIO 1&2 conversion */
-void LTC6813_adcvax(uint8_t MD, //ADC Mode
-					uint8_t DCP //Discharge Permit
+void LTC6813_adcvax(ltc6813_driver_t *dev,
+		            uint8_t MD, //!< ADC Conversion Mode
+					uint8_t DCP //!< Controls if Discharge is permitted during conversion
 					)
 {
-    LTC681x_adcvax(MD,DCP);
+    LTC681x_adcvax(dev, MD, DCP);
 }
 
 /* Starts cell voltage and SOC conversion */
-void LTC6813_adcvsc( uint8_t MD, //ADC Mode
-                     uint8_t DCP //Discharge Permit
-                   )
+void LTC6813_adcvsc(ltc6813_driver_t *dev,
+		            uint8_t MD, //!< ADC Conversion Mode
+					uint8_t DCP //!< Controls if Discharge is permitted during conversion
+					)
 {
-    LTC681x_adcvsc(MD,DCP);
+    LTC681x_adcvsc(dev, MD, DCP);
 }
 
 /*  Reads and parses the LTC6813 cell voltage registers */
-uint8_t LTC6813_rdcv(uint8_t reg, // Controls which cell voltage register is read back.
-                     uint8_t total_ic, // The number of ICs in the system
-                     cell_asic *ic // Array of the parsed cell codes
+uint8_t LTC6813_rdcv(ltc6813_driver_t *dev,
+		             uint8_t reg //!< Controls which cell voltage register is read back.
                     )
 {
 	int8_t pec_error = 0;
-	pec_error = LTC681x_rdcv(reg,total_ic,ic);
+	pec_error = LTC681x_rdcv(dev, reg);
 	return(pec_error);
 }
 
@@ -179,13 +174,12 @@ The function is used
 to read the  parsed GPIO codes of the LTC6813. This function will send the requested
 read commands parse the data and store the gpio voltages in aux_codes variable
 */
-int8_t LTC6813_rdaux(uint8_t reg, //Determines which GPIO voltage register is read back.
-				     uint8_t total_ic,//The number of ICs in the system
-				     cell_asic *ic//A two dimensional array of the gpio voltage codes.
-				    )
+int8_t LTC6813_rdaux(ltc6813_driver_t *dev,
+		             uint8_t reg //!< Controls which GPIO voltage register is read back
+                    )
 {
 	int8_t pec_error = 0;
-	LTC681x_rdaux(reg,total_ic,ic);
+	LTC681x_rdaux(dev, reg);
 	return (pec_error);
 }
 
@@ -195,26 +189,25 @@ The function is used
 to read the  parsed stat codes of the LTC6813. This function will send the requested
 read commands parse the data and store the stat voltages in stat_codes variable
 */
-int8_t LTC6813_rdstat(uint8_t reg, //Determines which Stat  register is read back.
-                      uint8_t total_ic,//The number of ICs in the system
-                      cell_asic *ic //A two dimensional array of the stat codes.
-                       )
+int8_t LTC6813_rdstat(ltc6813_driver_t *dev,
+		              uint8_t reg //!< Determines which Stat  register is read back.
+                     )
 {
     int8_t pec_error = 0;
-    pec_error = LTC681x_rdstat(reg,total_ic,ic);
+    pec_error = LTC681x_rdstat(dev, reg);
     return (pec_error);
 }
 
 /* Sends the poll ADC command */
-uint8_t LTC6813_pladc()
+uint8_t LTC6813_pladc(ltc6813_driver_t *dev)
 {
-	return(LTC681x_pladc());
+	return(LTC681x_pladc(dev));
 }
 
 /* This function will block operation until the ADC has finished it's conversion */
-uint32_t LTC6813_pollAdc()
+uint32_t LTC6813_pollAdc(ltc6813_driver_t *dev)
 {
-	return(LTC681x_pollAdc());
+	return(LTC681x_pollAdc(dev));
 }
 
 /*
@@ -222,9 +215,9 @@ The command clears the cell voltage registers and initializes
 all values to 1. The register will read back hexadecimal 0xFF
 after the command is sent.
 */
-void LTC6813_clrcell()
+void LTC6813_clrcell(ltc6813_driver_t *dev)
 {
-	LTC681x_clrcell();
+	LTC681x_clrcell(dev);
 }
 
 /*
@@ -232,9 +225,9 @@ The command clears the Auxiliary registers and initializes
 all values to 1. The register will read back hexadecimal 0xFF
 after the command is sent.
 */
-void LTC6813_clraux()
+void LTC6813_clraux(ltc6813_driver_t *dev)
 {
-	LTC681x_clraux();
+	LTC681x_clraux(dev);
 }
 
 /*
@@ -242,98 +235,101 @@ The command clears the Stat registers and initializes
 all values to 1. The register will read back hexadecimal 0xFF
 after the command is sent.
 */
-void LTC6813_clrstat()
+void LTC6813_clrstat(ltc6813_driver_t *dev)
 {
-	LTC681x_clrstat();
+	LTC681x_clrstat(dev);
 }
 
 /* Starts the Mux Decoder diagnostic self test */
-void LTC6813_diagn()
+void LTC6813_diagn(ltc6813_driver_t *dev)
 {
-     LTC681x_diagn();
+     LTC681x_diagn(dev);
 }
 
 /* Starts cell voltage self test conversion */
-void LTC6813_cvst(uint8_t MD, //ADC Mode
-                  uint8_t ST //Self Test
-                 )
+void LTC6813_cvst(ltc6813_driver_t *dev,
+		          uint8_t MD, //!< ADC Conversion Mode
+				  uint8_t ST //!< Self Test Mode
+				 )
 {
-    LTC681x_cvst(MD,ST);
+    LTC681x_cvst(dev, MD, ST);
 }
 
 /* Start an Auxiliary Register Self Test Conversion */
-void LTC6813_axst(uint8_t MD, //ADC Mode
-				  uint8_t ST //Self Test
-                 )
+void LTC6813_axst(ltc6813_driver_t *dev,
+		          uint8_t MD, //!< ADC Conversion Mode
+				  uint8_t ST //!< Sets if self test 1 or 2 is run
+				 )
 {
-	LTC681x_axst(MD,ST);
+	LTC681x_axst(dev, MD, ST);
 }
 
 /* Start a Status Register Self Test Conversion */
-void LTC6813_statst(uint8_t MD, //ADC Mode
-                    uint8_t ST //Self Test
+void LTC6813_statst(ltc6813_driver_t *dev,
+		            uint8_t MD, //!< ADC Conversion Mode
+					uint8_t ST //!< Sets if self test 1 or 2 is run
 					)
 {
-    LTC681x_statst(MD,ST);
+    LTC681x_statst(dev, MD, ST);
 }
 
 /* Starts cell voltage overlap conversion */
-void LTC6813_adol(uint8_t MD, //ADC Mode
-                  uint8_t DCP //Discharge Permit
-                 )
+void LTC6813_adol(ltc6813_driver_t *dev,
+		          uint8_t MD, //!< ADC Conversion Mode
+				  uint8_t DCP //!< Discharge permitted during conversion
+				 )
 {
-	LTC681x_adol(MD,DCP);
+	LTC681x_adol(dev, MD, DCP);
 }
 
 /* Start an GPIO Redundancy test */
-void LTC6813_adaxd(uint8_t MD, //ADC Mode
-				   uint8_t CHG //GPIO Channels to be measured
-                   )
+void LTC6813_adaxd(ltc6813_driver_t *dev,
+		           uint8_t MD, //!< ADC Conversion Mode
+				   uint8_t CHG //!< Sets which GPIO channels are converted
+				   )
 {
-	LTC681x_adaxd(MD,CHG);
+	LTC681x_adaxd(dev, MD, CHG);
 }
 
 /* Start a Status register redundancy test Conversion */
-void LTC6813_adstatd(uint8_t MD, //ADC Mode
-					 uint8_t CHST //Stat Channels to be measured
-                    )
+void LTC6813_adstatd(ltc6813_driver_t *dev,
+		             uint8_t MD, //!< ADC Mode
+					 uint8_t CHST //!< Sets which Status channels are converted
+					)
 {
-	LTC681x_adstatd(MD,CHST);
+	LTC681x_adstatd(dev, MD, CHST);
 }
 
 /* Runs the Digital Filter Self Test */
-int16_t LTC6813_run_cell_adc_st(uint8_t adc_reg, // Type of register
-								uint8_t total_ic, // Number of ICs in the system
-								cell_asic *ic, // A two dimensional array that will store the data
-								uint8_t md, //ADC Mode
-								uint8_t adcopt // The adcopt bit in the configuration register
+int16_t LTC6813_run_cell_adc_st(ltc6813_driver_t *dev,
+		                        uint8_t adc_reg, //!< Type of register
+                                uint8_t md, //!< ADC Mode
+								uint8_t adcopt //!< The adcopt bit in the configuration register
 								)
 {
 	int16_t error = 0;
-	error = LTC681x_run_cell_adc_st(adc_reg,total_ic,ic,md,adcopt);
+	error = LTC681x_run_cell_adc_st(dev, adc_reg, md, adcopt);
 	return(error);
 }
 
 /*  Runs the ADC overlap test for the IC */
-uint16_t LTC6813_run_adc_overlap(uint8_t total_ic, // Number of ICs in the system
-								cell_asic *ic // A two dimensional array that will store the data
-								)
+uint16_t LTC6813_run_adc_overlap(ltc6813_driver_t *dev)
 {
 	uint16_t error = 0;
 	int32_t measure_delta =0;
 	int16_t failure_pos_limit = 20;
 	int16_t failure_neg_limit = -20;
 	uint32_t conv_time=0;
-	wakeup_idle(total_ic);
-	LTC681x_adol(MD_7KHZ_3KHZ,DCP_DISABLED);
-	conv_time = LTC681x_pollAdc();
+	uint8_t total_ic = dev->num_ics;
+	cell_asic *ic = dev->ic_arr;
+	wakeup_idle(dev);
+	LTC681x_adol(dev, MD_7KHZ_3KHZ,DCP_DISABLED);
+	conv_time = LTC681x_pollAdc(dev);
 
-	wakeup_idle(total_ic);
-	error = LTC681x_rdcv(0, total_ic,ic);
+	wakeup_idle(dev);
+	error = LTC681x_rdcv(dev, 0);
 	for (int cic = 0; cic<total_ic; cic++)
 	{
-
-
 		measure_delta = (int32_t)ic[cic].cells.c_codes[6]-(int32_t)ic[cic].cells.c_codes[7];
 		if ((measure_delta>failure_pos_limit) || (measure_delta<failure_neg_limit))
 		{
@@ -349,65 +345,61 @@ uint16_t LTC6813_run_adc_overlap(uint8_t total_ic, // Number of ICs in the syste
 }
 
 /* Runs the redundancy self test */
-int16_t LTC6813_run_adc_redundancy_st(uint8_t adc_mode, //ADC Mode
-									  uint8_t adc_reg, // Type of register
-									  uint8_t total_ic, // Number of ICs in the system
-									  cell_asic *ic // A two dimensional array that will store the data
-									  )
+int16_t LTC6813_run_adc_redundancy_st(ltc6813_driver_t *dev,
+		                              uint8_t adc_mode, //!< ADC Mode
+                                      uint8_t adc_reg //!< Type of register
+                                     )
 {
 	int16_t error = 0;
-	LTC681x_run_adc_redundancy_st(adc_mode,adc_reg,total_ic,ic);
+	LTC681x_run_adc_redundancy_st(dev, adc_mode, adc_reg);
 	return(error);
 }
 
 /* Start an open wire Conversion */
-void LTC6813_adow(uint8_t MD,   //ADC Mode
-                  uint8_t PUP, //Pull up/Pull down current
-				  uint8_t CH,  //Sets which Cell channels are converted
-				  uint8_t DCP //Discharge Permit
-				  )
+void LTC6813_adow(ltc6813_driver_t *dev,
+		          uint8_t MD, //!< ADC Conversion Mode
+				  uint8_t PUP,//!< Pull up/Pull down current
+				  uint8_t CH, //!< Sets which Cell channels are converted
+				  uint8_t DCP //!< Discharge permitted during conversion
+				 )
 {
-    LTC681x_adow(MD,PUP,CH,DCP);
+    LTC681x_adow(dev, MD, PUP, CH, DCP);
 }
 
 /* Start GPIOs open wire ADC conversion */
-void LTC6813_axow(uint8_t MD, //ADC Mode
-				  uint8_t PUP //Pull up/Pull down current
+void LTC6813_axow(ltc6813_driver_t *dev,
+		          uint8_t MD, //!< ADC Mode
+				  uint8_t PUP //!< Pull up/Pull down current
 				 )
 {
-   LTC681x_axow(MD, PUP);
+   LTC681x_axow(dev, MD, PUP);
 }
 
 /* Runs the data sheet algorithm for open wire for single cell detection */
-void LTC6813_run_openwire_single(uint8_t total_ic, // Number of ICs in the system
-								cell_asic *ic // A two dimensional array that will store the data
-								)
+void LTC6813_run_openwire_single(ltc6813_driver_t *dev)
 {
-	LTC681x_run_openwire_single(total_ic, ic);
+	LTC681x_run_openwire_single(dev);
 }
 
 /* Runs the data sheet algorithm for open wire for multiple cell and two consecutive cells detection */
-void LTC6813_run_openwire_multi(uint8_t total_ic, // Number of ICs in the system
-								cell_asic *ic // A two dimensional array that will store the data
-								)
+void LTC6813_run_openwire_multi(ltc6813_driver_t *dev)
 {
-	LTC681x_run_openwire_multi( total_ic, ic);
+	LTC681x_run_openwire_multi(dev);
 }
 
 /* Runs open wire for GPIOs */
-void LTC6813_run_gpio_openwire(uint8_t total_ic, // Number of ICs in the system
-								cell_asic *ic // A two dimensional array that will store the data
-								)
+void LTC6813_run_gpio_openwire(ltc6813_driver_t *dev)
 {
-	LTC681x_run_gpio_openwire(total_ic, ic);
+	LTC681x_run_gpio_openwire(dev);
 }
 
 /* Helper function to set discharge bit in CFG register */
-void LTC6813_set_discharge(int Cell, // Cell to be discharged
-						   uint8_t total_ic, // Number of ICs in the system
-						   cell_asic *ic // A two dimensional array that will store the data
-						   )
+void LTC6813_set_discharge(ltc6813_driver_t *dev,
+		                   int Cell //!< The cell to be discharged
+		                  )
 {
+	uint8_t total_ic = dev->num_ics;
+	cell_asic *ic = dev->ic_arr;
 	for (int i=0; i<total_ic; i++)
 	{
 		if (Cell==0)
@@ -438,11 +430,12 @@ void LTC6813_set_discharge(int Cell, // Cell to be discharged
 }
 
 /* Helper function to set discharge bit in CFG register */
-void LTC6813_set_discharge_per_segment(uint8_t Cell, // Cell to be discharged
-						   uint8_t segment, // Number of ICs in the system
-						   cell_asic *ic // A two dimensional array that will store the data
-						   )
+void LTC6813_set_discharge_per_segment(ltc6813_driver_t *dev,
+								       uint8_t Cell,
+									   uint8_t segment
+									  )
 {
+	cell_asic *ic = dev->ic_arr;
 	if (Cell==0)
 	{
 	  ic[segment].configb.tx_data[1] = ic[segment].configb.tx_data[1] |(0x04);
@@ -463,66 +456,56 @@ void LTC6813_set_discharge_per_segment(uint8_t Cell, // Cell to be discharged
 	{
 	  ic[segment].configb.tx_data[1] = ic[segment].configb.tx_data[1] | (1<<(Cell-17));
 	}
-	else
-	{
-		;
-	}
 }
 
 
 /* Clears all of the DCC bits in the configuration registers */
-void LTC6813_clear_discharge(uint8_t total_ic, // Number of ICs in the system
-                             cell_asic *ic // A two dimensional array that will store the data
-							 )
+void LTC6813_clear_discharge(ltc6813_driver_t *dev)
 {
-    LTC681x_clear_discharge(total_ic,ic);
+    LTC681x_clear_discharge(dev);
 }
 
 /* Writes the pwm registers of a LTC6813 daisy chain  */
-void LTC6813_wrpwm(uint8_t total_ic, // Number of ICs in the system
-				   uint8_t pwmReg,  // PWM Register A or B
-				   cell_asic *ic //A two dimensional array of the configuration data that will be written
-				  )
+void LTC6813_wrpwm(ltc6813_driver_t *dev,
+                   uint8_t pwmReg //!<  PWM  Register A or B
+                  )
 {
-	LTC681x_wrpwm(total_ic,pwmReg,ic);
+	LTC681x_wrpwm(dev, pwmReg);
 }
 
 /* Reads pwm registers of a LTC6813 daisy chain */
-int8_t LTC6813_rdpwm(uint8_t total_ic, //Number of ICs in the system
-					 uint8_t pwmReg, // PWM Register A or B
-				     cell_asic *ic //A two dimensional array that the function stores the read configuration data.
-				    )
+int8_t LTC6813_rdpwm(ltc6813_driver_t *dev,
+                     uint8_t pwmReg //!< PWM  Register A or B
+                    )
 {
 	int8_t pec_error =0;
-	pec_error = LTC681x_rdpwm(total_ic,pwmReg,ic);
+	pec_error = LTC681x_rdpwm(dev, pwmReg);
 	return(pec_error);
 }
 
 /* Writes data in S control register the ltc6813-1  connected in a daisy chain stack */
-void LTC6813_wrsctrl(uint8_t total_ic, // number of ICs in the daisy chain
-                     uint8_t sctrl_reg, // SCTRL Register A or B
-                     cell_asic *ic // A two dimensional array that will store the data
+void LTC6813_wrsctrl(ltc6813_driver_t *dev,
+                     uint8_t sctrl_reg //! SCTRL  Register A or B
                     )
 {
-	LTC681x_wrsctrl(total_ic, sctrl_reg, ic);
+	LTC681x_wrsctrl(dev, sctrl_reg);
 }
 
 /* Reads sctrl registers of a LTC6813 daisy chain */
-int8_t LTC6813_rdsctrl(uint8_t total_ic, // number of ICs in the daisy chain
-                       uint8_t sctrl_reg, // SCTRL Register A or B
-                       cell_asic *ic //< a two dimensional array that the function stores the read data
+int8_t LTC6813_rdsctrl(ltc6813_driver_t *dev,
+                       uint8_t sctrl_reg//!< SCTRL Register A or B
                       )
 {
-	LTC681x_rdsctrl( total_ic, sctrl_reg,ic );
+	return LTC681x_rdsctrl(dev, sctrl_reg);
 }
 
 /*
 Start Sctrl data communication
 This command will start the sctrl pulse communication over the spins
 */
-void LTC6813_stsctrl()
+void LTC6813_stsctrl(ltc6813_driver_t *dev)
 {
-	LTC681x_stsctrl();
+	LTC681x_stsctrl(dev);
 }
 
 /*
@@ -530,19 +513,19 @@ The command clears the Sctrl registers and initializes
 all values to 0. The register will read back hexadecimal 0x00
 after the command is sent.
 */
-void LTC6813_clrsctrl()
+void LTC6813_clrsctrl(ltc6813_driver_t *dev)
 {
-	LTC681x_clrsctrl();
+	LTC681x_clrsctrl(dev);
 }
 
 /* Write the 6813 PWM/Sctrl Register B  */
-void LTC6813_wrpsb(uint8_t total_ic, // Number of ICs in the system
-					cell_asic *ic // A two dimensional array that will store the data
-					)
+void LTC6813_wrpsb(ltc6813_driver_t *dev)
 {
 	uint8_t cmd[2];
 	uint8_t write_buffer[256];
 	uint8_t c_ic = 0;
+	uint8_t total_ic = dev->num_ics;
+	cell_asic *ic = dev->ic_arr;
 
 	cmd[0] = 0x00;
 	cmd[1] = 0x1C;
@@ -558,13 +541,11 @@ void LTC6813_wrpsb(uint8_t total_ic, // Number of ICs in the system
 		write_buffer[4] = ic[c_ic].sctrlb.tx_data[4];
 		write_buffer[5]= ic[c_ic].sctrlb.tx_data[5];
 	}
-	write_68(total_ic, cmd, write_buffer);
+	write_68(dev, cmd, write_buffer);
 }
 
 /* Reading the 6813 PWM/Sctrl Register B */
-uint8_t LTC6813_rdpsb(uint8_t total_ic, //< number of ICs in the daisy chain
-                      cell_asic *ic //< a two dimensional array that the function stores the read data
-                      )
+uint8_t LTC6813_rdpsb(ltc6813_driver_t *dev)
 {
     uint8_t cmd[4];
     uint8_t read_buffer[256];
@@ -572,9 +553,11 @@ uint8_t LTC6813_rdpsb(uint8_t total_ic, //< number of ICs in the daisy chain
     uint16_t data_pec;
     uint16_t calc_pec;
     uint8_t c_ic = 0;
+	uint8_t total_ic = dev->num_ics;
+	cell_asic *ic = dev->ic_arr;
 	cmd[0] = 0x00;
 	cmd[1] = 0x1E;
-    pec_error = read_68(total_ic, cmd, read_buffer);
+    pec_error = read_68(dev, cmd, read_buffer);
 
     for(uint8_t current_ic =0; current_ic<total_ic; current_ic++)
     {
@@ -615,223 +598,253 @@ uint8_t LTC6813_rdpsb(uint8_t total_ic, //< number of ICs in the daisy chain
 }
 
 /* Writes the COMM registers of a LTC6813 daisy chain */
-void LTC6813_wrcomm(uint8_t total_ic, //The number of ICs being written to
-				    cell_asic *ic //A two dimensional array of the comm data that will be written
-				   )
+void LTC6813_wrcomm(ltc6813_driver_t *dev)
 {
-	LTC681x_wrcomm(total_ic,ic);
+	LTC681x_wrcomm(dev);
 }
 
 /* Reads COMM registers of a LTC6813 daisy chain */
-int8_t LTC6813_rdcomm(uint8_t total_ic, //Number of ICs in the system
-					  cell_asic *ic //A two dimensional array that the function stores the read data.
-				     )
+int8_t LTC6813_rdcomm(ltc6813_driver_t *dev)
 {
 	int8_t pec_error = 0;
-	LTC681x_rdcomm(total_ic, ic);
+	LTC681x_rdcomm(dev);
 	return(pec_error);
 }
 
 /* Shifts data in COMM register out over LTC6813 SPI/I2C port */
-void LTC6813_stcomm(uint8_t len) //Length of data to be transmitted
+void LTC6813_stcomm(ltc6813_driver_t *dev,
+		            uint8_t len //!< Length of data to be transmitted
+				   )
 {
-    LTC681x_stcomm(len);
+    LTC681x_stcomm(dev, len);
 }
 
 /* Mutes the LTC6813 discharge transistors */
-void LTC6813_mute()
+void LTC6813_mute(ltc6813_driver_t *dev)
 {
 	uint8_t cmd[2];
 
 	cmd[0] = 0x00;
 	cmd[1] = 0x28;
-	cmd_68(cmd);
+	cmd_68(dev, cmd);
 }
 
 /* Clears the LTC6813 Mute Discharge */
-void LTC6813_unmute()
+void LTC6813_unmute(ltc6813_driver_t *dev)
 {
 	uint8_t cmd[2];
 
 	cmd[0] = 0x00;
 	cmd[1] = 0x29;
-	cmd_68(cmd);
+	cmd_68(dev, cmd);
 }
 
 /* Helper function that increments PEC counters */
-void LTC6813_check_pec(uint8_t total_ic,//Number of ICs in the system
-						uint8_t reg, //  Type of register
-						cell_asic *ic // A two dimensional array that will store the data
-						)
+void LTC6813_check_pec(ltc6813_driver_t *dev,
+                       uint8_t reg //!<  Type of register
+					  )
 {
-	LTC681x_check_pec(total_ic,reg,ic);
+	LTC681x_check_pec(dev, reg);
 }
 
 /* Helper Function to reset PEC counters */
-void LTC6813_reset_crc_count(uint8_t total_ic, //Number of ICs in the system
-							 cell_asic *ic // A two dimensional array that will store the data
-							 )
+void LTC6813_reset_crc_count(ltc6813_driver_t *dev)
 {
-	LTC681x_reset_crc_count(total_ic,ic);
+	LTC681x_reset_crc_count(dev);
 }
 
 /* Helper function to initialize CFG variables */
-void LTC6813_init_cfg(uint8_t total_ic, cell_asic *ic)
+void LTC6813_init_cfg(ltc6813_driver_t *dev)
 {
-   LTC681x_init_cfg(total_ic,ic);
+   LTC681x_init_cfg(dev);
 }
 
 /* Helper function to set CFGR variable */
-void LTC6813_set_cfgr(uint8_t nIC, cell_asic *ic, uint8_t refon, uint8_t adcopt, uint8_t gpio[5],uint8_t dcc[12],uint8_t dcto[4], uint16_t uv, uint16_t  ov)
+void LTC6813_set_cfgr(ltc6813_driver_t *dev,
+		              uint8_t current_ic,
+                      uint8_t refon, //!< The REFON bit
+                      uint8_t adcopt, //!< The ADCOPT bit
+                      uint8_t gpio[5], //!< The GPIO bits
+                      uint8_t dcc[12], //!< The DCC bits
+					  uint8_t dcto[4], //!< The Dcto bits
+					  uint16_t uv, //!< The UV value
+					  uint16_t  ov //!< The OV value
+					  )
 {
-    LTC681x_set_cfgr_refon(nIC,ic,refon);
-    LTC681x_set_cfgr_adcopt(nIC,ic,adcopt);
-    LTC681x_set_cfgr_gpio(nIC,ic,gpio);
-    LTC681x_set_cfgr_dis(nIC,ic,dcc);
-	LTC681x_set_cfgr_dcto(nIC,ic,dcto);
-	LTC681x_set_cfgr_uv(nIC, ic, uv);
-    LTC681x_set_cfgr_ov(nIC, ic, ov);
+    LTC681x_set_cfgr_refon(dev, current_ic, refon);
+    LTC681x_set_cfgr_adcopt(dev, current_ic, adcopt);
+    LTC681x_set_cfgr_gpio(dev, current_ic, gpio);
+    LTC681x_set_cfgr_dis(dev, current_ic, dcc);
+	LTC681x_set_cfgr_dcto(dev, current_ic, dcto);
+	LTC681x_set_cfgr_uv(dev, current_ic, uv);
+    LTC681x_set_cfgr_ov(dev, current_ic, ov);
 }
 
 /* Helper function to set the REFON bit */
-void LTC6813_set_cfgr_refon(uint8_t nIC, cell_asic *ic, uint8_t refon)
+void LTC6813_set_cfgr_refon(ltc6813_driver_t *dev,
+		                    uint8_t current_ic,
+                            uint8_t refon //!< The REFON bit
+							)
 {
-	LTC681x_set_cfgr_refon(nIC,ic,refon);
+	LTC681x_set_cfgr_refon(dev, current_ic, refon);
 }
 
 /* Helper function to set the adcopt bit */
-void LTC6813_set_cfgr_adcopt(uint8_t nIC, cell_asic *ic, uint8_t adcopt)
+void LTC6813_set_cfgr_adcopt(ltc6813_driver_t *dev,
+		                     uint8_t current_ic,
+                             uint8_t adcopt //!< The ADCOPT bit
+							 )
 {
-	LTC681x_set_cfgr_adcopt(nIC,ic,adcopt);
+	LTC681x_set_cfgr_adcopt(dev, current_ic, adcopt);
 }
 
 /* Helper function to set GPIO bits */
-void LTC6813_set_cfgr_gpio(uint8_t nIC, cell_asic *ic,uint8_t gpio[5])
+void LTC6813_set_cfgr_gpio(ltc6813_driver_t *dev,
+		                   uint8_t current_ic,
+                           uint8_t gpio[] //!< The GPIO bits
+						   )
 {
-	LTC681x_set_cfgr_gpio(nIC,ic,gpio);
+	LTC681x_set_cfgr_gpio(dev, current_ic, gpio);
 }
 
 /* Helper function to control discharge */
-void LTC6813_set_cfgr_dis(uint8_t nIC, cell_asic *ic,uint8_t dcc[12])
+void LTC6813_set_cfgr_dis(ltc6813_driver_t *dev,
+                          uint8_t current_ic,
+                          uint8_t dcc[] //!< The DCC bits
+						  )
 {
-	LTC681x_set_cfgr_dis(nIC,ic,dcc);
+	LTC681x_set_cfgr_dis(dev, current_ic, dcc);
 }
 
 /* Helper Function to set uv value in CFG register */
-void LTC6813_set_cfgr_uv(uint8_t nIC, cell_asic *ic,uint16_t uv)
+void LTC6813_set_cfgr_uv(ltc6813_driver_t *dev,
+                         uint8_t current_ic,
+                         uint16_t uv //!< The UV value
+						 )
 {
-    LTC681x_set_cfgr_uv(nIC, ic, uv);
+    LTC681x_set_cfgr_uv(dev, current_ic, uv);
 }
 
 /* Helper Function to set dcto value in CFG register */
-void LTC6813_set_cfgr_dcto(uint8_t nIC, cell_asic *ic,uint8_t dcto[4])
+void LTC6813_set_cfgr_dcto(ltc6813_driver_t *dev,
+                         uint8_t current_ic,
+                         uint8_t dcto[4] //!< The Dcto bits
+						 )
 {
-    LTC681x_set_cfgr_dcto(nIC, ic, dcto);
+    LTC681x_set_cfgr_dcto(dev, current_ic, dcto);
 }
 
 /* Helper function to set OV value in CFG register */
-void LTC6813_set_cfgr_ov(uint8_t nIC, cell_asic *ic,uint16_t ov)
+void LTC6813_set_cfgr_ov(ltc6813_driver_t *dev,
+                         uint8_t current_ic,
+                         uint16_t ov //!< The OV value
+						 )
 {
-    LTC681x_set_cfgr_ov( nIC, ic, ov);
+    LTC681x_set_cfgr_ov(dev, current_ic, ov);
 }
 
 /* Helper Function to initialize the CFGRB data structures */
-void LTC6813_init_cfgb(uint8_t total_ic,cell_asic *ic)
+void LTC6813_init_cfgb(ltc6813_driver_t *dev)
 {
-	for (uint8_t current_ic = 0; current_ic<total_ic;current_ic++)
+	for (uint8_t current_ic = 0; current_ic<dev->num_ics;current_ic++)
     {
 		for(int j =0; j<6;j++)
         {
-            ic[current_ic].configb.tx_data[j] = 0;
+            dev->ic_arr[current_ic].configb.tx_data[j] = 0;
         }
     }
 }
 
 /* Helper Function to set the configuration register B */
-void LTC6813_set_cfgrb(uint8_t nIC, cell_asic *ic,uint8_t fdrf,uint8_t dtmen,uint8_t ps[2],uint8_t gpiobits[4],uint8_t dccbits[7])
+void LTC6813_set_cfgrb(ltc6813_driver_t *dev,
+		              uint8_t current_ic,
+					  uint8_t fdrf, //!< The FDRF bit
+                      uint8_t dtmen, //!< The DTMEN bit
+                      uint8_t ps[2], //!< Path selection bits
+					  uint8_t gpiobits[4], //!< The GPIO bits
+					  uint8_t dccbits[7] //!< The DCC bits
+					  )
 {
-    LTC6813_set_cfgrb_fdrf(nIC,ic,fdrf);
-    LTC6813_set_cfgrb_dtmen(nIC,ic,dtmen);
-    LTC6813_set_cfgrb_ps(nIC,ic,ps);
-    LTC6813_set_cfgrb_gpio_b(nIC,ic,gpiobits);
-	LTC6813_set_cfgrb_dcc_b(nIC,ic,dccbits);
+    LTC6813_set_cfgrb_fdrf(dev, current_ic, fdrf);
+    LTC6813_set_cfgrb_dtmen(dev, current_ic, dtmen);
+    LTC6813_set_cfgrb_ps(dev, current_ic, ps);
+    LTC6813_set_cfgrb_gpio_b(dev, current_ic, gpiobits);
+	LTC6813_set_cfgrb_dcc_b(dev, current_ic, dccbits);
 }
 
 /* Helper function to set the FDRF bit */
-void LTC6813_set_cfgrb_fdrf(uint8_t nIC, cell_asic *ic, uint8_t fdrf)
+void LTC6813_set_cfgrb_fdrf(ltc6813_driver_t *dev,
+							uint8_t current_ic,
+							uint8_t fdrf //!< The FDRF bit
+						   )
 {
-	if(fdrf) ic[nIC].configb.tx_data[1] = ic[nIC].configb.tx_data[1]|0x40;
-	else ic[nIC].configb.tx_data[1] = ic[nIC].configb.tx_data[1]&0xBF;
+	cell_asic *ic = dev->ic_arr;
+	if(fdrf) ic[current_ic].configb.tx_data[1] = ic[current_ic].configb.tx_data[1]|0x40;
+	else ic[current_ic].configb.tx_data[1] = ic[current_ic].configb.tx_data[1]&0xBF;
 }
 
 /* Helper function to set the DTMEN bit */
-void LTC6813_set_cfgrb_dtmen(uint8_t nIC, cell_asic *ic, uint8_t dtmen)
+void LTC6813_set_cfgrb_dtmen(ltc6813_driver_t *dev,
+			                 uint8_t current_ic,
+							 uint8_t dtmen //!< The DTMEN bit
+							)
 {
-	if(dtmen) ic[nIC].configb.tx_data[1] = ic[nIC].configb.tx_data[1]|0x08;
-	else ic[nIC].configb.tx_data[1] = ic[nIC].configb.tx_data[1]&0xF7;
+	cell_asic *ic = dev->ic_arr;
+	if(dtmen) ic[current_ic].configb.tx_data[1] = ic[current_ic].configb.tx_data[1]|0x08;
+	else ic[current_ic].configb.tx_data[1] = ic[current_ic].configb.tx_data[1]&0xF7;
 }
 
 /* Helper function to set the PATH SELECT bit */
-void LTC6813_set_cfgrb_ps(uint8_t nIC, cell_asic *ic, uint8_t ps[])
+void LTC6813_set_cfgrb_ps(ltc6813_driver_t *dev,
+		                  uint8_t current_ic,
+                          uint8_t ps[] //!< Path selection bits
+					     )
 {
+	cell_asic *ic = dev->ic_arr;
 	for(int i =0;i<2;i++)
 	{
-	  if(ps[i])ic[nIC].configb.tx_data[1] = ic[nIC].configb.tx_data[1]|(0x01<<(i+4));
-	  else ic[nIC].configb.tx_data[1] = ic[nIC].configb.tx_data[1]&(~(0x01<<(i+4)));
+	  if(ps[i])ic[current_ic].configb.tx_data[1] = ic[current_ic].configb.tx_data[1]|(0x01<<(i+4));
+	  else ic[current_ic].configb.tx_data[1] = ic[current_ic].configb.tx_data[1]&(~(0x01<<(i+4)));
 	}
 }
 
 /*  Helper function to set the gpio bits in configb b register  */
-void LTC6813_set_cfgrb_gpio_b(uint8_t nIC, cell_asic *ic, uint8_t gpiobits[])
+void LTC6813_set_cfgrb_gpio_b(ltc6813_driver_t *dev,
+		                      uint8_t current_ic,
+							  uint8_t gpiobits[] //!< The GPIO bits
+							 )
 {
+	cell_asic *ic = dev->ic_arr;
 	for(int i =0;i<4;i++)
 	{
-	  if(gpiobits[i])ic[nIC].configb.tx_data[0] = ic[nIC].configb.tx_data[0]|(0x01<<i);
-	  else ic[nIC].configb.tx_data[0] = ic[nIC].configb.tx_data[0]&(~(0x01<<i));
+	  if(gpiobits[i])ic[current_ic].configb.tx_data[0] = ic[current_ic].configb.tx_data[0]|(0x01<<i);
+	  else ic[current_ic].configb.tx_data[0] = ic[current_ic].configb.tx_data[0]&(~(0x01<<i));
 	}
 }
 
 /*  Helper function to set the dcc bits in configb b register */
-void LTC6813_set_cfgrb_dcc_b(uint8_t nIC, cell_asic *ic, uint8_t dccbits[])
+void LTC6813_set_cfgrb_dcc_b(ltc6813_driver_t *dev,
+		                     uint8_t current_ic,
+							 uint8_t dccbits[] //!< The DCC bits
+							)
 {
+	cell_asic *ic = dev->ic_arr;
 	for(int i =0;i<7;i++)
 	{
 		if(i==0)
 		{
-			if(dccbits[i])ic[nIC].configb.tx_data[1] = ic[nIC].configb.tx_data[1]|0x04;
-			else ic[nIC].configb.tx_data[1] = ic[nIC].configb.tx_data[1]&0xFB;
+			if(dccbits[i])ic[current_ic].configb.tx_data[1] = ic[current_ic].configb.tx_data[1]|0x04;
+			else ic[current_ic].configb.tx_data[1] = ic[current_ic].configb.tx_data[1]&0xFB;
 		}
 		if(i>0 && i<5)
 		{
-			if(dccbits[i])ic[nIC].configb.tx_data[0] = ic[nIC].configb.tx_data[0]|(0x01<<(i+3));
-			else ic[nIC].configb.tx_data[0] = ic[nIC].configb.tx_data[0]&(~(0x01<<(i+3)));
+			if(dccbits[i])ic[current_ic].configb.tx_data[0] = ic[current_ic].configb.tx_data[0]|(0x01<<(i+3));
+			else ic[current_ic].configb.tx_data[0] = ic[current_ic].configb.tx_data[0]&(~(0x01<<(i+3)));
 		}
 		if(i>4 && i<7)
 		{
-			if(dccbits[i])ic[nIC].configb.tx_data[1] = ic[nIC].configb.tx_data[1]|(0x01<<(i-5));
-			else ic[nIC].configb.tx_data[1] = ic[nIC].configb.tx_data[1]&(~(0x01<<(i-5)));
+			if(dccbits[i])ic[current_ic].configb.tx_data[1] = ic[current_ic].configb.tx_data[1]|(0x01<<(i-5));
+			else ic[current_ic].configb.tx_data[1] = ic[current_ic].configb.tx_data[1]&(~(0x01<<(i-5)));
 		}
 	}
-}
-
-void init_app_data_6813(app_data *app_data_init)
-{
-	a_d = app_data_init;
-	if(a_d->debug==1){
-		printf("prescaler: %lu\r\n",a_d->hspi1->Init.BaudRatePrescaler);
-		printf("\r\nDebugging init_app_data_681x\r\n");
-		uint8_t data[3],sent[3];
-		sent[0]=0;
-		while (sent[0]<3){
-			sent[0] +=1;
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
-			HAL_SPI_TransmitReceive(a_d->hspi1, (uint8_t *) sent,(uint8_t *) data,1,100);
-			printf("data sent %d :: data in init: %d \r\n",sent[0],data[0]);
-			HAL_SPI_TransmitReceive(app_data_init->hspi1, (uint8_t *) sent,(uint8_t *) data,1,100);
-			printf("data sent %d :: data in init: %d \r\n",sent[0],data[0]);
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
-			HAL_Delay(1000);
-		}
-	}
-	init_app_data_681x(a_d);
 }

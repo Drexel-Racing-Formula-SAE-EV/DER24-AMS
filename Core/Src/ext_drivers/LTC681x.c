@@ -1668,13 +1668,13 @@ void LTC681x_wrpwm(ltc681x_driver_t *dev,
 	uint8_t c_ic = 0;
 	if (pwmReg == 0)
 	{
-	cmd[0] = 0x00;
-	cmd[1] = 0x20;
+		cmd[0] = 0x00;
+		cmd[1] = 0x20;
 	}
 	else
 	{
-	cmd[0] = 0x00;
-	cmd[1] = 0x1C;
+		cmd[0] = 0x00;
+		cmd[1] = 0x1C;
 	}
 
 	for (uint8_t current_ic = 0; current_ic<dev->num_ics; current_ic++)
@@ -1824,7 +1824,7 @@ int8_t LTC681x_rdsctrl(ltc681x_driver_t *dev,
         else dev->ic_arr[c_ic].sctrl.rx_pec_match = 0;
 
     }
-    return(pec_error);
+    return pec_error;
 }
 
 /*
@@ -2168,7 +2168,7 @@ void spi_write_read(ltc681x_driver_t *dev,
 {
 	LTC681x_set_cs(dev, 0);
 	HAL_SPI_Transmit(dev->hspi[dev->string], tx_Data, tx_len, 100);
-	HAL_SPI_TransmitRecieve(dev->hspi[dev->string], tx_Data, rx_data, rx_len, 100);;
+	HAL_SPI_TransmitReceive(dev->hspi[dev->string], tx_Data, rx_data, rx_len, 100);;
 	LTC681x_set_cs(dev, 1);
 }
 
@@ -2188,4 +2188,5 @@ uint8_t spi_read_byte(ltc681x_driver_t *dev, uint8_t tx_dat)
 void LTC681x_set_cs(ltc681x_driver_t *dev, int state)
 {
 	HAL_GPIO_WritePin(dev->cs_port[dev->string], dev->cs_pin[dev->string], state);
+	return;
 }
