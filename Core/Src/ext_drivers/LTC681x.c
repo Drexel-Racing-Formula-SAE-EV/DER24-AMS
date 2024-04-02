@@ -57,14 +57,14 @@ void wakeup_idle(ltc681x_driver_t *dev) //Number of ICs in the system
 }
 
 /* Generic wakeup command to wake the LTC681x from sleep state */
-void wakeup_sleep(ltc681x_driver_t *dev) //Number of ICs in the system
+void wakeup_sleep(ltc681x_driver_t *dev)
 {
 	for(int i = 0; i < dev->num_ics; i++)
 	{
 		// TODO: check delays. original was 300uS and 10uS
-		LTC861x_set_cs(dev, 0);
+		LTC681x_set_cs(dev, 0);
 		HAL_Delay(1);
-		LTC861x_set_cs(dev, 1);
+		LTC681x_set_cs(dev, 1);
 		HAL_Delay(1);
 	}
 }
@@ -74,7 +74,7 @@ void cmd_68(ltc681x_driver_t *dev, uint8_t tx_cmd[2]) //The command to be transm
 {
 	uint8_t cmd[4];
 	uint16_t cmd_pec;
-	uint8_t md_bits;
+	//uint8_t md_bits;
 
 	cmd[0] = tx_cmd[0];
 	cmd[1] =  tx_cmd[1];
@@ -90,13 +90,12 @@ Generic function to write 68xx commands and write payload data.
 Function calculates PEC for tx_cmd data and the data to be transmitted.
  */
 void write_68(ltc681x_driver_t *dev, // device driver
-			  uint8_t total_ic, //Number of ICs to be written to
 			  uint8_t tx_cmd[2], //The command to be transmitted
 			  uint8_t data[] // Payload Data
 			  )
 {
 	const uint8_t BYTES_IN_REG = 6;
-	const uint8_t CMD_LEN = 4+(8*total_ic);
+	const uint8_t CMD_LEN = 4+(8 * dev->num_ics);
 	uint8_t *cmd;
 	uint16_t data_pec;
 	uint16_t cmd_pec;
@@ -108,10 +107,9 @@ void write_68(ltc681x_driver_t *dev, // device driver
 	cmd_pec = pec15_calc(2, cmd);
 	cmd[2] = (uint8_t)(cmd_pec >> 8);
 	cmd[3] = (uint8_t)(cmd_pec);
-	//printf("hex: %x %x\r\n",cmd[0],cmd[1]);
 
 	cmd_index = 4;
-	for (uint8_t current_ic = total_ic; current_ic > 0; current_ic--)               // Executes for each LTC681x, this loops starts with the last IC on the stack.
+	for (uint8_t current_ic = dev->num_ics; current_ic > 0; current_ic--)               // Executes for each LTC681x, this loops starts with the last IC on the stack.
     {	                                                                            //The first configuration written is received by the last IC in the daisy chain
 		for (uint8_t current_byte = 0; current_byte < BYTES_IN_REG; current_byte++)
 		{
@@ -132,7 +130,6 @@ void write_68(ltc681x_driver_t *dev, // device driver
 
 /* Generic function to write 68xx commands and read data. Function calculated PEC for tx_cmd data */
 int8_t read_68( ltc681x_driver_t *dev, // device driver
-				uint8_t total_ic, // Number of ICs in the system
 				uint8_t tx_cmd[2], // The command to be transmitted
 				uint8_t *rx_data // Data to be read
 				)
@@ -152,9 +149,9 @@ int8_t read_68( ltc681x_driver_t *dev, // device driver
 	cmd[3] = (uint8_t)(cmd_pec);
 
 
-	spi_write_read(dev, cmd, 4, data, (BYTES_IN_REG*total_ic));         //Transmits the command and reads the configuration data of all ICs on the daisy chain into rx_data[] array
+	spi_write_read(dev, cmd, 4, data, (BYTES_IN_REG * dev->num_ics));         //Transmits the command and reads the configuration data of all ICs on the daisy chain into rx_data[] array
 
-	for (uint8_t current_ic = 0; current_ic < total_ic; current_ic++) //Executes for each LTC681x in the daisy chain and packs the data
+	for (uint8_t current_ic = 0; current_ic < dev->num_ics; current_ic++) //Executes for each LTC681x in the daisy chain and packs the data
 	{																//into the rx_data array as well as check the received data for any bit errors
 		for (uint8_t current_byte = 0; current_byte < BYTES_IN_REG; current_byte++)
 		{
@@ -217,69 +214,63 @@ uint16_t pec15_calc(uint8_t len, //Number of bytes that will be used to calculat
 }
 
 /* Write the LTC681x CFGRA */
-void LTC681x_wrcfg(uint8_t total_ic, //The number of ICs being written to
-                   cell_asic ic[]  // A two dimensional array of the configuration data that will be written
-                  )
+void LTC681x_wrcfg(ltc681x_driver_t *dev)
 {
 	uint8_t cmd[2] = {0x00 , 0x01} ;
 	uint8_t write_buffer[256];
 	uint8_t write_count = 0;
 	uint8_t c_ic = 0;
 
-	for (uint8_t current_ic = 0; current_ic<total_ic; current_ic++)
+	for (uint8_t current_ic = 0; current_ic < dev->num_ics; current_ic++)
 	{
-		if (ic->isospi_reverse == 0)
+		if (dev->ic_arr->isospi_reverse == 0)
 		{
 			c_ic = current_ic;
 		}
 		else
 		{
-			c_ic = total_ic - current_ic - 1;
+			c_ic = dev->num_ics - current_ic - 1;
 		}
 
 		for (uint8_t data = 0; data<6; data++)
 		{
-			write_buffer[write_count] = ic[c_ic].config.tx_data[data];
+			write_buffer[write_count] = dev->ic_arr[c_ic].config.tx_data[data];
 			write_count++;
 		}
 	}
-	write_68(total_ic, cmd, write_buffer);
+	write_68(dev, cmd, write_buffer);
 }
 
 /* Write the LTC681x CFGRB */
-void LTC681x_wrcfgb(uint8_t total_ic, //The number of ICs being written to
-                    cell_asic ic[] // A two dimensional array of the configuration data that will be written
-                   )
+void LTC681x_wrcfgb(ltc681x_driver_t *dev)
 {
 	uint8_t cmd[2] = {0x00 , 0x24} ;
 	uint8_t write_buffer[256];
 	uint8_t write_count = 0;
 	uint8_t c_ic = 0;
 
-	for (uint8_t current_ic = 0; current_ic<total_ic; current_ic++)
+	for (uint8_t current_ic = 0; current_ic < dev->num_ics; current_ic++)
 	{
-		if (ic->isospi_reverse == 0)
+		if (dev->ic_arr->isospi_reverse == 0)
 		{
 			c_ic = current_ic;
 		}
 		else
 		{
-			c_ic = total_ic - current_ic - 1;
+			c_ic = dev->num_ics - current_ic - 1;
 		}
 
 		for (uint8_t data = 0; data<6; data++)
 		{
-			write_buffer[write_count] = ic[c_ic].configb.tx_data[data];
+			write_buffer[write_count] = dev->ic_arr[c_ic].configb.tx_data[data];
 			write_count++;
 		}
 	}
-	write_68(total_ic, cmd, write_buffer);
+	write_68(dev, cmd, write_buffer);
 }
 
 /* Read the LTC681x CFGA */
-int8_t LTC681x_rdcfg(uint8_t total_ic, //Number of ICs in the system
-                     cell_asic ic[] // A two dimensional array that the function stores the read configuration data.
-                    )
+int8_t LTC681x_rdcfg(ltc681x_driver_t *dev)
 {
 	uint8_t cmd[2]= {0x00 , 0x02};
 	uint8_t read_buffer[256];
@@ -288,41 +279,39 @@ int8_t LTC681x_rdcfg(uint8_t total_ic, //Number of ICs in the system
 	uint16_t calc_pec;
 	uint8_t c_ic = 0;
 
-	pec_error = read_68(total_ic, cmd, read_buffer);
+	pec_error = read_68(dev, cmd, read_buffer);
 
-	for (uint8_t current_ic = 0; current_ic<total_ic; current_ic++)
+	for (uint8_t current_ic = 0; current_ic<dev->num_ics; current_ic++)
 	{
-		if (ic->isospi_reverse == 0)
+		if (dev->ic_arr->isospi_reverse == 0)
 		{
 			c_ic = current_ic;
 		}
 		else
 		{
-			c_ic = total_ic - current_ic - 1;
+			c_ic = dev->num_ics - current_ic - 1;
 		}
 
 		for (int byte=0; byte<8; byte++)
 		{
-			ic[c_ic].config.rx_data[byte] = read_buffer[byte+(8*current_ic)];
+			dev->ic_arr[c_ic].config.rx_data[byte] = read_buffer[byte+(8*current_ic)];
 		}
 
 		calc_pec = pec15_calc(6,&read_buffer[8*current_ic]);
 		data_pec = read_buffer[7+(8*current_ic)] | (read_buffer[6+(8*current_ic)]<<8);
 		if (calc_pec != data_pec )
 		{
-			ic[c_ic].config.rx_pec_match = 1;
+			dev->ic_arr[c_ic].config.rx_pec_match = 1;
 		}
-		else ic[c_ic].config.rx_pec_match = 0;
+		else dev->ic_arr[c_ic].config.rx_pec_match = 0;
 	}
-	LTC681x_check_pec(total_ic,CFGRR,ic);
+	LTC681x_check_pec(dev, CFGRR);
 
 	return(pec_error);
 }
 
 /* Reads the LTC681x CFGB */
-int8_t LTC681x_rdcfgb(uint8_t total_ic, //Number of ICs in the system
-                      cell_asic ic[] // A two dimensional array that the function stores the read configuration data.
-                     )
+int8_t LTC681x_rdcfgb(ltc681x_driver_t *dev)
 {
 	uint8_t cmd[2]= {0x00 , 0x26};
 	uint8_t read_buffer[256];
@@ -331,42 +320,42 @@ int8_t LTC681x_rdcfgb(uint8_t total_ic, //Number of ICs in the system
 	uint16_t calc_pec;
 	uint8_t c_ic = 0;
 
-	pec_error = read_68(total_ic, cmd, read_buffer);
+	pec_error = read_68(dev, cmd, read_buffer);
 
-	for (uint8_t current_ic = 0; current_ic<total_ic; current_ic++)
+	for (uint8_t current_ic = 0; current_ic<dev->num_ics; current_ic++)
 	{
-		if (ic->isospi_reverse == 0)
+		if (dev->ic_arr->isospi_reverse == 0)
 		{
 			c_ic = current_ic;
 		}
 		else
 		{
-			c_ic = total_ic - current_ic - 1;
+			c_ic = dev->num_ics - current_ic - 1;
 		}
 
 		for (int byte=0; byte<8; byte++)
 		{
-			ic[c_ic].configb.rx_data[byte] = read_buffer[byte+(8*current_ic)];
+			dev->ic_arr[c_ic].configb.rx_data[byte] = read_buffer[byte+(8*current_ic)];
 		}
 
 		calc_pec = pec15_calc(6,&read_buffer[8*current_ic]);
 		data_pec = read_buffer[7+(8*current_ic)] | (read_buffer[6+(8*current_ic)]<<8);
 		if (calc_pec != data_pec )
 		{
-			ic[c_ic].configb.rx_pec_match = 1;
+			dev->ic_arr[c_ic].configb.rx_pec_match = 1;
 		}
-		else ic[c_ic].configb.rx_pec_match = 0;
+		else dev->ic_arr[c_ic].configb.rx_pec_match = 0;
 	}
-	LTC681x_check_pec(total_ic,CFGRB,ic);
+	LTC681x_check_pec(dev, CFGRB);
 
 	return(pec_error);
 }
 
 /* Starts ADC conversion for cell voltage */
-void LTC681x_adcv( ltc681x_driver_t *dev, // device driver
-				   uint8_t MD, //ADC Mode
-				   uint8_t DCP, //Discharge Permit
-				   uint8_t CH //Cell Channels to be measured
+void LTC681x_adcv(ltc681x_driver_t *dev, // device driver
+				  uint8_t MD, //ADC Mode
+				  uint8_t DCP, //Discharge Permit
+				  uint8_t CH //Cell Channels to be measured
                  )
 {
 	uint8_t cmd[2];
@@ -382,9 +371,9 @@ void LTC681x_adcv( ltc681x_driver_t *dev, // device driver
 
 /* Start ADC Conversion for GPIO and Vref2  */
 void LTC681x_adax(ltc681x_driver_t *dev, // device driver
-					uint8_t MD, //ADC Mode
+				  uint8_t MD, //ADC Mode
 				  uint8_t CHG //GPIO Channels to be measured
-				  )
+				 )
 {
 	uint8_t cmd[4];
 	uint8_t md_bits;
@@ -394,7 +383,7 @@ void LTC681x_adax(ltc681x_driver_t *dev, // device driver
 	md_bits = (MD & 0x01) << 7;
 	cmd[1] = md_bits + 0x60 + CHG ;
 
-	cmd_68(cmd);
+	cmd_68(dev, cmd);
 }
 
 /* Start ADC Conversion for Status  */
@@ -411,7 +400,7 @@ void LTC681x_adstat(ltc681x_driver_t *dev, // device driver
 	md_bits = (MD & 0x01) << 7;
 	cmd[1] = md_bits + 0x68 + CHST ;
 
-	cmd_68(cmd);
+	cmd_68(dev, cmd);
 }
 
 /* Starts cell voltage and SOC conversion */
@@ -428,7 +417,7 @@ void LTC681x_adcvsc(ltc681x_driver_t *dev, // device driver
 	md_bits = (MD & 0x01) << 7;
 	cmd[1] =  md_bits | 0x60 | (DCP<<4) | 0x07;
 
-	cmd_68(cmd);
+	cmd_68(dev, cmd);
 }
 
 /* Starts cell voltage and GPIO 1&2 conversion */
@@ -443,9 +432,9 @@ void LTC681x_adcvax(ltc681x_driver_t *dev, // device driver
 	md_bits = (MD & 0x02) >> 1;
 	cmd[0] = md_bits | 0x04;
 	md_bits = (MD & 0x01) << 7;
-	cmd[1] =  md_bits | ((DCP&0x01)<<4) + 0x6F;
+	cmd[1] =  md_bits | (((DCP&0x01)<<4) + 0x6F);
 
-	cmd_68(cmd);
+	cmd_68(dev, cmd);
 }
 
 /*
@@ -454,58 +443,46 @@ The function is used to read the parsed Cell voltages codes of the LTC681x.
 This function will send the requested read commands parse the data
 and store the cell voltages in c_codes variable.
 */
-uint8_t LTC681x_rdcv(uint8_t reg, // Controls which cell voltage register is read back.
-                     uint8_t total_ic, // The number of ICs in the system
-                     cell_asic *ic // Array of the parsed cell codes
+uint8_t LTC681x_rdcv(ltc681x_driver_t *dev,
+					 uint8_t reg //!< Controls which cell voltage register is read back.
                     )
 {
 	int8_t pec_error = 0;
 	uint8_t *cell_data;
 	uint8_t c_ic = 0;
-	cell_data = (uint8_t *) malloc((NUM_RX_BYT*total_ic)*sizeof(uint8_t));
+	cell_data = (uint8_t *) malloc((NUM_RX_BYT*dev->num_ics)*sizeof(uint8_t));
 
 	if (reg == 0)
 	{
-		for (uint8_t cell_reg = 1; cell_reg<ic[0].ic_reg.num_cv_reg+1; cell_reg++) //Executes once for each of the LTC681x cell voltage registers
+		for (uint8_t cell_reg = 1; cell_reg<dev->ic_arr[0].ic_reg.num_cv_reg+1; cell_reg++) //Executes once for each of the LTC681x cell voltage registers
 		{
-			LTC681x_rdcv_reg(cell_reg, total_ic,cell_data );
-			for (int current_ic = 0; current_ic<total_ic; current_ic++)
+			LTC681x_rdcv_reg(dev, cell_reg,cell_data );
+			for (int current_ic = 0; current_ic<dev->num_ics; current_ic++)
 			{
-			if (ic->isospi_reverse == 0)
-			{
-			  c_ic = current_ic;
-			}
-			else
-			{
-			  c_ic = total_ic - current_ic - 1;
-			}
-			pec_error = pec_error + parse_cells(current_ic,cell_reg, cell_data,
-												&ic[c_ic].cells.c_codes[0],
-												&ic[c_ic].cells.pec_match[0]);
+				if (dev->ic_arr->isospi_reverse == 0) c_ic = current_ic;
+				else c_ic = dev->num_ics - current_ic - 1;
+
+				pec_error = pec_error + parse_cells(current_ic,cell_reg, cell_data,
+													&dev->ic_arr[c_ic].cells.c_codes[0],
+													&dev->ic_arr[c_ic].cells.pec_match[0]);
 			}
 		}
 	}
 
 	else
 	{
-		LTC681x_rdcv_reg(reg, total_ic,cell_data);
+		LTC681x_rdcv_reg(dev, reg, cell_data);
 
-		for (int current_ic = 0; current_ic<total_ic; current_ic++)
+		for (int current_ic = 0; current_ic<dev->num_ics; current_ic++)
 		{
-			if (ic->isospi_reverse == 0)
-			{
-			c_ic = current_ic;
-			}
-			else
-			{
-			c_ic = total_ic - current_ic - 1;
-			}
+			if (dev->ic_arr->isospi_reverse == 0) c_ic = current_ic;
+			else c_ic = dev->num_ics - current_ic - 1;
 			pec_error = pec_error + parse_cells(current_ic,reg, &cell_data[8*c_ic],
-											  &ic[c_ic].cells.c_codes[0],
-											  &ic[c_ic].cells.pec_match[0]);
+											  &dev->ic_arr[c_ic].cells.c_codes[0],
+											  &dev->ic_arr[c_ic].cells.pec_match[0]);
 		}
 	}
-	LTC681x_check_pec(total_ic,CELL,ic);
+	LTC681x_check_pec(dev, CELL);
 	free(cell_data);
 
 	return(pec_error);
@@ -516,21 +493,22 @@ The function is used to read the  parsed GPIO codes of the LTC681x.
 This function will send the requested read commands parse the data
 and store the gpio voltages in a_codes variable.
 */
-int8_t LTC681x_rdaux(uint8_t reg, //Determines which GPIO voltage register is read back.
-                     uint8_t total_ic,//The number of ICs in the system
-                     cell_asic *ic//A two dimensional array of the gpio voltage codes.
+int8_t LTC681x_rdaux(ltc681x_driver_t *dev,
+					 uint8_t reg //!< Determines which GPIO voltage register is read back.
                     )
 {
 	uint8_t *data;
 	int8_t pec_error = 0;
 	uint8_t c_ic =0;
+	uint8_t total_ic = dev->num_ics;
+	cell_asic *ic = dev->ic_arr;
 	data = (uint8_t *) malloc((NUM_RX_BYT*total_ic)*sizeof(uint8_t));
 
 	if (reg == 0)
 	{
 		for (uint8_t gpio_reg = 1; gpio_reg<ic[0].ic_reg.num_gpio_reg+1; gpio_reg++) //Executes once for each of the LTC681x aux voltage registers
 		{
-			LTC681x_rdaux_reg(gpio_reg, total_ic,data);                 //Reads the raw auxiliary register data into the data[] array
+			LTC681x_rdaux_reg(dev, gpio_reg, data);                 //Reads the raw auxiliary register data into the data[] array
 			for (int current_ic = 0; current_ic<total_ic; current_ic++)
 			{
 				if (ic->isospi_reverse == 0)
@@ -549,7 +527,7 @@ int8_t LTC681x_rdaux(uint8_t reg, //Determines which GPIO voltage register is re
 	}
 	else
 	{
-		LTC681x_rdaux_reg(reg, total_ic, data);
+		LTC681x_rdaux_reg(dev, reg, data);
 
 		for (int current_ic = 0; current_ic<total_ic; current_ic++)
 		{
@@ -566,7 +544,7 @@ int8_t LTC681x_rdaux(uint8_t reg, //Determines which GPIO voltage register is re
 								  &ic[c_ic].aux.pec_match[0]);
 		}
 	}
-	LTC681x_check_pec(total_ic,AUX,ic);
+	LTC681x_check_pec(dev, AUX);
 	free(data);
 
 	return (pec_error);
@@ -578,9 +556,8 @@ The function is used to read the  parsed Stat codes of the LTC681x.
 This function will send the requested read commands parse the data
 and store the gpio voltages in stat_codes variable.
 */
-int8_t LTC681x_rdstat(uint8_t reg, //Determines which Stat  register is read back.
-                      uint8_t total_ic,//The number of ICs in the system
-                      cell_asic *ic //A two dimensional array of the stat codes.
+int8_t LTC681x_rdstat(ltc681x_driver_t *dev,
+					  uint8_t reg //!< Determines which Stat  register is read back.
                      )
 
 {
@@ -593,6 +570,8 @@ int8_t LTC681x_rdstat(uint8_t reg, //Determines which Stat  register is read bac
 	uint16_t received_pec;
 	uint16_t data_pec;
 	uint8_t c_ic = 0;
+	uint8_t total_ic = dev->num_ics;
+	cell_asic *ic = dev->ic_arr;
 
 	data = (uint8_t *) malloc((12*total_ic)*sizeof(uint8_t));
 
@@ -601,7 +580,7 @@ int8_t LTC681x_rdstat(uint8_t reg, //Determines which Stat  register is read bac
 		for (uint8_t stat_reg = 1; stat_reg< 3; stat_reg++)                      //Executes once for each of the LTC681x stat voltage registers
 		{
 			data_counter = 0;
-			LTC681x_rdstat_reg(stat_reg, total_ic,data);                            //Reads the raw status register data into the data[] array
+			LTC681x_rdstat_reg(dev, stat_reg, data);                            //Reads the raw status register data into the data[] array
 
 			for (uint8_t current_ic = 0 ; current_ic < total_ic; current_ic++)      // Executes for every LTC681x in the daisy chain
 			{																		// current_ic is used as the IC counter
@@ -657,7 +636,7 @@ int8_t LTC681x_rdstat(uint8_t reg, //Determines which Stat  register is read bac
 	}
 	else
 	{
-		LTC681x_rdstat_reg(reg, total_ic, data);
+		LTC681x_rdstat_reg(dev, reg, data);
 		for (int current_ic = 0 ; current_ic < total_ic; current_ic++)            // Executes for every LTC681x in the daisy chain
 		{																		  // current_ic is used as an IC counter
 			if (ic->isospi_reverse == 0)
@@ -683,7 +662,8 @@ int8_t LTC681x_rdstat(uint8_t reg, //Determines which Stat  register is read bac
 			}
 			else if (reg == 2)
 			{
-				parsed_stat = data[data_counter++] + (data[data_counter++]<<8); //Each stat codes is received as two bytes and is combined to
+				parsed_stat = data[data_counter] + ((data[data_counter + 1]) <<8); //Each stat codes is received as two bytes and is combined to
+				data_counter += 2;
 				ic[c_ic].stat.stat_codes[3] = parsed_stat;
 				ic[c_ic].stat.flags[0] = data[data_counter++];
 				ic[c_ic].stat.flags[1] = data[data_counter++];
@@ -704,7 +684,7 @@ int8_t LTC681x_rdstat(uint8_t reg, //Determines which Stat  register is read bac
 			data_counter=data_counter+2;
 		}
 	}
-	LTC681x_check_pec(total_ic,STAT,ic);
+	LTC681x_check_pec(dev, STAT);
 
 	free(data);
 
@@ -713,14 +693,14 @@ int8_t LTC681x_rdstat(uint8_t reg, //Determines which Stat  register is read bac
 
 /* Writes the command and reads the raw cell voltage register data */
 void LTC681x_rdcv_reg(ltc681x_driver_t *dev, // device driver
-					uint8_t reg, //Determines which cell voltage register is read back
-                      uint8_t total_ic, //the number of ICs in the
+					  uint8_t reg, //Determines which cell voltage register is read back
                       uint8_t *data //An array of the unparsed cell codes
                      )
 {
 	const uint8_t REG_LEN = 8; //Number of bytes in each ICs register + 2 bytes for the PEC
 	uint8_t cmd[4];
 	uint16_t cmd_pec;
+	uint8_t total_ic = dev->num_ics;
 
 	if (reg == 1)     //1: RDCVA
 	{
@@ -767,14 +747,14 @@ in the *data point as a byte array. This function is rarely used outside of
 the LTC681x_rdaux() command.
 */
 void LTC681x_rdaux_reg(ltc681x_driver_t *dev, // device driver
-					uint8_t reg, //Determines which GPIO voltage register is read back
-                       uint8_t total_ic, //The number of ICs in the system
+					   uint8_t reg, //Determines which GPIO voltage register is read back
                        uint8_t *data //Array of the unparsed auxiliary codes
                       )
 {
 	const uint8_t REG_LEN = 8; // Number of bytes in the register + 2 bytes for the PEC
 	uint8_t cmd[4];
 	uint16_t cmd_pec;
+	uint8_t total_ic = dev->num_ics;
 
 	if (reg == 1)     //Read back auxiliary group A
 	{
@@ -816,14 +796,14 @@ in the *data point as a byte array. This function is rarely used outside of
 the LTC681x_rdstat() command.
 */
 void LTC681x_rdstat_reg(ltc681x_driver_t *dev, // device driver
-					uint8_t reg, //Determines which stat register is read back
-                        uint8_t total_ic, //The number of ICs in the system
+					    uint8_t reg, //Determines which stat register is read back
                         uint8_t *data //Array of the unparsed stat codes
                        )
 {
 	const uint8_t REG_LEN = 8; // number of bytes in the register + 2 bytes for the PEC
 	uint8_t cmd[4];
 	uint16_t cmd_pec;
+	uint8_t total_ic = dev->num_ics;
 
 	if (reg == 1)     //Read back status group A
 	{
@@ -895,7 +875,7 @@ int8_t parse_cells(uint8_t current_ic, // Current IC
 }
 
 /* Sends the poll ADC command */
-uint8_t LTC681x_pladc()
+uint8_t LTC681x_pladc(ltc681x_driver_t *dev)
 {
 	uint8_t cmd[4];
 	uint8_t adc_state = 0xFF;
@@ -907,24 +887,16 @@ uint8_t LTC681x_pladc()
 	cmd[2] = (uint8_t)(cmd_pec >> 8);
 	cmd[3] = (uint8_t)(cmd_pec);
 
-	if(a_d->ltcstring == 1){
-		LTC_6813B_CS_RESET
-		spi_write_array(4,cmd);
-		adc_state = spi_read_byte(0xFF);
-		LTC_6813B_CS_SET
-	}
-	else{
-		LTC_6813_CS_RESET
-		spi_write_array(4,cmd);
-		adc_state = spi_read_byte(0xFF);
-		LTC_6813_CS_SET
-	}
+	LTC681x_set_cs(dev, 0);
+	spi_write_array(dev, 4, cmd);
+	adc_state = spi_read_byte(dev,0xFF);
+	LTC681x_set_cs(dev, 1);
 
 	return(adc_state);
 }
 
 /* This function will block operation until the ADC has finished it's conversion */
-uint32_t LTC681x_pollAdc()
+uint32_t LTC681x_pollAdc(ltc681x_driver_t *dev)
 {
 	uint32_t counter = 0;
 	uint8_t finished = 0;
@@ -938,40 +910,15 @@ uint32_t LTC681x_pollAdc()
 	cmd[2] = (uint8_t)(cmd_pec >> 8);
 	cmd[3] = (uint8_t)(cmd_pec);
 
-	if(a_d->ltcstring == 1){
-		LTC_6813B_CS_RESET
-		spi_write_array(4,cmd);
-		while ((counter<200000)&&(finished == 0))
-		{
-			current_time = spi_read_byte(0xff);
-			if (current_time>0)
-			{
-				finished = 1;
-			}
-			else
-			{
-				counter = counter + 10;
-			}
-		}
-		LTC_6813B_CS_SET
+	LTC681x_set_cs(dev, 0);
+	spi_write_array(dev, 4, cmd);
+	while ((counter<200000)&&(finished == 0))
+	{
+		current_time = spi_read_byte(dev, 0xff);
+		if (current_time > 0) finished = 1;
+		else counter = counter + 10;
 	}
-	else{
-		LTC_6813_CS_RESET
-		spi_write_array(4,cmd);
-		while ((counter<200000)&&(finished == 0))
-		{
-			current_time = spi_read_byte(0xff);
-			if (current_time>0)
-			{
-				finished = 1;
-			}
-			else
-			{
-				counter = counter + 10;
-			}
-		}
-		LTC_6813_CS_SET
-	}
+	LTC681x_set_cs(dev, 1);
 
 	return(counter);
 }
@@ -1019,7 +966,7 @@ void LTC681x_diagn(ltc681x_driver_t *dev)
 
 /* Starts cell voltage self test conversion */
 void LTC681x_cvst(ltc681x_driver_t *dev,
-				uint8_t MD, //ADC Mode
+				  uint8_t MD, //ADC Mode
 				  uint8_t ST //Self Test
                  )
 {
@@ -1036,9 +983,9 @@ void LTC681x_cvst(ltc681x_driver_t *dev,
 
 /* Start an Auxiliary Register Self Test Conversion */
 void LTC681x_axst(ltc681x_driver_t *dev,
-				uint8_t MD, //ADC Mode
+				  uint8_t MD, //ADC Mode
 				  uint8_t ST //Self Test
-				  )
+				 )
 {
 	uint8_t cmd[2];
 	uint8_t md_bits;
@@ -1055,7 +1002,7 @@ void LTC681x_axst(ltc681x_driver_t *dev,
 void LTC681x_statst(ltc681x_driver_t *dev,
 					uint8_t MD, //ADC Mode
 				    uint8_t ST //Self Test
-					)
+				   )
 {
 	uint8_t cmd[2];
 	uint8_t md_bits;
@@ -1070,7 +1017,7 @@ void LTC681x_statst(ltc681x_driver_t *dev,
 
 /* Starts cell voltage overlap conversion */
 void LTC681x_adol(ltc681x_driver_t *dev,
-					uint8_t MD, //ADC Mode
+				  uint8_t MD, //ADC Mode
                   uint8_t DCP //Discharge Permit
 				 )
 {
@@ -1087,9 +1034,9 @@ void LTC681x_adol(ltc681x_driver_t *dev,
 
 /* Start an GPIO Redundancy test */
 void LTC681x_adaxd(ltc681x_driver_t *dev,
-					uint8_t MD, //ADC Mode
+				   uint8_t MD, //ADC Mode
 				   uint8_t CHG //GPIO Channels to be measured
-				   )
+				  )
 {
 	uint8_t cmd[4];
 	uint8_t md_bits;
@@ -1104,9 +1051,9 @@ void LTC681x_adaxd(ltc681x_driver_t *dev,
 
 /* Start a Status register redundancy test Conversion */
 void LTC681x_adstatd(ltc681x_driver_t *dev,
-					uint8_t MD, //ADC Mode
+					 uint8_t MD, //ADC Mode
 					 uint8_t CHST //Stat Channels to be measured
-					 )
+					)
 {
 	uint8_t cmd[2];
 	uint8_t md_bits;
@@ -1120,31 +1067,32 @@ void LTC681x_adstatd(ltc681x_driver_t *dev,
 }
 
 /* Runs the Digital Filter Self Test */
-int16_t LTC681x_run_cell_adc_st(uint8_t adc_reg, // Type of register
-								uint8_t total_ic, // Number of ICs in the daisy chain
-								cell_asic *ic, // A two dimensional array that will store the data
-								uint8_t md, // ADC Mode
-								uint8_t adcopt // ADCOPT bit in the configuration register
-								)
+int16_t LTC681x_run_cell_adc_st(ltc681x_driver_t *dev,
+							    uint8_t adc_reg, //!< Type of register
+								uint8_t md, //!< ADC Mode
+								uint8_t adcopt //!< ADCOPT bit in the configuration register
+							   )
 {
 	int16_t error = 0;
 	uint16_t expected_result = 0;
+	uint8_t total_ic = dev->num_ics;
+	cell_asic *ic = dev->ic_arr;
 
 	for (int self_test = 1; self_test<3; self_test++)
 	{
 		expected_result = LTC681x_st_lookup(md,self_test,adcopt);
-		wakeup_idle(total_ic);
+		wakeup_idle(dev);
 
 		switch (adc_reg)
 		{
-		  case CELL:
-			  wakeup_idle(total_ic);
-			  LTC681x_clrcell();
-			  LTC681x_cvst(md,self_test);
-			  LTC681x_pollAdc();
+			case CELL:
+			  wakeup_idle(dev);
+			  LTC681x_clrcell(dev);
+			  LTC681x_cvst(dev, md,self_test);
+			  LTC681x_pollAdc(dev);
 
-			  wakeup_idle(total_ic);
-			  error = LTC681x_rdcv(0, total_ic,ic);
+			  wakeup_idle(dev);
+			  error = LTC681x_rdcv(dev, 0);
 			  for (int cic = 0; cic < total_ic; cic++)
 				{
 				  for (int channel=0; channel< ic[cic].ic_reg.cell_channels; channel++)
@@ -1159,13 +1107,13 @@ int16_t LTC681x_run_cell_adc_st(uint8_t adc_reg, // Type of register
 			break;
 		  case AUX:
 			  error = 0;
-			  wakeup_idle(total_ic);
-			  LTC681x_clraux();
-			  LTC681x_axst(md,self_test);
-			  LTC681x_pollAdc();
+			  wakeup_idle(dev);
+			  LTC681x_clraux(dev);
+			  LTC681x_axst(dev, md, self_test);
+			  LTC681x_pollAdc(dev);
 
-			  wakeup_idle(total_ic);
-			  LTC681x_rdaux(0, total_ic,ic);
+			  wakeup_idle(dev);
+			  LTC681x_rdaux(dev, 0);
 			  for (int cic = 0; cic < total_ic; cic++)
 				{
 				  for (int channel=0; channel< ic[cic].ic_reg.aux_channels; channel++)
@@ -1179,23 +1127,23 @@ int16_t LTC681x_run_cell_adc_st(uint8_t adc_reg, // Type of register
 				}
 			break;
 		  case STAT:
-			  wakeup_idle(total_ic);
-			  LTC681x_clrstat();
-			  LTC681x_statst(md,self_test);
-			  LTC681x_pollAdc();
+			wakeup_idle(dev);
+			LTC681x_clrstat(dev);
+			LTC681x_statst(dev, md,self_test);
+			LTC681x_pollAdc(dev);
 
-			  wakeup_idle(total_ic);
-			  error = LTC681x_rdstat(0,total_ic,ic);
-			  for (int cic = 0; cic < total_ic; cic++)
+			wakeup_idle(dev);
+			error = LTC681x_rdstat(dev, 0);
+			for (int cic = 0; cic < total_ic; cic++)
+			{
+			  for (int channel=0; channel< ic[cic].ic_reg.stat_channels; channel++)
+			  {
+				if (ic[cic].stat.stat_codes[channel] != expected_result)
 				{
-				  for (int channel=0; channel< ic[cic].ic_reg.stat_channels; channel++)
-				  {
-					if (ic[cic].stat.stat_codes[channel] != expected_result)
-					{
-					  error = error+1;
-					}
-				  }
+				  error = error+1;
 				}
+			  }
+			}
 			break;
 
 		  default:
@@ -1208,21 +1156,21 @@ int16_t LTC681x_run_cell_adc_st(uint8_t adc_reg, // Type of register
 }
 
 /* Runs the ADC overlap test for the IC */
-uint16_t LTC681x_run_adc_overlap(uint8_t total_ic,  // Number of ICs in the daisy chain
-								 cell_asic *ic  // A two dimensional array that will store the data
-								 )
+uint16_t LTC681x_run_adc_overlap(ltc681x_driver_t *dev)
 {
 	uint16_t error = 0;
 	int32_t measure_delta =0;
 	int16_t failure_pos_limit = 20;
 	int16_t failure_neg_limit = -20;
-	int32_t a, b;
+	//int32_t a, b;
+	uint8_t total_ic = dev->num_ics;
+	cell_asic *ic = dev->ic_arr;
 
-	wakeup_idle(total_ic);
-	LTC681x_adol(MD_7KHZ_3KHZ,DCP_DISABLED);
-	LTC681x_pollAdc();
-	wakeup_idle(total_ic);
-	error = LTC681x_rdcv(0, total_ic,ic);
+	wakeup_idle(dev);
+	LTC681x_adol(dev, MD_7KHZ_3KHZ,DCP_DISABLED);
+	LTC681x_pollAdc(dev);
+	wakeup_idle(dev);
+	error = LTC681x_rdcv(dev, 0);
 
 	  for (int cic = 0; cic<total_ic; cic++)
 	  {
@@ -1238,53 +1186,48 @@ uint16_t LTC681x_run_adc_overlap(uint8_t total_ic,  // Number of ICs in the dais
 }
 
 /* Runs the redundancy self test */
-int16_t LTC681x_run_adc_redundancy_st(uint8_t adc_mode, // ADC Mode
-									  uint8_t adc_reg, // Type of register
-									  uint8_t total_ic, // Number of ICs in the daisy chain
-									  cell_asic *ic // A two dimensional array that will store the data
-									  )
+int16_t LTC681x_run_adc_redundancy_st(ltc681x_driver_t *dev,
+									  uint8_t adc_mode, //!< ADC Mode
+                                      uint8_t adc_reg //!< Type of register
+									 )
 {
 	int16_t error = 0;
+	uint8_t total_ic = dev->num_ics;
+	cell_asic *ic = dev->ic_arr;
 	for (int self_test = 1; self_test<3; self_test++)
 	{
-		wakeup_idle(total_ic);
+		wakeup_idle(dev);
 		switch (adc_reg)
 		{
 			case AUX:
-			LTC681x_clraux();
-			LTC681x_adaxd(adc_mode,AUX_CH_ALL);
-			LTC681x_pollAdc();
+				LTC681x_clraux(dev);
+				LTC681x_adaxd(dev, adc_mode,AUX_CH_ALL);
+				LTC681x_pollAdc(dev);
 
-			wakeup_idle(total_ic);
-			error = LTC681x_rdaux(0, total_ic,ic);
-			for (int cic = 0; cic < total_ic; cic++)
-			{
-				for (int channel=0; channel< ic[cic].ic_reg.aux_channels; channel++)
+				wakeup_idle(dev);
+				error = LTC681x_rdaux(dev, 0);
+				for (int cic = 0; cic < total_ic; cic++)
 				{
-					if (ic[cic].aux.a_codes[channel] >= 65280)
+					for (int channel=0; channel< ic[cic].ic_reg.aux_channels; channel++)
 					{
-						error = error+1;
+						if (ic[cic].aux.a_codes[channel] >= 65280) error++;
 					}
 				}
-			}
-			break;
+				break;
 			case STAT:
-			LTC681x_clrstat();
-			LTC681x_adstatd(adc_mode,STAT_CH_ALL);
-			LTC681x_pollAdc();
-			wakeup_idle(total_ic);
-			error = LTC681x_rdstat(0,total_ic,ic);
-			for (int cic = 0; cic < total_ic; cic++)
-			{
-				for (int channel=0; channel< ic[cic].ic_reg.stat_channels; channel++)
+				LTC681x_clrstat(dev);
+				LTC681x_adstatd(dev, adc_mode,STAT_CH_ALL);
+				LTC681x_pollAdc(dev);
+				wakeup_idle(dev);
+				error = LTC681x_rdstat(dev, 0);
+				for (int cic = 0; cic < total_ic; cic++)
 				{
-					if (ic[cic].stat.stat_codes[channel] >= 65280)
+					for (int channel=0; channel< ic[cic].ic_reg.stat_channels; channel++)
 					{
-						error = error+1;
+						if (ic[cic].stat.stat_codes[channel] >= 65280) error++;
 					}
 				}
-			}
-			break;
+				break;
 
 			default:
 			error = -1;
@@ -1389,7 +1332,7 @@ void LTC681x_run_openwire_single(ltc681x_driver_t *dev)
 
 	int8_t error;
 	int8_t i;
-	uint32_t conv_time=0;
+	uint32_t conv_time = 0;
 
 	wakeup_sleep(dev);
 	LTC681x_clrcell(dev);
@@ -1479,9 +1422,9 @@ void LTC681x_run_openwire_multi(ltc681x_driver_t *dev)
 	int8_t opencells[N_CHANNELS];
 	int8_t n=0;
 	int8_t i,j,k;
-	uint32_t conv_time=0;
+	uint32_t conv_time = 0;
 
-	wakeup_sleep(dev->num_ics);
+	wakeup_sleep(dev);
 	LTC681x_clrcell(dev);
 
 	// Pull Ups
@@ -1620,7 +1563,7 @@ void LTC681x_run_openwire_multi(ltc681x_driver_t *dev)
 
 	uint16_t aux_val[dev->num_ics][N_CHANNELS];
 	uint16_t pDwn[dev->num_ics][N_CHANNELS];
-	uint16_t ow_delta[][N_CHANNELS];
+	uint16_t ow_delta[dev->num_ics][N_CHANNELS];
 
 	int8_t error;
 	int8_t i;
@@ -1639,14 +1582,14 @@ void LTC681x_run_openwire_multi(ltc681x_driver_t *dev)
 	wakeup_idle(dev);
 	error = LTC681x_rdaux(dev, 0);
 
-	for (int cic=0; cic<dev->ic_arr; cic++)
+	for (int cic=0; cic<dev->num_ics; cic++)
 	{
 	    for (int channel=0; channel<N_CHANNELS; channel++)
 		{
 			aux_val[cic][channel]=dev->ic_arr[cic].aux.a_codes[channel];
 		}
 	}
-	LTC681x_clraux();
+	LTC681x_clraux(dev);
 
 	// pull downs
 	for (i = 0; i < 3; i++)
@@ -1751,7 +1694,7 @@ void LTC681x_wrpwm(ltc681x_driver_t *dev,
 			write_count++;
 		}
 	}
-	write_68(dev->num_ics, cmd, write_buffer);
+	write_68(dev, cmd, write_buffer);
 }
 
 
@@ -1779,7 +1722,7 @@ int8_t LTC681x_rdpwm(ltc681x_driver_t *dev,
 		cmd[1] = 0x1E;
 	}
 
-	pec_error = read_68(dev->num_ics, cmd, read_buffer);
+	pec_error = read_68(dev, cmd, read_buffer);
 	for (uint8_t current_ic =0; current_ic<dev->num_ics; current_ic++)
 	{
 		if (dev->ic_arr->isospi_reverse == 0)
@@ -1793,7 +1736,7 @@ int8_t LTC681x_rdpwm(ltc681x_driver_t *dev,
 
 		for (int byte=0; byte<8; byte++)
 		{
-			dev->ic-arr[c_ic].pwm.rx_data[byte] = read_buffer[byte+(8*current_ic)];
+			dev->ic_arr[c_ic].pwm.rx_data[byte] = read_buffer[byte+(8*current_ic)];
 		}
 
 		calc_pec = pec15_calc(6,&read_buffer[8*current_ic]);
@@ -1862,7 +1805,7 @@ int8_t LTC681x_rdsctrl(ltc681x_driver_t *dev,
       cmd[1] = 0x1E;
 	}
 
-    pec_error = read_68(dev->num_ics, cmd, read_buffer);
+    pec_error = read_68(dev, cmd, read_buffer);
 
     for(uint8_t current_ic =0; current_ic<dev->num_ics; current_ic++)
     {
@@ -1914,15 +1857,14 @@ void LTC681x_clrsctrl(ltc681x_driver_t *dev)
 }
 
 /* Writes the comm register */
-void LTC681x_wrcomm(uint8_t total_ic, //The number of ICs being written to
-                    cell_asic ic[] // A two dimensional array that stores the data to be written
-                   )
+void LTC681x_wrcomm(ltc681x_driver_t *dev)
 {
 	uint8_t cmd[2]= {0x07 , 0x21};
 	uint8_t write_buffer[256];
 	uint8_t write_count = 0;
 	uint8_t c_ic = 0;
-	for (uint8_t current_ic = 0; current_ic<total_ic; current_ic++)
+	cell_asic *ic = dev->ic_arr;
+	for (uint8_t current_ic = 0; current_ic<dev->num_ics; current_ic++)
 	{
 		if (ic->isospi_reverse == 0)
 		{
@@ -1930,7 +1872,7 @@ void LTC681x_wrcomm(uint8_t total_ic, //The number of ICs being written to
 		}
 		else
 		{
-			c_ic = total_ic - current_ic - 1;
+			c_ic = dev->num_ics - current_ic - 1;
 		}
 
 		for (uint8_t data = 0; data<6; data++)
@@ -1939,7 +1881,7 @@ void LTC681x_wrcomm(uint8_t total_ic, //The number of ICs being written to
 			write_count++;
 		}
 	}
-	write_68(total_ic, cmd, write_buffer);
+	write_68(dev, cmd, write_buffer);
 }
 
 /* Reads COMM registers of a LTC681x daisy chain */
@@ -1952,7 +1894,7 @@ int8_t LTC681x_rdcomm(ltc681x_driver_t *dev)
 	uint16_t calc_pec;
 	uint8_t c_ic=0;
 
-	pec_error = read_68(dev->num_ics, cmd, read_buffer);
+	pec_error = read_68(dev, cmd, read_buffer);
 
 	for (uint8_t current_ic = 0; current_ic<dev->num_ics; current_ic++)
 	{
@@ -2105,7 +2047,7 @@ void LTC681x_set_cfgr(ltc681x_driver_t *dev,
 	LTC681x_set_cfgr_refon(dev, nIC, refon);
 	LTC681x_set_cfgr_adcopt(dev, nIC, adcopt);
 	LTC681x_set_cfgr_gpio(dev, nIC, gpio);
-	LTC681x_set_cfgr_disd(dev, nIC, dcc);
+	LTC681x_set_cfgr_dis(dev, nIC, dcc);
 	LTC681x_set_cfgr_dcto(dev, nIC, dcto);
 	LTC681x_set_cfgr_uv(dev, nIC, uv);
 	LTC681x_set_cfgr_ov(dev, nIC, ov);
@@ -2208,7 +2150,7 @@ void spi_write_array(ltc681x_driver_t *dev, // Device pointer
                     )
 {
 	LTC681x_set_cs(dev, 0);
-	HAL_SPI_Transmit(dev->hspi[dev->string], data,len,100);
+	HAL_SPI_Transmit(dev->hspi[dev->string], data, len, 100);
 	LTC681x_set_cs(dev, 1);
 }
 
@@ -2225,8 +2167,8 @@ void spi_write_read(ltc681x_driver_t *dev,
                    )
 {
 	LTC681x_set_cs(dev, 0);
-	HAL_SPI_Transmit(dev->hspi[dev->string], tx_Data, tx_len, 100)
-	HAL_SPI_TransmitRecieve(dev->hspi[dev->string], blank_data, rx_data, rx_len, 100);;
+	HAL_SPI_Transmit(dev->hspi[dev->string], tx_Data, tx_len, 100);
+	HAL_SPI_TransmitRecieve(dev->hspi[dev->string], tx_Data, rx_data, rx_len, 100);;
 	LTC681x_set_cs(dev, 1);
 }
 
@@ -2237,13 +2179,13 @@ uint8_t spi_read_byte(ltc681x_driver_t *dev, uint8_t tx_dat)
   uint8_t blank_data[1]={tx_dat};
 
   LTC681x_set_cs(dev, 0);
-  HAL_SPI_TransmitReceive(dev->hspi[dev->string], blank_data, data,1,100);
+  HAL_SPI_TransmitReceive(dev->hspi[dev->string], blank_data, &data,1,100);
   LTC681x_set_cs(dev, 1);
 
   return data;
 }
 
-int LTC681x_set_cs(ltc681x_driver_t *dev, int state)
+void LTC681x_set_cs(ltc681x_driver_t *dev, int state)
 {
 	HAL_GPIO_WritePin(dev->cs_port[dev->string], dev->cs_pin[dev->string], state);
 }

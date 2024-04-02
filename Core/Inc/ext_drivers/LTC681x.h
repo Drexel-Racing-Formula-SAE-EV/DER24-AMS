@@ -196,7 +196,7 @@ typedef enum
 typedef struct
 {
 	ltc681x_str_t string;
-	SPI_HandleTypeDef hspi[2];
+	SPI_HandleTypeDef *hspi[2];
 	GPIO_TypeDef *cs_port[2];
 	uint16_t cs_pin[2];
 	uint8_t num_ics;
@@ -237,8 +237,8 @@ void write_68(ltc681x_driver_t *dev,
  -1: Data read back has incorrect PEC
  */
 int8_t read_68(ltc681x_driver_t *dev,
-                uint8_t tx_cmd[2], //!< 2 byte array containing the BMS command to be sent
-                uint8_t *rx_data); //!< Array that the read back data will be stored in.
+               uint8_t tx_cmd[2], //!< 2 byte array containing the BMS command to be sent
+               uint8_t *rx_data); //!< Array that the read back data will be stored in.
 
 /*!
  Calculates  and returns the CRC15
@@ -296,10 +296,10 @@ void LTC681x_adcv(ltc681x_driver_t *dev, // device driver
  Start a GPIO and Vref2 Conversion
  @return void
  */
-void LTC681x_adax( ltc681x_driver_t *dev, // device driver
-					uint8_t MD, //!< ADC Conversion Mode
+void LTC681x_adax(ltc681x_driver_t *dev, // device driver
+				  uint8_t MD, //!< ADC Conversion Mode
 				  uint8_t CHG //!< Sets which GPIO channels are converted
-				);
+				 );
 
 /*!
  Start a Status ADC Conversion
@@ -337,7 +337,7 @@ void LTC681x_adcvsc(ltc681x_driver_t *dev, // device driver
  -1: PEC error detected, retry read
  */
 uint8_t LTC681x_rdcv(ltc681x_driver_t *dev,
-					 uint8_t reg, //!< Controls which cell voltage register is read back.
+					 uint8_t reg //!< Controls which cell voltage register is read back.
                     );
 
 /*!
@@ -349,7 +349,7 @@ uint8_t LTC681x_rdcv(ltc681x_driver_t *dev,
  -1: PEC error detected, retry read
   */
 int8_t LTC681x_rdaux(ltc681x_driver_t *dev,
-					 uint8_t reg, //!< Determines which GPIO voltage register is read back.
+					 uint8_t reg //!< Determines which GPIO voltage register is read back.
                     );
 
 /*!
@@ -361,7 +361,7 @@ int8_t LTC681x_rdaux(ltc681x_driver_t *dev,
  -1: PEC error detected, retry read
  */
 int8_t LTC681x_rdstat(ltc681x_driver_t *dev,
-					  uint8_t reg, //!< Determines which Stat  register is read back.
+					  uint8_t reg //!< Determines which Stat  register is read back.
                      );
 
 /*!
@@ -502,7 +502,8 @@ void LTC681x_adaxd(ltc681x_driver_t *dev,
  Start a Status register redundancy test Conversion
  @return void
  */
-void LTC681x_adstatd(uint8_t MD, //!< ADC Mode
+void LTC681x_adstatd(ltc681x_driver_t *dev,
+		             uint8_t MD, //!< ADC Mode
 					 uint8_t CHST //!< Sets which Status channels are converted
 					);
 
@@ -514,7 +515,7 @@ int16_t LTC681x_run_cell_adc_st(ltc681x_driver_t *dev,
 							    uint8_t adc_reg, //!< Type of register
 								uint8_t md, //!< ADC Mode
 								uint8_t adcopt //!< ADCOPT bit in the configuration register
-								);
+							   );
 
 /*!
  Self Test Helper Function
@@ -531,8 +532,7 @@ uint16_t LTC681x_st_lookup(uint8_t MD, //!< ADC Mode
   0: Pass
  -1: False, Error detected
  */
-uint16_t LTC681x_run_adc_overlap(ltc681x_driver_t *dev
-								 );
+uint16_t LTC681x_run_adc_overlap(ltc681x_driver_t *dev);
 
 /*!
  Helper function that runs the ADC Digital Redundancy commands and checks output for errors
@@ -540,8 +540,8 @@ uint16_t LTC681x_run_adc_overlap(ltc681x_driver_t *dev
  */
 int16_t LTC681x_run_adc_redundancy_st(ltc681x_driver_t *dev,
 									  uint8_t adc_mode, //!< ADC Mode
-                                      uint8_t adc_reg, //!< Type of register
-									  );
+                                      uint8_t adc_reg //!< Type of register
+									 );
 
 /*!
  Start an open wire Conversion
@@ -559,7 +559,7 @@ void LTC681x_adow(ltc681x_driver_t *dev,
  @return void
  */
 void LTC681x_axow(ltc681x_driver_t *dev,
-				uint8_t MD, //!< ADC Mode
+				  uint8_t MD, //!< ADC Mode
 				  uint8_t PUP //!<Pull up/Pull down current
 				 );
 
@@ -646,8 +646,7 @@ void LTC681x_clrsctrl(ltc681x_driver_t *dev);
  The comm is written in descending order so the last device's configuration is written first.
  @return void
  */
-void LTC681x_wrcomm(ltc681x_driver_t *dev
-                   );
+void LTC681x_wrcomm(ltc681x_driver_t *dev);
 
 /*!
  Reads comm registers of a LTC681x daisy chain
@@ -783,6 +782,6 @@ void spi_write_read(ltc681x_driver_t *dev,
 
 uint8_t spi_read_byte(ltc681x_driver_t *dev, uint8_t tx_dat);//name conflicts with linduino also needs to take a byte as a parameter
 
-int LTC681x_set_cs(ltc681x_driver_t *dev, int state);
+void LTC681x_set_cs(ltc681x_driver_t *dev, int state);
 
 #endif
