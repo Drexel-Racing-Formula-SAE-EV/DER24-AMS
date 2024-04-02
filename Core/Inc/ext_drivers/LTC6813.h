@@ -619,4 +619,15 @@ void LTC6813_set_cfgrb_dcc_b(ltc6813_driver_t *dev,
 							 uint8_t dccbits[] //!< The DCC bits
 							);
 
+int LTC6813_init(ltc6813_driver_t *dev,
+		         SPI_HandleTypeDef *hspi_a,
+				 SPI_HandleTypeDef *hspi_b,
+				 GPIO_TypeDef *cs_port_a,
+				 GPIO_TypeDef *cs_port_b,
+				 uint16_t cs_pin_a,
+				 uint16_t cs_pin_b,
+				 uint8_t num_ics,
+				 cell_asic *ic_arr
+				);
+
 #endif

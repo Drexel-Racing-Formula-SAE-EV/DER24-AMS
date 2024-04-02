@@ -2190,3 +2190,28 @@ void LTC681x_set_cs(ltc681x_driver_t *dev, int state)
 	HAL_GPIO_WritePin(dev->cs_port[dev->string], dev->cs_pin[dev->string], state);
 	return;
 }
+
+int LTC681x_init(ltc681x_driver_t *dev,
+		         SPI_HandleTypeDef *hspi_a,
+				 SPI_HandleTypeDef *hspi_b,
+				 GPIO_TypeDef *cs_port_a,
+				 GPIO_TypeDef *cs_port_b,
+				 uint16_t cs_pin_a,
+				 uint16_t cs_pin_b,
+				 uint8_t num_ics,
+				 cell_asic *ic_arr
+				)
+{
+	int ret = 0;
+	dev->string = LTC681X_STR_A;
+	dev->hspi[0] = hspi_a;
+	dev->hspi[1] = hspi_b;
+	dev->cs_port[0] = cs_port_a;
+	dev->cs_port[1] = cs_port_b;
+	dev->cs_pin[0] = cs_pin_a;
+	dev->cs_pin[1] = cs_pin_b;
+	dev->num_ics = num_ics;
+	dev->ic_arr = ic_arr;
+	// TODO: determine if other config is needed
+	return ret;
+}

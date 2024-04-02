@@ -784,4 +784,15 @@ uint8_t spi_read_byte(ltc681x_driver_t *dev, uint8_t tx_dat);//name conflicts wi
 
 void LTC681x_set_cs(ltc681x_driver_t *dev, int state);
 
+int LTC681x_init(ltc681x_driver_t *dev,
+		         SPI_HandleTypeDef *hspi_a,
+				 SPI_HandleTypeDef *hspi_b,
+				 GPIO_TypeDef *cs_port_a,
+				 GPIO_TypeDef *cs_port_b,
+				 uint16_t cs_pin_a,
+				 uint16_t cs_pin_b,
+				 uint8_t num_ics,
+				 cell_asic *ic_arr
+				);
+
 #endif

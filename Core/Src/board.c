@@ -6,6 +6,7 @@
  */
 
 #include "board.h"
+#include "main.h"
 
 #define FAN_MAX 3360
 
@@ -24,5 +25,15 @@ void board_init(board_t *board)
 	fan_init(&board->fans[8], TIM4, &board->stm32f407g.htim4, FAN_MAX, &TIM4->CCR3, 3);
 	fan_init(&board->fans[9], TIM4, &board->stm32f407g.htim4, FAN_MAX, &TIM4->CCR4, 4);
 
+	LTC6813_init(&board->ltc,
+				 &board->stm32f407g.hspi1,
+				 &board->stm32f407g.hspi3,
+				 STRINGA_CS_GPIO_Port,
+				 STRINGB_CS_GPIO_Port,
+				 STRINGA_CS_Pin,
+				 STRINGB_CS_Pin,
+				 NLTC,
+				 board->ltc_arr
+			    );
 	return;
 }
