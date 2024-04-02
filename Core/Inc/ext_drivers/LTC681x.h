@@ -406,7 +406,7 @@ int8_t parse_cells(uint8_t current_ic, //!< Current IC
                    uint8_t cell_data[], //!< Unparsed data
                    uint16_t *cell_codes, //!< Parsed data
                    uint8_t *ic_pec //!< PEC error
-				   );
+				  );
 
 /*!
  Sends the poll ADC command

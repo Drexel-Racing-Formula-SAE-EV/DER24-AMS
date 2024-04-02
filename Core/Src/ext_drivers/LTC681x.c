@@ -831,11 +831,11 @@ void LTC681x_rdstat_reg(ltc681x_driver_t *dev, // device driver
 
 /* Helper function that parses voltage measurement registers */
 int8_t parse_cells(uint8_t current_ic, // Current IC
-					uint8_t cell_reg,  // Type of register
-					uint8_t cell_data[], // Unparsed data
-					uint16_t *cell_codes, // Parsed data
-					uint8_t *ic_pec // PEC error
-					)
+				   uint8_t cell_reg,  // Type of register
+				   uint8_t cell_data[], // Unparsed data
+				   uint16_t *cell_codes, // Parsed data
+				   uint8_t *ic_pec // PEC error
+				  )
 {
 	const uint8_t BYT_IN_REG = 6;
 	const uint8_t CELL_IN_REG = 3;
@@ -844,7 +844,6 @@ int8_t parse_cells(uint8_t current_ic, // Current IC
 	uint16_t received_pec;
 	uint16_t data_pec;
 	uint8_t data_counter = current_ic*NUM_RX_BYT; //data counter
-
 
 	for (uint8_t current_cell = 0; current_cell<CELL_IN_REG; current_cell++) // This loop parses the read back data into the register codes, it
 	{																		// loops once for each of the 3 codes in the register
@@ -1553,11 +1552,12 @@ void LTC681x_run_openwire_multi(ltc681x_driver_t *dev)
 				}
 			}
 		}
+	}
 }
 
 /* Runs open wire for GPIOs */
- void LTC681x_run_gpio_openwire(ltc681x_driver_t *dev)
- {
+void LTC681x_run_gpio_openwire(ltc681x_driver_t *dev)
+{
 	uint16_t OPENWIRE_THRESHOLD = 150;
 	const uint8_t  N_CHANNELS = dev->ic_arr[0].ic_reg.aux_channels +1;
 
@@ -1584,7 +1584,7 @@ void LTC681x_run_openwire_multi(ltc681x_driver_t *dev)
 
 	for (int cic=0; cic<dev->num_ics; cic++)
 	{
-	    for (int channel=0; channel<N_CHANNELS; channel++)
+		for (int channel=0; channel<N_CHANNELS; channel++)
 		{
 			aux_val[cic][channel]=dev->ic_arr[cic].aux.a_codes[channel];
 		}
@@ -1703,7 +1703,7 @@ int8_t LTC681x_rdpwm(ltc681x_driver_t *dev,
                      uint8_t pwmReg //!< The PWM Register to be written A or B
                     )
 {
-	const uint8_t BYTES_IN_REG = 8;
+	//const uint8_t BYTES_IN_REG = 8;
 	uint8_t cmd[4];
 	uint8_t read_buffer[256];
 	int8_t pec_error = 0;
