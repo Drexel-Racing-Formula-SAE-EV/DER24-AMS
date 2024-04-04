@@ -11,6 +11,7 @@
 #include "tasks/fan_task.h"
 #include "tasks/cli_task.h"
 #include "tasks/canbus_task.h"
+#include "tasks/air_task.h"
 
 app_data_t app = {0};
 
@@ -48,6 +49,7 @@ void app_create()
 	assert(app.cli_task = cli_task_start(&app));
 	assert(app.fan_task = fan_task_start(&app));
 	assert(app.canbus_task = canbus_task_start(&app));
+	assert(app.air_task = air_task_start(&app));
 }
 
 void set_bms(bool state)

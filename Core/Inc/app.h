@@ -20,6 +20,7 @@
 
 #define CLI_FREQ 20
 #define CAN_FREQ 10
+#define AIR_FREQ 10
 
 #define ECU_CANBUS_ID 0x420
 
@@ -64,6 +65,7 @@ typedef struct
 	TaskHandle_t fan_task;
 	TaskHandle_t cli_task;
 	TaskHandle_t canbus_task;
+	TaskHandle_t air_task;
 } app_data_t;
 
 void app_create();
