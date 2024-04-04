@@ -21,12 +21,12 @@
 */
 typedef enum 
 {
-    SHORT_TO_CHASSIS_GROUND_STATUS,
-    NORMAL_STATUS,
-    UNDERVOLT_STATUS,
-    SPEED_START_STATUS,
-    DEVICE_ERROR_STATUS,
-    GROUND_FAULT_STATUS
+    IMD_SHORT_TO_CHASSIS_GROUND,
+    IMD_NORMAL,
+    IMD_UNDERVOLT,
+    IMD_SPEED_START,
+    IMD_DEVICE_ERROR,
+    IMD_GROUND_FAULT
 } imd_status_t;
 
 /*
@@ -55,9 +55,18 @@ typedef struct
 {
     bool OK_HS;
     imd_status_t status;
-    TIM_TypeDef *timer;
-    float frequency;
-    float duty_cycle;
+	uint32_t clock_freq;
+	TIM_HandleTypeDef *htim;
+	TIM_TypeDef *tim;
+	HAL_TIM_ActiveChannel high_channel;
+	HAL_TIM_ActiveChannel total_channel;
+	GPIO_TypeDef *status_port;
+	uint16_t status_pin;
+	uint32_t high_count;
+	uint32_t total_count;
+	float duty;
+	float freq;
+	int ret;
 } imd_t;
 
 /*
@@ -66,14 +75,8 @@ typedef struct
 *
 * imd: a pointer to and imd_t we want to initialize
 */
-void imd_init(imd_t* imd);
+void imd_init(imd_t *dev, uint32_t clock_freq, TIM_HandleTypeDef *htim, TIM_TypeDef *tim, HAL_TIM_ActiveChannel high_channel, HAL_TIM_ActiveChannel total_channel, GPIO_TypeDef *status_port, uint16_t status_pin);
 
-/*
-* function: set_imd_status_signal
-* -------------------------------
-*
-* imd: a pointer to an imd_t we want to update
-*/
-void set_imd_status_signal(imd_t* imd);
+int imd_read(imd_t *dev);
 
 #endif

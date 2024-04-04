@@ -11,7 +11,7 @@
 
 #include "app.h"
 #include "cmsis_os.h"
-#include "imd.h"
+#include "ext_drivers/imd.h"
 
 /*
 * function: imd_task_start

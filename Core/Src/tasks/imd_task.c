@@ -34,26 +34,14 @@ void imd_task_fn(void *argument){
     imd_t *imd;
     
     data = (app_data_t *) argument;
-    imd = data->board->imd;
+    imd = &data->board.imd;
+    uint32_t entry;
 
-    for(EVER){
-        if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {  // If the interrupt is triggered by channel 1 (fix channel #)
-            uint32 ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
-            if (ICValue != 0) {
-                //add 1 to duty cycle for some reason! but its accurate
-                imd->duty_cycle = (HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) *100)/ICValue;
-                imd->frequency = 168000000/ICValue;
-                imd->status = imd->frequency / 10;
-
-                // set OK_HS state - can be read from pin 8 but should take ~ similar time to do calculation
-                imd->OK_HS = imd->status == NORMAL_STATUS ? true : false;
-                
-                // old debug?
-                /*if(i<5){
-                    printf("Duty:%f Freq:%ul\r\n",*a_d.Duty,*a_d.Freq);i++;
-                }*/
-            }
-        }
+    for(;;)
+    {
+    	entry = osKernelGetTickCount();
+    	data->imd_state = imd->status;
+    	osDelayUntil(entry + (1000 / IMD_FREQ));
     }
 
 }
