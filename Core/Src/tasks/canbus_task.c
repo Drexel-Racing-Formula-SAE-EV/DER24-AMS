@@ -41,16 +41,29 @@ void canbus_task_fn(void *arg)
     for(;;)
     {
     	entry = osKernelGetTickCount();
+    	// TODO: turn into huge packet index like ECU
     	ret = 0;
     	packet = 0;
     	can_data[0] = TO_MSB16(packet);
     	can_data[1] = TO_LSB16(packet);
-    	can_data[2] = TO_MSB16(data->air_state);
-    	can_data[3] = TO_LSB16(data->air_state);
-    	can_data[4] = TO_MSB16(data->imd_state);
-    	can_data[5] = TO_LSB16(data->imd_state);
-    	can_data[6] = TO_MSB16((int)(data->current * 10.0));
-    	can_data[7] = TO_LSB16((int)(data->current * 10.0));
+    	can_data[2] = TO_MSB16(data->state);
+    	can_data[3] = TO_LSB16(data->state);
+    	can_data[4] = TO_MSB16(data->air_state);
+    	can_data[5] = TO_LSB16(data->air_state);
+    	can_data[6] = TO_MSB16((int16_t)(data->current * 10.0));
+    	can_data[7] = TO_LSB16((int16_t)(data->current * 10.0));
+    	ret = HAL_CAN_AddTxMessage(canbus->hcan, tx_header, can_data, &canbus->tx_mailbox);
+    	data->canbus_fault = ret;
+
+    	packet = 1;
+    	can_data[0] = TO_MSB16(packet);
+    	can_data[1] = TO_LSB16(packet);
+    	can_data[2] = TO_MSB16(data->imd_ok);
+    	can_data[3] = TO_LSB16(data->imd_ok);
+    	can_data[4] = TO_MSB16(data->imd_status);
+    	can_data[5] = TO_LSB16(data->imd_status);
+    	can_data[6] = TO_MSB16((int16_t)(data->board.imd.duty * 10.0));
+    	can_data[7] = TO_LSB16((int16_t)(data->board.imd.duty * 10.0));
     	ret = HAL_CAN_AddTxMessage(canbus->hcan, tx_header, can_data, &canbus->tx_mailbox);
     	data->canbus_fault = ret;
 

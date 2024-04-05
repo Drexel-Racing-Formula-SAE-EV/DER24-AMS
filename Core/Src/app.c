@@ -25,7 +25,8 @@ void app_create()
 	app.canbus_fault = false;
 
 	app.air_state = false;
-	app.imd_state = IMD_NORMAL;
+	app.imd_ok = true;
+	app.imd_status = IMD_NORMAL;
 
 	app.state = STATE_START;
 

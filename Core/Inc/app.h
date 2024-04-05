@@ -19,14 +19,14 @@
 #define VER_MINOR 1
 
 #define CLI_FREQ 20
-#define CAN_FREQ 10
+#define CAN_FREQ 2
 #define AIR_FREQ 10
-#define IMD_FREQ 5
+#define IMD_FREQ 10
 
 #define ECU_CANBUS_ID 0x420
 
-#define TO_LSB16(x) (x & 0xff)
-#define TO_MSB16(x) ((x & 0xffff) >> 8) & 0xff
+#define TO_LSB16(x) ((uint16_t)x & 0xff)
+#define TO_MSB16(x) ((((uint16_t)x & 0xff00) >> 8) & 0xff)
 
 typedef enum
 {
@@ -47,7 +47,8 @@ typedef struct
 	bool canbus_fault;
 
 	bool air_state;
-	imd_status_t imd_state;
+	bool imd_ok;
+	imd_status_t imd_status;
     
 	state_t state;
 
