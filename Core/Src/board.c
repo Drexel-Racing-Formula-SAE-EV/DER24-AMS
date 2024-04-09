@@ -13,7 +13,6 @@
 void board_init(board_t *board)
 {
 	stm32f407g_init(&board->stm32f407g);
-	HAL_GPIO_WritePin(BMS_SAFETY_OUT_GPIO_Port, BMS_SAFETY_OUT_Pin, 1);
 
 	fan_init(&board->fans[0], TIM1, &board->stm32f407g.htim1, FAN_MAX, &TIM1->CCR3, 3);
 	fan_init(&board->fans[1], TIM1, &board->stm32f407g.htim1, FAN_MAX, &TIM1->CCR4, 4);

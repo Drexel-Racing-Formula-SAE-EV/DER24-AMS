@@ -23,7 +23,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app.h"
-#include "tasks/fan_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
