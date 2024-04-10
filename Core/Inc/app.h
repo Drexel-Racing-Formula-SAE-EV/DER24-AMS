@@ -15,6 +15,8 @@
 #include "board.h"
 #include "ext_drivers/accumulator.h"
 
+#define LTC_FREQ 10
+
 typedef enum
 {
 	STATE_NULL,
@@ -42,9 +44,10 @@ typedef struct
 	float current;
 
 	board_t board;
-	accumulator_t accumulator;
+	accumulator_t acc;
 
 	TaskHandle_t fan_task;
+	TaskHandle_t ltc_task;
 } app_data_t;
 
 void app_create();
