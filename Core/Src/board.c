@@ -9,6 +9,8 @@
 #include "main.h"
 
 #define FAN_MAX 3360
+#define CUR_SEN_CH_L 14
+#define CUR_SEN_CH_H 1
 
 void board_init(board_t *board)
 {
@@ -27,6 +29,7 @@ void board_init(board_t *board)
 	fan_init(&board->fans[9], TIM4, &board->stm32f407g.htim4, FAN_MAX, &TIM4->CCR4, 4);
 
 	cli_device_init(&board->cli, &board->stm32f407g.huart2);
+	current_sensor_init(&board->current_sensor,&board->stm32f407g.hadc2,&board->stm32f407g.hadc1,CUR_SEN_CH_L,CUR_SEN_CH_H);
 
 	return;
 }
