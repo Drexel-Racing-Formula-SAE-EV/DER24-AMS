@@ -10,6 +10,7 @@ void current_sensor_init(current_sensor_t *dev, ADC_HandleTypeDef *hadc_low,ADC_
 	dev->voltage_low = 0;
 	dev->current_low = 0;
 	dev->current_high = 0;
+	dev->current = 0;
 	dev->count_high =0;
 	dev->count_low = 0;
 }
