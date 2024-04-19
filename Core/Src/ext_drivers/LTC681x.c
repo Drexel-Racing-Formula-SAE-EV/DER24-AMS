@@ -2166,9 +2166,10 @@ void spi_write_read(ltc681x_driver_t *dev,
                     uint8_t rx_len //Option: number of bytes to be read from the SPI port
                    )
 {
+	HAL_StatusTypeDef ret = 0;
 	LTC681x_set_cs(dev, 0);
-	HAL_SPI_Transmit(dev->hspi[dev->string], tx_Data, tx_len, 100);
-	HAL_SPI_TransmitReceive(dev->hspi[dev->string], tx_Data, rx_data, rx_len, 100);;
+	ret |= HAL_SPI_Transmit(dev->hspi[dev->string], tx_Data, tx_len, 100);
+	ret |= HAL_SPI_TransmitReceive(dev->hspi[dev->string], tx_Data, rx_data, rx_len, 100);
 	LTC681x_set_cs(dev, 1);
 }
 
@@ -2212,6 +2213,12 @@ int LTC681x_init(ltc681x_driver_t *dev,
 	dev->cs_pin[1] = cs_pin_b;
 	dev->num_ics = num_ics;
 	dev->ic_arr = ic_arr;
+	HAL_GPIO_WritePin(cs_port_a, cs_pin_a, 1);
+	HAL_GPIO_WritePin(cs_port_b, cs_pin_b, 1);
+
+	// TODO: delete test
+	//uint8_t d = 104;
+	//spi_write_array(dev, 1, &d);
 	// TODO: determine if other config is needed
 	return ret;
 }

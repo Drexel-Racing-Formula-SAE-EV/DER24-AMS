@@ -27,7 +27,7 @@ void ltc_task_fn(void *argument)
 	for(;;)
 	{
         entry = osKernelGetTickCount();
-
+        accumulator_read(acc);
         osDelayUntil(entry + (1000 / LTC_FREQ));
 	}
 }

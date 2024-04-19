@@ -183,7 +183,6 @@ typedef enum
 #define STAT 3
 #define CFGRR 0
 #define CFGRB 4
-//#define CS_PIN 10
 
 typedef struct
 {
@@ -194,6 +193,25 @@ typedef struct
 	uint8_t num_ics;
 	cell_asic *ic_arr;
 } ltc681x_driver_t;
+
+typedef struct
+{
+	uint16_t OV_THRESHOLD;
+	uint16_t UV_THRESHOLD;
+	uint16_t MEASUREMENT_LOOP_TIME;
+	uint8_t REFON;
+	uint8_t ADCOPT;
+	uint8_t GPIOBITS_A[5];
+	uint8_t GPIOBITS_B[4];
+	uint16_t UV;
+	uint16_t OV;
+	uint8_t DCCBITS_A[12];
+	uint8_t DCCBITS_B[7];
+	uint8_t DCTOBITS[4];
+	uint8_t FDRF;
+	uint8_t DTMEN;
+	uint8_t PSBITS[2];
+} ltc681x_conf_t;
 
 /*!
  Wake isoSPI up from IDlE state and enters the READY state

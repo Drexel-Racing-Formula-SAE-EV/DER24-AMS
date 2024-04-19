@@ -62,6 +62,8 @@
 #include "stdint.h"
 #include "ext_drivers/LTC6813.h"
 
+
+
 /* Helper function to initialize register limits. */
 void LTC6813_init_reg_limits(ltc6813_driver_t *dev)
 {

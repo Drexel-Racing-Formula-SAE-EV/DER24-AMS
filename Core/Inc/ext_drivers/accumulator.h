@@ -11,17 +11,17 @@
 #include <stdbool.h>
 #include "ext_drivers/LTC6813.h"
 
-#define NSEGS 5
+#define NSEGS 1
 #define NMEAS 14
 
 typedef struct
 {
-	ltc6813_driver_t ltc;
-	cell_asic arr[NSEGS];
-
 	float max_temp;
 	float max_volt;
 	float min_volt;
+	ltc6813_driver_t ltc;
+	cell_asic arr[NSEGS];
+	ltc681x_conf_t cfg;
 } accumulator_t;
 
 void accumulator_init(accumulator_t *dev,

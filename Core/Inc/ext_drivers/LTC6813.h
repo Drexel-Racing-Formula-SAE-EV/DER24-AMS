@@ -489,7 +489,7 @@ void LTC6813_set_cfgr(ltc6813_driver_t *dev,
                       uint8_t dcc[12], //!< The DCC bits
 					  uint8_t dcto[4], //!< The Dcto bits
 					  uint16_t uv, //!< The UV value
-					  uint16_t  ov //!< The OV value
+					  uint16_t ov //!< The OV value
 					  );
 
 /*!
