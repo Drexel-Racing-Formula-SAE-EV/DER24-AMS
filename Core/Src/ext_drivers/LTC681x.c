@@ -468,7 +468,6 @@ uint8_t LTC681x_rdcv(ltc681x_driver_t *dev,
 			}
 		}
 	}
-
 	else
 	{
 		LTC681x_rdcv_reg(dev, reg, cell_data);
@@ -909,7 +908,6 @@ uint32_t LTC681x_pollAdc(ltc681x_driver_t *dev)
 	cmd[2] = (uint8_t)(cmd_pec >> 8);
 	cmd[3] = (uint8_t)(cmd_pec);
 
-	LTC681x_set_cs(dev, 0);
 	spi_write_array(dev, 4, cmd);
 	while ((counter<200000)&&(finished == 0))
 	{
@@ -917,7 +915,6 @@ uint32_t LTC681x_pollAdc(ltc681x_driver_t *dev)
 		if (current_time > 0) finished = 1;
 		else counter = counter + 10;
 	}
-	LTC681x_set_cs(dev, 1);
 
 	return(counter);
 }
