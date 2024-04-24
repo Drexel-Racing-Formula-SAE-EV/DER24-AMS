@@ -107,8 +107,9 @@ int accumulator_read(accumulator_t *dev)
     	//check_error(error);
     } while(error == -1);
 
-
-	// Convert to voltage, min max stuff too
+	// Convert to voltage
+    ret |= convert_cell_reads(dev);
+    // min max stuff too
 	return ret;
 }
 
@@ -123,5 +124,6 @@ int convert_cell_reads(accumulator_t *dev)
 	}
 
 	return 0;
-
 }
+
+
