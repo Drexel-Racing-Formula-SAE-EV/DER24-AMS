@@ -106,7 +106,22 @@ int accumulator_read(accumulator_t *dev)
     	error = LTC6813_rdcv(ltc, REG_ALL); // Set to read back all cell voltage registers
     	//check_error(error);
     } while(error == -1);
+
+
 	// Convert to voltage, min max stuff too
 	return ret;
 }
 
+int convert_cell_reads(accumulator_t *dev)
+{
+	int seg, row;
+
+	for(seg = 0; seg < NSEGS; seg++){
+		for(row = 0; row < 18; row++){
+			dev->arr[seg].voltage[row] = ((dev->arr[seg].cells.c_codes[row] / 65535.0) * 21.3) - 0.3;
+		}
+	}
+
+	return 0;
+
+}

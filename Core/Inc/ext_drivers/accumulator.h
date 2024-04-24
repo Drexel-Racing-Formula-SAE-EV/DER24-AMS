@@ -34,4 +34,6 @@ void accumulator_init(accumulator_t *dev,
 					  );
 int accumulator_read(accumulator_t *dev);
 
+int convert_cell_reads(accumulator_t *dev);
+
 #endif /* INC_EXT_DRIVERS_ACCUMULATOR_H_ */

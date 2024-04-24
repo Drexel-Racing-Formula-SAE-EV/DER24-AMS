@@ -122,6 +122,8 @@ typedef struct
   pec_counter crc_count;
   register_cfg ic_reg;
   long system_open_wire;
+  float voltage[18];
+  float temp[18];
 } cell_asic;
 
 typedef enum
