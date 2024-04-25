@@ -120,8 +120,8 @@ int convert_cell_reads(accumulator_t *dev)
 	float max = -0.3, min = 21;
 
 	for (seg = 0; seg < NSEGS; seg++){
-		for (row = 0; row < 18; row++){
-			dev->arr[seg].voltage[row] = ((dev->arr[seg].cells.c_codes[row] / 65535.0) * 21.3) - 0.3;
+		for (row = 0; row < dev->arr[seg].ic_reg.cell_channels; row++){
+			dev->arr[seg].voltage[row] = dev->arr[seg].cells.c_codes[row] * 0.0001;
 			if (dev->arr[seg].voltage[row] > max) dev->arr[seg].voltage[row] = max;
 			if (dev->arr[seg].voltage[row] < min) dev->arr[seg].voltage[row] = min;
 		}
