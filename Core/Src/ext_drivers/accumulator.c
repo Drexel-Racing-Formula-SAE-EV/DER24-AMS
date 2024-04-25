@@ -23,25 +23,15 @@ void accumulator_init(accumulator_t *dev,
 	dev->cfg.REFON = 1; //!< Reference Powered Up Bit
 	dev->cfg.ADCOPT = 0; //!< ADC Mode option bit
 	//!< GPIO Pin Control // Gpio 1,2,3,4,5
-	dev->cfg.GPIOBITS_A[0] = 1;
-	dev->cfg.GPIOBITS_A[1] = 1;
-	dev->cfg.GPIOBITS_A[2] = 1;
-	dev->cfg.GPIOBITS_A[3] = 1;
-	dev->cfg.GPIOBITS_A[4] = 1;
+	for(int i = 0; i < 5; i++) dev->cfg.GPIOBITS_A[i] = 1;
 	//!< GPIO Pin Control // Gpio 6,7,8,9
-	for(int i = 0; i<4;i++){
-		dev->cfg.GPIOBITS_B[i]=1;
-	}
+	for(int i = 0; i < 4; i++) dev->cfg.GPIOBITS_B[i]=1;
 	dev->cfg.UV=dev->cfg.UV_THRESHOLD; //!< Under voltage Comparison Voltage
 	dev->cfg.OV=dev->cfg.OV_THRESHOLD; //!< Over voltage Comparison Voltage
 	//!< Discharge cell switch //Dcc 1,2,3,4,5,6,7,8,9,10,11,12
-	for(int i = 0; i<4;i++){
-		dev->cfg.DCCBITS_A[i]=0;
-	}
+	for(int i = 0; i < 4; i++) dev->cfg.DCCBITS_A[i]=0;
 	//!< Discharge cell switch //Dcc 0,13,14,15
-	for(int i = 0; i<7;i++){
-		dev->cfg.DCCBITS_B[i]=0;
-	}
+	for(int i = 0; i < 7; i++) dev->cfg.DCCBITS_B[i]=0;
 	//!< Discharge time value //Dcto 0,1,2,3  // Programed for 4 min
 	dev->cfg.DCTOBITS[0] = 1;
 	dev->cfg.DCTOBITS[1] = 0;
