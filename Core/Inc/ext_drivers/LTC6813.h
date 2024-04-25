@@ -69,6 +69,15 @@
 #define AUX 2
 #define STAT 3
 
+#define ICOM_BLANK 0x00
+#define ICOM_STOP  0x01
+#define ICOM_START 0x06
+#define ICOM_NT    0x07
+
+#define FCOM_ACK       0x00
+#define FCOM_NACK      0x08
+#define FCOM_NACK_STOP 0x09
+
 typedef ltc681x_driver_t ltc6813_driver_t;
 
 /*!

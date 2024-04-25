@@ -16,6 +16,8 @@ void accumulator_init(accumulator_t *dev,
 					  uint16_t cs_pin_b
 					 )
 {
+	dev->total_volt = 0;
+
 	dev->cfg.OV_THRESHOLD = 0;
 
 	dev->cfg.REFON = 1; //!< Reference Powered Up Bit
@@ -91,11 +93,11 @@ void accumulator_init(accumulator_t *dev,
 	LTC6813_init_reg_limits(ltc);
 }
 
-int accumulator_read(accumulator_t *dev)
+int accumulator_read_volt(accumulator_t *dev)
 {
 	ltc6813_driver_t *ltc = &dev->ltc;
 	int ret = 0;
-	int8_t error = 0;
+	int error = 0;
 	uint32_t conv = 0;
 
 	wakeup_sleep(ltc);
@@ -103,34 +105,143 @@ int accumulator_read(accumulator_t *dev)
 	conv = LTC6813_pollAdc(ltc);
     wakeup_sleep(ltc);
     do{
-    	error = LTC6813_rdcv(ltc, REG_ALL); // Set to read back all cell voltage registers
-    	//check_error(error);
+    	error = LTC6813_rdcv(ltc, REG_ALL);
     } while(error == -1);
-
-	// Convert to voltage
-    ret |= convert_cell_reads(dev);
-    // min max stuff too
-	return ret;
+    ret |= accumulator_convert_volt(dev);
+    return ret;
 }
 
-int convert_cell_reads(accumulator_t *dev)
+int accumulator_read_temp(accumulator_t *dev)
+{
+	ltc6813_driver_t *ltc = &dev->ltc;
+	int error = 0;
+	uint32_t conv = 0;
+
+	// TODO: Change to measure all temps
+	for(int i = 0; i < 1; i++)
+	{
+		accumulator_set_temp_ch(dev, i);
+		wakeup_sleep(ltc);
+		LTC6813_adax(ltc, MD_7KHZ_3KHZ, AUX_CH_ALL);
+		conv = LTC6813_pollAdc(ltc);
+		wakeup_sleep(ltc);
+		error = LTC6813_rdaux(ltc, REG_ALL); // Set to read back all aux registers
+		error |= accumulator_convert_temp(dev, i);
+	}
+	return error;
+}
+
+int accumulator_convert_volt(accumulator_t *dev)
 {
 	int seg, row;
-
+	float total = 0;
 	float max = -0.3, min = 21;
+	float seg_total, seg_min, seg_max;
+	float volt;
 
-	for (seg = 0; seg < NSEGS; seg++){
-		for (row = 0; row < dev->arr[seg].ic_reg.cell_channels; row++){
-			dev->arr[seg].voltage[row] = dev->arr[seg].cells.c_codes[row] * 0.0001;
-			if (dev->arr[seg].voltage[row] > max) dev->arr[seg].voltage[row] = max;
-			if (dev->arr[seg].voltage[row] < min) dev->arr[seg].voltage[row] = min;
+	for(seg = 0; seg < NSEGS; seg++)
+	{
+		seg_total = 0;
+		seg_min = 21;
+		seg_max = -0.3;
+		for(row = 0; row < NCELLS; row++)
+		{
+			volt = (float)dev->arr[seg].cells.c_codes[row] * 0.0001 + (row == NCELLS - 1 ? 0.5 : 0);
+			dev->arr[seg].voltage[row] = volt;
+			total += volt;
+			seg_total += volt;
+			if(volt > seg_max) seg_max = volt;
+			if(volt < seg_min) seg_min = volt;
+			if(volt > max) max = volt;
+			if(volt < min) min = volt;
 		}
+		dev->arr[seg].min_volt = seg_min;
+		dev->arr[seg].max_volt = seg_max;
+		dev->arr[seg].total_volt = seg_total;
 	}
-
-	dev->max_volt = max;
 	dev->min_volt = min;
+	dev->max_volt = max;
+	dev->total_volt = total;
 
 	return 0;
 }
 
+int accumulator_convert_temp(accumulator_t *dev, int channel)
+{
+	int seg;
+	float temp[2] = {0};
+
+	for(seg = 0; seg < NSEGS; seg++)
+	{
+		 // TODO: calc temp eq
+		temp[0] = (float)dev->arr[seg].aux.a_codes[0];
+		temp[1] = (float)dev->arr[seg].aux.a_codes[1];
+		dev->arr[seg].temp[channel] = temp[0];
+		dev->arr[seg].temp[channel + 7] = temp[1];
+	}
+	return 0;
+}
+
+int accumulator_set_temp_ch(accumulator_t *dev, uint8_t channel)
+{
+	int error = 0;
+	error |= accumulator_set_mux_ch(dev, channel, MUX_ADDR7_00);
+	error |= accumulator_set_mux_ch(dev, channel, MUX_ADDR7_01);
+    return error;
+}
+
+int accumulator_set_mux_ch(accumulator_t *dev, uint8_t channel, uint8_t addr7)
+{
+	int error = 0;
+	uint8_t data[3] = {0};
+	uint8_t icom[3] = {0};
+	uint8_t fcom[3] = {0};
+	uint8_t com[6] = {0};
+
+	if(channel > 7) return 1;
+
+	icom[0] = ICOM_START;
+	data[0] = addr7 << 1;
+	fcom[0] = FCOM_NACK;
+
+	icom[1] = ICOM_BLANK;
+	data[1] = 1 << channel;
+	fcom[1] = FCOM_NACK_STOP;
+
+	icom[2] = ICOM_NT;
+	data[2] = 0xFF;
+	fcom[2] = FCOM_NACK_STOP;
+
+	// COMM0: ICOM0[3:0]  D0[7:4]
+	// COMM1: D0[3:0]     FCOM0[3:0]
+	// COMM2: ICOM1[3:0]  D1[7:4]
+	// COMM3: D1[3:0]     FCOM1[3:0]
+	// COMM4: ICOM2[3:0]  D2[7:4]
+	// COMM5: D2[3:0]     FCOM2[3:0]
+	// TODO: replace with loop once verified
+	com[0] = (icom[0] << 4) | (data[0] >> 4);
+	com[1] = (data[0] << 4) | (fcom[0] & 0xF);
+	com[2] = (icom[1] << 4) | (data[1] >> 4);
+	com[3] = (data[1] << 4) | (fcom[1] & 0xF);
+	com[4] = (icom[2] << 4) | (data[2] >> 4);
+	com[5] = (data[2] << 4) | (fcom[2] & 0xF);
+
+    for (uint8_t current_ic = 0; current_ic < dev->ltc.num_ics; current_ic++)
+    {
+    	// TODO: replace with loop once verified
+		dev->ltc.ic_arr[current_ic].com.tx_data[0]= com[0];
+		dev->ltc.ic_arr[current_ic].com.tx_data[1]= com[1];
+    	dev->ltc.ic_arr[current_ic].com.tx_data[2]= com[2];
+    	dev->ltc.ic_arr[current_ic].com.tx_data[3]= com[3];
+		dev->ltc.ic_arr[current_ic].com.tx_data[4]= com[4];
+		dev->ltc.ic_arr[current_ic].com.tx_data[5]= com[5];
+    }
+    wakeup_sleep(&dev->ltc);
+    LTC6813_wrcomm(&dev->ltc);
+    wakeup_idle(&dev->ltc);
+    LTC6813_stcomm(&dev->ltc, 3);
+    //wakeup_idle(&dev->ltc);
+    //error |= LTC6813_rdcomm(&dev->ltc); // read from comm register
+    return error;
+}
 

@@ -12,10 +12,14 @@
 #include "ext_drivers/LTC6813.h"
 
 #define NSEGS 1
-#define NMEAS 14
+#define NCELLS 14
+#define NTEMPS 16
+#define MUX_ADDR7_00 0x4C
+#define MUX_ADDR7_01 0x4D
 
 typedef struct
 {
+	float total_volt;
 	float max_temp;
 	float max_volt;
 	float min_volt;
@@ -32,8 +36,11 @@ void accumulator_init(accumulator_t *dev,
 					  uint16_t cs_pin_a,
 					  uint16_t cs_pin_b
 					  );
-int accumulator_read(accumulator_t *dev);
-
-int convert_cell_reads(accumulator_t *dev);
+int accumulator_read_volt(accumulator_t *dev);
+int accumulator_read_temp(accumulator_t *dev);
+int accumulator_convert_volt(accumulator_t *dev);
+int accumulator_convert_temp(accumulator_t *dev, int channel);
+int accumulator_set_temp_ch(accumulator_t *dev, uint8_t channel);
+int accumulator_set_mux_ch(accumulator_t *dev, uint8_t channel, uint8_t addr7);
 
 #endif /* INC_EXT_DRIVERS_ACCUMULATOR_H_ */

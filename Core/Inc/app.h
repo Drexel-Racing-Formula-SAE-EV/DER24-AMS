@@ -17,6 +17,9 @@
 
 #define LTC_FREQ 10
 
+#define OVERVOLT 4.2
+#define UNDERVOLT 2.5
+
 typedef enum
 {
 	STATE_NULL,
@@ -28,6 +31,13 @@ typedef enum
 
 typedef struct
 {
+	float total_voltage;
+	float max_voltage;
+	float min_voltage;
+	float max_temp;
+	float avg_temp;
+	float current;
+
 	bool hardFault;
 	bool softFault;
 
@@ -36,12 +46,6 @@ typedef struct
 	float IMD_duty;
 
 	state_t state;
-
-	float max_temp;
-	float avg_temp;
-	float max_voltage;
-	float min_voltage;
-	float current;
 
 	board_t board;
 	accumulator_t acc;
