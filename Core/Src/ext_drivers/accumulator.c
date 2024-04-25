@@ -117,11 +117,18 @@ int convert_cell_reads(accumulator_t *dev)
 {
 	int seg, row;
 
-	for(seg = 0; seg < NSEGS; seg++){
-		for(row = 0; row < 18; row++){
+	float max = -0.3, min = 21;
+
+	for (seg = 0; seg < NSEGS; seg++){
+		for (row = 0; row < 18; row++){
 			dev->arr[seg].voltage[row] = ((dev->arr[seg].cells.c_codes[row] / 65535.0) * 21.3) - 0.3;
+			if (dev->arr[seg].voltage[row] > max) dev->arr[seg].voltage[row] = max;
+			if (dev->arr[seg].voltage[row] < min) dev->arr[seg].voltage[row] = min;
 		}
 	}
+
+	dev->max_volt = max;
+	dev->min_volt = min;
 
 	return 0;
 }
