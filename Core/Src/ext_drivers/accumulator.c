@@ -182,6 +182,28 @@ int accumulator_convert_temp(accumulator_t *dev, int channel)
 	return 0;
 }
 
+int accumulator_stat_temp(accumulator_t *dev)
+{
+	int seg, row;
+	float max = 0;
+	float seg_max;
+	float temp;
+
+	for(seg = 0; seg < NSEGS; seg++)
+	{
+		seg_max = 0;
+		for(row = 0; row < NTEMPS; row++)
+		{
+			temp = dev->ltc.ic_arr[seg].temp[row];
+			if(temp > seg_max) seg_max = temp;
+			if(temp > max) max = temp;
+		}
+		dev->ltc.ic_arr[seg].max_temp = seg_max;
+	}
+	dev->max_temp = max;
+	return 0;
+}
+
 int accumulator_set_temp_ch(accumulator_t *dev, uint8_t channel)
 {
 	int error = 0;
