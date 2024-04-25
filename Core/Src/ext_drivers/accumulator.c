@@ -128,6 +128,7 @@ int accumulator_read_temp(accumulator_t *dev)
 		error = LTC6813_rdaux(ltc, REG_ALL); // Set to read back all aux registers
 		error |= accumulator_convert_temp(dev, i);
 	}
+	error |= accumulator_stat_temp(dev);
 	return error;
 }
 
