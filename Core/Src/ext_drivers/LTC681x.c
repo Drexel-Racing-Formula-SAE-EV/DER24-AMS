@@ -52,7 +52,7 @@ void wakeup_idle(ltc681x_driver_t *dev) //Number of ICs in the system
 {
 	for(int i = 0; i < dev->num_ics; i++)
 	{
-		spi_read_byte(dev, 0xFF);
+		spi_read_byte(dev, 0xFF, 1);
 	}
 }
 
@@ -82,7 +82,7 @@ void cmd_68(ltc681x_driver_t *dev, uint8_t tx_cmd[2]) //The command to be transm
 	cmd[2] = (uint8_t)(cmd_pec >> 8);
 	cmd[3] = (uint8_t)(cmd_pec);
 
-	spi_write_array(dev, 4,cmd);
+	spi_write_array(dev, 4, cmd, 1);
 }
 
 /*
@@ -123,7 +123,7 @@ void write_68(ltc681x_driver_t *dev, // device driver
 		cmd_index = cmd_index + 2;
 	}
 
-	spi_write_array(dev, CMD_LEN, cmd);
+	spi_write_array(dev, CMD_LEN, cmd, 1);
 
 	free(cmd);
 }
@@ -149,7 +149,7 @@ int8_t read_68( ltc681x_driver_t *dev, // device driver
 	cmd[3] = (uint8_t)(cmd_pec);
 
 
-	spi_write_read(dev, cmd, 4, data, (BYTES_IN_REG * dev->num_ics));         //Transmits the command and reads the configuration data of all ICs on the daisy chain into rx_data[] array
+	spi_write_read(dev, cmd, 4, data, (BYTES_IN_REG * dev->num_ics), 1);         //Transmits the command and reads the configuration data of all ICs on the daisy chain into rx_data[] array
 
 	for (uint8_t current_ic = 0; current_ic < dev->num_ics; current_ic++) //Executes for each LTC681x in the daisy chain and packs the data
 	{																//into the rx_data array as well as check the received data for any bit errors
@@ -736,7 +736,7 @@ void LTC681x_rdcv_reg(ltc681x_driver_t *dev, // device driver
 	cmd[2] = (uint8_t)(cmd_pec >> 8);
 	cmd[3] = (uint8_t)(cmd_pec);
 
-	spi_write_read(dev, cmd,4,data,(REG_LEN*total_ic));
+	spi_write_read(dev, cmd,4,data,(REG_LEN*total_ic), 1);
 
 }
 
@@ -785,7 +785,7 @@ void LTC681x_rdaux_reg(ltc681x_driver_t *dev, // device driver
 	cmd[2] = (uint8_t)(cmd_pec >> 8);
 	cmd[3] = (uint8_t)(cmd_pec);
 
-	spi_write_read(dev, cmd,4,data,(REG_LEN*total_ic));
+	spi_write_read(dev, cmd,4,data,(REG_LEN*total_ic), 1);
 
 }
 
@@ -825,7 +825,7 @@ void LTC681x_rdstat_reg(ltc681x_driver_t *dev, // device driver
 	cmd[2] = (uint8_t)(cmd_pec >> 8);
 	cmd[3] = (uint8_t)(cmd_pec);
 
-	spi_write_read(dev, cmd,4,data,(REG_LEN*total_ic));
+	spi_write_read(dev, cmd,4,data,(REG_LEN*total_ic), 1);
 }
 
 /* Helper function that parses voltage measurement registers */
@@ -886,8 +886,8 @@ uint8_t LTC681x_pladc(ltc681x_driver_t *dev)
 	cmd[3] = (uint8_t)(cmd_pec);
 
 	LTC681x_set_cs(dev, 0);
-	spi_write_array(dev, 4, cmd);
-	adc_state = spi_read_byte(dev,0xFF);
+	spi_write_array(dev, 4, cmd, 0);
+	adc_state = spi_read_byte(dev, 0xFF, 0);
 	LTC681x_set_cs(dev, 1);
 
 	return(adc_state);
@@ -908,10 +908,10 @@ uint32_t LTC681x_pollAdc(ltc681x_driver_t *dev)
 	cmd[2] = (uint8_t)(cmd_pec >> 8);
 	cmd[3] = (uint8_t)(cmd_pec);
 
-	spi_write_array(dev, 4, cmd);
+	spi_write_array(dev, 4, cmd, 1);
 	while ((counter<200000)&&(finished == 0))
 	{
-		current_time = spi_read_byte(dev, 0xff);
+		current_time = spi_read_byte(dev, 0xff, 1);
 		if (current_time > 0) finished = 1;
 		else counter = counter + 10;
 	}
@@ -1839,7 +1839,7 @@ void LTC681x_stsctrl(ltc681x_driver_t *dev)
     cmd[2] = (uint8_t)(cmd_pec >> 8);
     cmd[3] = (uint8_t)(cmd_pec);
 
-    spi_write_array(dev, 4,cmd);
+    spi_write_array(dev, 4, cmd, 1);
 }
 
 /*
@@ -1933,8 +1933,8 @@ void LTC681x_stcomm(ltc681x_driver_t *dev,
 	cmd[3] = (uint8_t)(cmd_pec);
 
 	LTC681x_set_cs(dev, 0);
-	spi_write_array(dev, 4, cmd);
-	for (int i = 0; i < len * 3; i++) spi_read_byte(dev, 0xFF);
+	spi_write_array(dev, 4, cmd, 0);
+	for (int i = 0; i < len * 3; i++) spi_read_byte(dev, 0xFF, 0);
 	LTC681x_set_cs(dev, 1);
 }
 
@@ -2143,12 +2143,13 @@ Writes an array of bytes out of the SPI port
 */
 void spi_write_array(ltc681x_driver_t *dev, // Device pointer
 					 uint8_t len, // Option: Number of bytes to be written on the SPI port
-                     uint8_t data[] //Array of bytes to be written on the SPI port
-                    )
+                     uint8_t data[], //Array of bytes to be written on the SPI port
+					 uint8_t use_cs
+					)
 {
-	LTC681x_set_cs(dev, 0);
+	if(use_cs) LTC681x_set_cs(dev, 0);
 	HAL_SPI_Transmit(dev->hspi[dev->string], data, len, 100);
-	LTC681x_set_cs(dev, 1);
+	if(use_cs) LTC681x_set_cs(dev, 1);
 }
 
 /*
@@ -2160,25 +2161,26 @@ void spi_write_read(ltc681x_driver_t *dev,
 					uint8_t tx_Data[],//array of data to be written on SPI port
                     uint8_t tx_len, //length of the tx data arry
                     uint8_t *rx_data,//Input: array that will store the data read by the SPI port
-                    uint8_t rx_len //Option: number of bytes to be read from the SPI port
-                   )
+                    uint8_t rx_len, //Option: number of bytes to be read from the SPI port
+					uint8_t use_cs
+				   )
 {
 	HAL_StatusTypeDef ret = 0;
-	LTC681x_set_cs(dev, 0);
+	if(use_cs) LTC681x_set_cs(dev, 0);
 	ret |= HAL_SPI_Transmit(dev->hspi[dev->string], tx_Data, tx_len, 100);
 	ret |= HAL_SPI_TransmitReceive(dev->hspi[dev->string], tx_Data, rx_data, rx_len, 100);
-	LTC681x_set_cs(dev, 1);
+	if(use_cs) LTC681x_set_cs(dev, 1);
 }
 
 
-uint8_t spi_read_byte(ltc681x_driver_t *dev, uint8_t tx_dat)
+uint8_t spi_read_byte(ltc681x_driver_t *dev, uint8_t tx_dat, uint8_t use_cs)
 {
   uint8_t data;
   uint8_t blank_data[1]={tx_dat};
 
-  LTC681x_set_cs(dev, 0);
-  HAL_SPI_TransmitReceive(dev->hspi[dev->string], blank_data, &data,1,100);
-  LTC681x_set_cs(dev, 1);
+  if(use_cs) LTC681x_set_cs(dev, 0);
+  HAL_SPI_TransmitReceive(dev->hspi[dev->string], blank_data, &data, 1, 100);
+  if(use_cs) LTC681x_set_cs(dev, 1);
 
   return data;
 }

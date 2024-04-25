@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include "ext_drivers/LTC6813.h"
 
-#define NSEGS 3
+#define NSEGS 1
 #define NCELLS 14
 #define NTEMPS 16
 #define MUX_ADDR7_00 0x4C
