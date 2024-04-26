@@ -167,7 +167,7 @@ int accumulator_convert_temp(accumulator_t *dev, int channel)
 		temp[0] = (float)dev->arr[seg].aux.a_codes[0];
 		temp[1] = (float)dev->arr[seg].aux.a_codes[1];
 		dev->arr[seg].temp[channel] = temp[0];
-		dev->arr[seg].temp[channel + 7] = temp[1];
+		dev->arr[seg].temp[channel + 8] = temp[1];
 	}
 	return 0;
 }
@@ -252,8 +252,6 @@ int accumulator_set_mux_ch(accumulator_t *dev, uint8_t channel, uint8_t addr7)
     LTC6813_wrcomm(&dev->ltc);
     wakeup_idle(&dev->ltc);
     LTC6813_stcomm(&dev->ltc, 3);
-    //wakeup_idle(&dev->ltc);
-    //error |= LTC6813_rdcomm(&dev->ltc); // read from comm register
     return error;
 }
 
