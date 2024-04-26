@@ -164,8 +164,8 @@ int accumulator_convert_temp(accumulator_t *dev, int channel)
 	for(seg = 0; seg < NSEGS; seg++)
 	{
 		 // TODO: calc temp eq
-		temp[0] = (float)dev->arr[seg].aux.a_codes[0];
-		temp[1] = (float)dev->arr[seg].aux.a_codes[1];
+		temp[0] = (float)dev->arr[seg].aux.a_codes[0] * 0.0001;
+		temp[1] = (float)dev->arr[seg].aux.a_codes[1] * 0.0001;
 		dev->arr[seg].temp[channel] = temp[0];
 		dev->arr[seg].temp[channel + 8] = temp[1];
 	}
