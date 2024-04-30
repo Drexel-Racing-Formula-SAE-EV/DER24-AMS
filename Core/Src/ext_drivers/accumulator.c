@@ -240,13 +240,10 @@ int accumulator_set_mux_ch(accumulator_t *dev, uint8_t channel, uint8_t addr7)
 
     for (uint8_t current_ic = 0; current_ic < dev->ltc.num_ics; current_ic++)
     {
-    	// TODO: replace with loop once verified
-		dev->ltc.ic_arr[current_ic].com.tx_data[0]= com[0];
-		dev->ltc.ic_arr[current_ic].com.tx_data[1]= com[1];
-    	dev->ltc.ic_arr[current_ic].com.tx_data[2]= com[2];
-    	dev->ltc.ic_arr[current_ic].com.tx_data[3]= com[3];
-		dev->ltc.ic_arr[current_ic].com.tx_data[4]= com[4];
-		dev->ltc.ic_arr[current_ic].com.tx_data[5]= com[5];
+    	for(uint8_t byte = 0; byte < 8; byte++)
+    	{
+    		dev->ltc.ic_arr[current_ic].com.tx_data[byte]= com[byte];
+    	}
     }
     wakeup_sleep(&dev->ltc);
     LTC6813_wrcomm(&dev->ltc);
