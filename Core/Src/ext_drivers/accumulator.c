@@ -230,13 +230,11 @@ int accumulator_set_mux_ch(accumulator_t *dev, uint8_t channel, uint8_t addr7)
 	// COMM3: D1[3:0]     FCOM1[3:0]
 	// COMM4: ICOM2[3:0]  D2[7:4]
 	// COMM5: D2[3:0]     FCOM2[3:0]
-	// TODO: replace with loop once verified
-	com[0] = (icom[0] << 4) | (data[0] >> 4);
-	com[1] = (data[0] << 4) | (fcom[0] & 0xF);
-	com[2] = (icom[1] << 4) | (data[1] >> 4);
-	com[3] = (data[1] << 4) | (fcom[1] & 0xF);
-	com[4] = (icom[2] << 4) | (data[2] >> 4);
-	com[5] = (data[2] << 4) | (fcom[2] & 0xF);
+	for(uint8_t byte = 0; byte < 3; byte++)
+	{
+		com[byte * 2]     = (icom[byte] << 4) | (data[byte] >> 4);
+		com[byte * 2 + 1] = (data[byte] << 4) | (fcom[byte] & 0xF);
+	}
 
     for (uint8_t current_ic = 0; current_ic < dev->ltc.num_ics; current_ic++)
     {
