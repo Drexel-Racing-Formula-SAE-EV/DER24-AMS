@@ -6,6 +6,7 @@
  */
 
 #include "ext_drivers/accumulator.h"
+#include <math.h>
 
 void accumulator_init(accumulator_t *dev,
 				      SPI_HandleTypeDef *hspi_a,
@@ -160,12 +161,18 @@ int accumulator_convert_temp(accumulator_t *dev, int channel)
 {
 	int seg;
 	float temp[2] = {0};
+	float volt[2] = {0};
+	float ratio[2] = {0};
 
 	for(seg = 0; seg < NSEGS; seg++)
 	{
 		 // TODO: calc temp eq
-		temp[0] = (float)dev->arr[seg].aux.a_codes[0] * 0.0001;
-		temp[1] = (float)dev->arr[seg].aux.a_codes[1] * 0.0001;
+		volt[0] = (float)dev->arr[seg].aux.a_codes[0] * 0.0001;
+		volt[1] = (float)dev->arr[seg].aux.a_codes[1] * 0.0001;
+		ratio[0] = (VNTC / volt[0]) - 1;
+		ratio[1] = (VNTC / volt[1]) - 1;
+		temp[0] = NXFT15XV103FEAB050_convert(ratio[0]);
+		temp[1] = NXFT15XV103FEAB050_convert(ratio[1]);
 		dev->arr[seg].temp[channel] = temp[0];
 		dev->arr[seg].temp[channel + 8] = temp[1];
 	}
@@ -250,3 +257,11 @@ int accumulator_set_mux_ch(accumulator_t *dev, uint8_t channel, uint8_t addr7)
     return error;
 }
 
+float NXFT15XV103FEAB050_convert(float ratio)
+{
+	float a = 3400.0;
+	float b = -0.6;
+	float c = 6.2;
+	float d = -20.0;
+	return a * exp(b * (ratio + c)) + d;
+}

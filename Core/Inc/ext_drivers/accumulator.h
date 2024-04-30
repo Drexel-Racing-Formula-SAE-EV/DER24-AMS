@@ -16,6 +16,7 @@
 #define NTEMPS 16
 #define MUX_ADDR7_00 0x4C
 #define MUX_ADDR7_01 0x4D
+#define VNTC 5.0
 
 typedef struct
 {
@@ -43,5 +44,6 @@ int accumulator_convert_temp(accumulator_t *dev, int channel);
 int accumulator_set_temp_ch(accumulator_t *dev, uint8_t channel);
 int accumulator_stat_temp(accumulator_t *dev);
 int accumulator_set_mux_ch(accumulator_t *dev, uint8_t channel, uint8_t addr7);
+float NXFT15XV103FEAB050_convert(float ratio);
 
 #endif /* INC_EXT_DRIVERS_ACCUMULATOR_H_ */
