@@ -10,6 +10,7 @@
 #include "cmsis_os.h"
 #include "tasks/fan_task.h"
 #include "tasks/cli_task.h"
+#include "tasks/current_task.h"
 
 app_data_t app = {0};
 
@@ -43,6 +44,7 @@ void app_create()
 
 	assert(app.cli_task = cli_task_start(&app));
 	assert(app.fan_task = fan_task_start(&app));
+	assert(app.current_task = current_task_start(&app));
 }
 
 void set_bms(bool state)

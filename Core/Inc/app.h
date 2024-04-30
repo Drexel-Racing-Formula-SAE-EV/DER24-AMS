@@ -19,6 +19,8 @@
 #define VER_MINOR 1
 
 #define CLI_FREQ 20
+#define CURRENT_FREQ 10
+
 
 typedef enum
 {
@@ -54,6 +56,7 @@ typedef struct
 
 	TaskHandle_t fan_task;
 	TaskHandle_t cli_task;
+	TaskHandle_t current_task;
 } app_data_t;
 
 void app_create();
