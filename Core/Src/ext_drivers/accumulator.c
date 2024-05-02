@@ -137,7 +137,7 @@ int accumulator_convert_volt(accumulator_t *dev)
 		seg_max = -0.3;
 		for(row = 0; row < NCELLS; row++)
 		{
-			volt = (float)dev->arr[seg].cells.c_codes[row] * 0.0001 + (row == NCELLS - 1 ? 0.5 : 0);
+			volt = (float)dev->arr[seg].cells.c_codes[row] * 0.0001;
 			dev->arr[seg].voltage[row] = volt;
 			total += volt;
 			seg_total += volt;
@@ -166,14 +166,15 @@ int accumulator_convert_temp(accumulator_t *dev, int channel)
 
 	for(seg = 0; seg < NSEGS; seg++)
 	{
-		 // TODO: calc temp eq
 		volt[0] = (float)dev->arr[seg].aux.a_codes[0] * 0.0001;
 		volt[1] = (float)dev->arr[seg].aux.a_codes[1] * 0.0001;
-		ratio[0] = (VNTC / volt[0]) - 1;
-		ratio[1] = (VNTC / volt[1]) - 1;
+		ratio[0] = (5.0 / volt[0]) - 1;
+		ratio[1] = (5.0 / volt[1]) - 1;
 		temp[0] = NXFT15XV103FEAB050_convert(ratio[0]);
 		temp[1] = NXFT15XV103FEAB050_convert(ratio[1]);
-		dev->arr[seg].temp[channel] = temp[0];
+		//temp[0] = volt[0];
+		//temp[1] = volt[1];
+		dev->arr[seg].temp[channel]     = temp[0];
 		dev->arr[seg].temp[channel + 8] = temp[1];
 	}
 	return 0;
@@ -259,9 +260,8 @@ int accumulator_set_mux_ch(accumulator_t *dev, uint8_t channel, uint8_t addr7)
 
 float NXFT15XV103FEAB050_convert(float ratio)
 {
-	float a = 3400.0;
-	float b = -0.6;
-	float c = 6.2;
-	float d = -20.0;
-	return a * exp(b * (ratio + c)) + d;
+	// TODO: Verify
+	double a = 104.517;
+	double b = 0.221876;
+	return a * pow(b, ratio);
 }
