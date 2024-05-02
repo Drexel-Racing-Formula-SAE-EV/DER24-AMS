@@ -38,6 +38,7 @@ typedef struct
 
 	bool fan_fault;
 	bool cli_fault;
+	bool current_fault;
 
 	bool IMD_fault;
 	float IMD_freq; // maybe move enum IMD_code_t
