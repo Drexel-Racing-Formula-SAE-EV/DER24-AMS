@@ -9,6 +9,8 @@
 #include "main.h"
 
 #define FAN_MAX 3360
+#define CUR_SEN_CH_L 14
+#define CUR_SEN_CH_H 1
 
 void board_init(board_t *board)
 {
@@ -28,6 +30,12 @@ void board_init(board_t *board)
 	canbus_device_init(&board->canbus, &board->stm32f407g.hcan1);
 
 	cli_device_init(&board->cli, &board->stm32f407g.huart2);
+	current_sensor_init(&board->current_sensor,
+						&board->stm32f407g.hadc2,
+						&board->stm32f407g.hadc1,
+						CUR_SEN_CH_L,
+						CUR_SEN_CH_H
+					   );
 
 	imd_init(&board->imd, 84000000, &board->stm32f407g.htim5, TIM5, TIM_CHANNEL_2, TIM_CHANNEL_1, IMD_STATUS_MCU_GPIO_Port, IMD_STATUS_MCU_Pin);
 

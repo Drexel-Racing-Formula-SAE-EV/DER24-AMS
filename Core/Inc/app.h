@@ -19,9 +19,10 @@
 #define VER_MINOR 1
 
 #define CLI_FREQ 20
-#define CAN_FREQ 2
 #define AIR_FREQ 10
+#define CURRENT_FREQ 10
 #define IMD_FREQ 10
+#define CAN_FREQ 2
 
 #define ECU_CANBUS_ID 0x420
 
@@ -45,6 +46,7 @@ typedef struct
 	bool fan_fault;
 	bool cli_fault;
 	bool canbus_fault;
+	bool current_fault;
 
 	bool air_state;
 	bool imd_ok;
@@ -66,6 +68,7 @@ typedef struct
 	TaskHandle_t canbus_task;
 	TaskHandle_t air_task;
 	TaskHandle_t imd_task;
+	TaskHandle_t current_task;
 } app_data_t;
 
 void app_create();

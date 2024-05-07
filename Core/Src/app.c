@@ -13,6 +13,7 @@
 #include "tasks/canbus_task.h"
 #include "tasks/air_task.h"
 #include "tasks/imd_task.h"
+#include "tasks/current_task.h"
 
 app_data_t app = {0};
 
@@ -48,6 +49,7 @@ void app_create()
 	assert(app.canbus_task = canbus_task_start(&app));
 	assert(app.air_task = air_task_start(&app));
 	assert(app.imd_task = imd_task_start(&app));
+	assert(app.current_task = current_task_start(&app));
 }
 
 void set_bms(bool state)
