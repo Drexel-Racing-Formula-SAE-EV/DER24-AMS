@@ -23,6 +23,7 @@
 #define CURRENT_FREQ 10
 #define LTC_FREQ 10
 #define IMD_FREQ 10
+#define FAN_FREQ 5
 #define CAN_FREQ 2
 
 #define ECU_CANBUS_ID 0x420
@@ -30,7 +31,9 @@
 #define TO_LSB16(x) ((uint16_t)x & 0xff)
 #define TO_MSB16(x) ((((uint16_t)x & 0xff00) >> 8) & 0xff)
 
-
+// TODO: check temp thresholds
+#define TEMP_THRESH_H 50.0
+#define TEMP_THRESH_L 40.0
 #define OVERVOLT 4.2
 #define UNDERVOLT 2.5
 
@@ -64,6 +67,7 @@ typedef struct
 	bool air_state;
 	bool imd_ok;
 	imd_status_t imd_status;
+    bool fan_state;
     
 	state_t state;
 

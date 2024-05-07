@@ -30,6 +30,8 @@ void app_create()
 	app.imd_ok = true;
 	app.imd_status = IMD_NORMAL;
 
+	app.fan_state = false;
+
 	app.state = STATE_START;
 
 	app.max_temp = 0.0;

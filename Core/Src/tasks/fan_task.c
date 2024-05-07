@@ -17,24 +17,31 @@ TaskHandle_t fan_task_start(app_data_t *data){
 
 void fan_task_fn(void *argument)
 {
-	app_data_t *app_data = (app_data_t *) argument;
-	float duty = 0.0;
+	app_data_t *data = (app_data_t *) argument;
+	uint32_t entry;
 
-	/*
 	for (int i = 0; i < NFANS; i++) {
-		set_fan_percent(&app_data->board.fans[i], 0.0);
+		set_fan_percent(&data->board.fans[i], 100.0);
+		data->fan_state = true;
 	}
-	*/
+	osDelay(2000);
+	data->fan_state = false;
 
 	for(;;)
 	{
-		for (int i = 0; i < NFANS; i++) {
-			set_fan_percent(&app_data->board.fans[i], duty);
+		entry = osKernelGetTickCount();
+		if(data->max_temp > TEMP_THRESH_H)
+		{
+			for(int i = 0; i < NFANS; i++) set_fan_percent(&data->board.fans[i], 100.0);
+			data->fan_state = true;
 		}
-		duty += 10.0;
-		if(duty > 100.0) duty = 0.0;
+		else if(data->max_temp < TEMP_THRESH_L)
+		{
+			for(int i = 0; i < NFANS; i++) set_fan_percent(&data->board.fans[i], 0.0);
+			data->fan_state = false;
+		}
 
-		osDelay(5000);
+		osDelayUntil(entry + (1000 / FAN_FREQ));
 	}
 }
 
