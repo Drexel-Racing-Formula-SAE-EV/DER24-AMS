@@ -14,6 +14,7 @@
 #include "tasks/air_task.h"
 #include "tasks/imd_task.h"
 #include "tasks/current_task.h"
+#include "tasks/ltc_task.h"
 
 app_data_t app = {0};
 
@@ -38,11 +39,16 @@ void app_create()
 	app.current = 0.0;
 
 	board_init(&app.board);
-	accumulator_init(&app.accumulator);
+	accumulator_init(&app.acc,
+					 &app.board.stm32f407g.hspi1,
+					 &app.board.stm32f407g.hspi3,
+					 STRINGA_CS_GPIO_Port,
+					 STRINGB_CS_GPIO_Port,
+					 STRINGA_CS_Pin,
+					 STRINGB_CS_Pin
+					);
 
 	HAL_UART_Receive_IT(app.board.cli.huart, &app.board.cli.c, 1);
-
-	set_bms(1);
 
 	assert(app.cli_task = cli_task_start(&app));
 	assert(app.fan_task = fan_task_start(&app));
@@ -50,6 +56,9 @@ void app_create()
 	assert(app.air_task = air_task_start(&app));
 	assert(app.imd_task = imd_task_start(&app));
 	assert(app.current_task = current_task_start(&app));
+	assert(app.ltc_task = ltc_task_start(&app));
+
+	set_bms(1);
 }
 
 void set_bms(bool state)

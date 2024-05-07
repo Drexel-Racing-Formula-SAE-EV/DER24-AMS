@@ -14,6 +14,7 @@
 #include "ext_drivers/cli.h"
 #include "ext_drivers/canbus.h"
 #include "ext_drivers/current_sensor.h"
+#include "ext_drivers/accumulator.h"
 
 #define NFANS 10
 

@@ -21,6 +21,7 @@
 #define CLI_FREQ 20
 #define AIR_FREQ 10
 #define CURRENT_FREQ 10
+#define LTC_FREQ 10
 #define IMD_FREQ 10
 #define CAN_FREQ 2
 
@@ -29,17 +30,29 @@
 #define TO_LSB16(x) ((uint16_t)x & 0xff)
 #define TO_MSB16(x) ((((uint16_t)x & 0xff00) >> 8) & 0xff)
 
+
+#define OVERVOLT 4.2
+#define UNDERVOLT 2.5
+
 typedef enum
 {
 	STATE_NULL,
 	STATE_START,
 	STATE_CHARGE,
 	STATE_DISCARGE,
+	STATE_BALANCE,
 	STATE_ERROR
 } state_t;
 
 typedef struct
 {
+	float total_voltage;
+	float max_voltage;
+	float min_voltage;
+	float max_temp;
+	float avg_temp;
+	float current;
+
 	bool hard_fault;
 	bool soft_fault;
 
@@ -54,14 +67,8 @@ typedef struct
     
 	state_t state;
 
-	float max_temp;
-	float avg_temp;
-	float max_voltage;
-	float min_voltage;
-	float current;
-
 	board_t board;
-	accumulator_t accumulator;
+	accumulator_t acc;
 
 	TaskHandle_t fan_task;
 	TaskHandle_t cli_task;
@@ -69,6 +76,7 @@ typedef struct
 	TaskHandle_t air_task;
 	TaskHandle_t imd_task;
 	TaskHandle_t current_task;
+	TaskHandle_t ltc_task;
 } app_data_t;
 
 void app_create();
