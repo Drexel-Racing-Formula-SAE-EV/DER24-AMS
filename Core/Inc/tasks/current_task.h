@@ -13,4 +13,4 @@
 
 TaskHandle_t current_task_start(app_data_t *data);
 
-#endif /*CURRENT_TASK_H_ */
+#endif /* CURRENT_TASK_H_ */
