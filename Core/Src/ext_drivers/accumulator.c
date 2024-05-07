@@ -30,7 +30,7 @@ void accumulator_init(accumulator_t *dev,
 	dev->cfg.UV=dev->cfg.UV_THRESHOLD; //!< Under voltage Comparison Voltage
 	dev->cfg.OV=dev->cfg.OV_THRESHOLD; //!< Over voltage Comparison Voltage
 	//!< Discharge cell switch //Dcc 1,2,3,4,5,6,7,8,9,10,11,12
-	for(int i = 0; i < 4; i++) dev->cfg.DCCBITS_A[i] = 0;
+	for(int i = 0; i < 12; i++) dev->cfg.DCCBITS_A[i] = 0;
 	//!< Discharge cell switch //Dcc 0,13,14,15
 	for(int i = 0; i < 7; i++) dev->cfg.DCCBITS_B[i] = 0;
 	//!< Discharge time value //Dcto 0,1,2,3  // Programed for 4 min
@@ -92,7 +92,9 @@ int accumulator_read_volt(accumulator_t *dev)
 	uint32_t conv = 0;
 
 	wakeup_sleep(ltc);
+	// call MUTE
 	LTC6813_adcv(ltc, MD_7KHZ_3KHZ, DCP_DISABLED, CELL_CH_ALL);
+	// call UNMUTE
 	conv = LTC6813_pollAdc(ltc);
     wakeup_sleep(ltc);
     do{

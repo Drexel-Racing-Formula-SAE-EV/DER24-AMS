@@ -26,6 +26,7 @@ typedef enum
 	STATE_START,
 	STATE_CHARGE,
 	STATE_DISCARGE,
+	STATE_BALANCE,
 	STATE_ERROR
 } state_t;
 

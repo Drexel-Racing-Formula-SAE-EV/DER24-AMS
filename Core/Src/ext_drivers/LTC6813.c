@@ -401,34 +401,7 @@ void LTC6813_set_discharge(ltc6813_driver_t *dev,
 		                  )
 {
 	uint8_t total_ic = dev->num_ics;
-	cell_asic *ic = dev->ic_arr;
-	for (int i=0; i<total_ic; i++)
-	{
-		if (Cell==0)
-		{
-		  ic[i].configb.tx_data[1] = ic[i].configb.tx_data[1] |(0x04);
-		}
-		else if (Cell<9)
-		{
-		  ic[i].config.tx_data[4] = ic[i].config.tx_data[4] | (1<<(Cell-1));
-		}
-		else if (Cell < 13)
-		{
-		  ic[i].config.tx_data[5] = ic[i].config.tx_data[5] | (1<<(Cell-9));
-		}
-		else if (Cell<17)
-		{
-		  ic[i].configb.tx_data[0] = ic[i].configb.tx_data[0] | (1<<(Cell-9));
-		}
-		else if (Cell<19)
-		{
-		  ic[i].configb.tx_data[1] = ic[i].configb.tx_data[1] | (1<<(Cell-17));
-		}
-		else
-		{
-			break;
-		}
-	}
+	for(uint8_t seg = 0; seg < total_ic; seg++) LTC6813_set_discharge_per_segment(dev, Cell, seg);
 }
 
 /* Helper function to set discharge bit in CFG register */
@@ -438,26 +411,12 @@ void LTC6813_set_discharge_per_segment(ltc6813_driver_t *dev,
 									  )
 {
 	cell_asic *ic = dev->ic_arr;
-	if (Cell==0)
-	{
-	  ic[segment].configb.tx_data[1] = ic[segment].configb.tx_data[1] |(0x04);
-	}
-	else if (Cell<9)
-	{
-	  ic[segment].config.tx_data[4] = ic[segment].config.tx_data[4] | (1<<(Cell-1));
-	}
-	else if (Cell < 13)
-	{
-	  ic[segment].config.tx_data[5] = ic[segment].config.tx_data[5] | (1<<(Cell-9));
-	}
-	else if (Cell<17)
-	{
-	  ic[segment].configb.tx_data[0] = ic[segment].configb.tx_data[0] | (1<<(Cell-9));
-	}
-	else if (Cell<19)
-	{
-	  ic[segment].configb.tx_data[1] = ic[segment].configb.tx_data[1] | (1<<(Cell-17));
-	}
+	if     (Cell == 0) ic[segment].configb.tx_data[1] |= (0x04);
+	else if(Cell <  9) ic[segment].config.tx_data[4]  |= (1 << (Cell - 1));
+	else if(Cell < 13) ic[segment].config.tx_data[5]  |= (1 << (Cell - 9));
+	else if(Cell < 17) ic[segment].configb.tx_data[0] |= (1 << (Cell - 9));
+	else if(Cell < 19) ic[segment].configb.tx_data[1] |= (1 << (Cell - 17));
+	else return;
 }
 
 
