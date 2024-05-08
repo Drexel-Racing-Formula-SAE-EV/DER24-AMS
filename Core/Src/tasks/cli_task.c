@@ -170,9 +170,7 @@ int get_stat(int argc, char *argv[])
 int get_fans(int argc, char *argv[])
 {
 	int ret = 0;
-	snprintf(outline, CLI_LINESZ, "fan status: ");
-	if (data->fan_state == true) snprintf(outline, CLI_LINESZ, "ON");
-	else snprintf(outline, CLI_LINESZ, "OFF");
+	snprintf(outline, CLI_LINESZ, "fan status: %s", data->fan_state ? "ON" : "OFF");
 	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "max segment temp: %f", data->max_temp);
 	ret |= cli_printline(cli, outline);
