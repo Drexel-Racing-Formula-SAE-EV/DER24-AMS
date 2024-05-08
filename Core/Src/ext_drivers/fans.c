@@ -25,7 +25,3 @@ int set_fan_percent(fan_t *fan, float percent){
 	*(fan->CCR) = (volatile uint32_t)fan->max_timer_val * (volatile uint32_t)percent / 100;
 	return 0;
 }
-
-
-
-
