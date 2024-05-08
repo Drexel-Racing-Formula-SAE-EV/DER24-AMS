@@ -27,6 +27,7 @@ int cmd_not_found(int argc, char *argv[]);
 int help(int argc, char *argv[]);
 int id(int argc, char *argv[]);
 int get_faults(int argc, char *argv[]);
+int get_stat(int argc, char *argv[]);
 
 char outline[CLI_LINESZ];
 app_data_t *data;
@@ -35,7 +36,8 @@ command_t cmds[] =
 {
 	{"help", &help, "print help menu"},
 	{"id", &id, "identifies system"},
-	{"fault", &get_faults, "gets the faults of the system"}
+	{"fault", &get_faults, "gets the faults of the system"},
+	{"stat", &get_stat, "prints out min and max stats from accumulator"}
 };
 
 TaskHandle_t cli_task_start(app_data_t *data)
@@ -145,6 +147,20 @@ int get_faults(int argc, char *argv[])
 	snprintf(outline, CLI_LINESZ, "  fan:    %d", data->fan_fault);
 	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "  canbus: %d", data->canbus_fault);
+	ret |= cli_printline(cli, outline);
+	return ret;
+}
+
+int get_stat(int argc, char *argv[])
+{
+	int ret = 0;
+	snprintf(outline, CLI_LINESZ, "total voltage: %f", data->total_voltage);
+	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "max cell voltage: %f", data->max_voltage);
+	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "min cell voltage: %f", data->min_voltage);
+	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "max segment temp: %f", data->max_temp);
 	ret |= cli_printline(cli, outline);
 	return ret;
 }
