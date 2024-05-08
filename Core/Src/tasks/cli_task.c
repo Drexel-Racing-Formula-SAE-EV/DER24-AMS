@@ -25,8 +25,8 @@ int cli_handle_cmd(int argc, char *argv[]);
 int cmd_not_found(int argc, char *argv[]);
 
 int help(int argc, char *argv[]);
+int id(int argc, char *argv[]);
 int get_faults(int argc, char *argv[]);
-int get_version(int argc, char *argv[]);
 
 char outline[CLI_LINESZ];
 app_data_t *data;
@@ -34,8 +34,8 @@ cli_device_t *cli;
 command_t cmds[] =
 {
 	{"help", &help, "print help menu"},
-	{"fault", &get_faults, "gets the faults of the system"},
-	{"ver", &get_version, "gets the firmware version"}
+	{"id", &id, "identifies system"},
+	{"fault", &get_faults, "gets the faults of the system"}
 };
 
 TaskHandle_t cli_task_start(app_data_t *data)
@@ -55,9 +55,8 @@ void cli_task_fn(void *arg)
     int n;
     int ret = 0;
 	
-    snprintf(outline, CLI_LINESZ, "~~~~~~~~~~ DER AMS FW V%d.%d ~~~~~~~~~~", VER_MAJOR, VER_MINOR);
-	cli_printline(cli, outline);
-	cli_printline(cli, "Type 'help' for list of commands");
+    cli_printline(cli, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    cli_printline(cli, "Type 'help' for list of commands");
 
 	for(;;)
 	{
@@ -80,6 +79,7 @@ void cli_task_fn(void *arg)
 
 int cli_handle_cmd(int argc, char *argv[])
 {
+	cli_device_t *cli = &data->board.cli;
 	int i;
 	int ret = 0;
 	bool cmd_found = false;
@@ -125,6 +125,13 @@ int help(int argc, char *argv[])
 	return ret;
 }
 
+int id(int argc, char *argv[])
+{
+    snprintf(outline, CLI_LINESZ, "DER AMS FW V%d.%d.%d", VER_MAJOR, VER_MINOR, VER_BUG);
+	cli_printline(cli, outline);
+	return 0;
+}
+
 int get_faults(int argc, char *argv[])
 {
 	int ret = 0;
@@ -141,12 +148,3 @@ int get_faults(int argc, char *argv[])
 	ret |= cli_printline(cli, outline);
 	return ret;
 }
-
-int get_version(int argc, char *argv[])
-{
-	int ret = 0;
-	snprintf(outline, CLI_LINESZ, "v%d.%d", VER_MAJOR, VER_MINOR);
-	ret |= cli_printline(cli, outline);
-	return ret;
-}
-
