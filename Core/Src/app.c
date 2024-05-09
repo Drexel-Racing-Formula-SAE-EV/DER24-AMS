@@ -40,6 +40,8 @@ void app_create()
 	app.min_voltage = 0.0;
 	app.current = 0.0;
 
+	app.bms_state = false;
+
 	board_init(&app.board);
 	accumulator_init(&app.acc,
 					 &app.board.stm32f407g.hspi1,
@@ -53,8 +55,8 @@ void app_create()
 	HAL_UART_Receive_IT(app.board.cli.huart, &app.board.cli.c, 1);
 
 	assert(app.cli_task = cli_task_start(&app));
-	assert(app.fan_task = fan_task_start(&app));
 	assert(app.canbus_task = canbus_task_start(&app));
+	assert(app.fan_task = fan_task_start(&app));
 	assert(app.air_task = air_task_start(&app));
 	assert(app.imd_task = imd_task_start(&app));
 	assert(app.current_task = current_task_start(&app));
@@ -65,5 +67,6 @@ void app_create()
 
 void set_bms(bool state)
 {
+	app.bms_state = state;
 	HAL_GPIO_WritePin(BMS_SAFETY_OUT_GPIO_Port, BMS_SAFETY_OUT_Pin, state);
 }

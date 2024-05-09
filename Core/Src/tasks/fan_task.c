@@ -11,7 +11,7 @@ void fan_task_fn(void *argument);
 
 TaskHandle_t fan_task_start(app_data_t *data){
 	TaskHandle_t handle;
-	xTaskCreate(fan_task_fn, "fan task", 128, (void *)data, 7, &handle);
+	xTaskCreate(fan_task_fn, "fan task", 128, (void *)data, FAN_PRIO, &handle);
 	return handle;
 }
 

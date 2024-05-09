@@ -10,7 +10,7 @@ void air_task_fn(void *argument);
 
 TaskHandle_t air_task_start(app_data_t *data){
 	TaskHandle_t handle;
-	xTaskCreate(air_task_fn, "air task", 128, (void *)data, 7, &handle);
+	xTaskCreate(air_task_fn, "air task", 128, (void *)data, AIR_PRIO, &handle);
 	return handle;
 }
 

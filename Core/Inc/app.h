@@ -27,6 +27,14 @@
 #define FAN_FREQ 5
 #define CAN_FREQ 2
 
+#define CLI_PRIO  14
+#define CAN_PRIO  15
+#define AIR_PRIO  12
+#define LTC_PRIO  10
+#define CURR_PRIO 9
+#define FAN_PRIO  8
+#define IMD_PRIO  7
+
 #define ECU_CANBUS_ID 0x420
 
 #define TO_LSB16(x) ((uint16_t)x & 0xff)
@@ -69,6 +77,8 @@ typedef struct
 	bool imd_ok;
 	imd_status_t imd_status;
     bool fan_state;
+
+    bool bms_state;
     
 	state_t state;
 
