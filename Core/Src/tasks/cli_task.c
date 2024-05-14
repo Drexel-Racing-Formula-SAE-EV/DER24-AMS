@@ -27,6 +27,7 @@ int cmd_not_found(int argc, char *argv[]);
 int help(int argc, char *argv[]);
 int get_faults(int argc, char *argv[]);
 int get_version(int argc, char *argv[]);
+int get_current(int argc, char *argv[]);
 
 char outline[CLI_LINESZ];
 app_data_t *data;
@@ -36,6 +37,7 @@ command_t cmds[] =
 	{"help", &help, "print help menu"},
 	{"fault", &get_faults, "gets the faults of the system"},
 	{"ver", &get_version, "gets the firmware version"}
+	{"current", &get_current, "prints reading from current sensor"}
 };
 
 TaskHandle_t cli_task_start(app_data_t *data)
@@ -148,3 +150,11 @@ int get_version(int argc, char *argv[])
 	return ret;
 }
 
+
+int get_current(int argc, char *argv[])
+{
+	int ret = 0;
+	snprintf(outline, CLI_LINEZ, "Current Value: %.3f amps", data->current);
+	ret |= cli_printline(cli,outline);
+	return ret;
+}
