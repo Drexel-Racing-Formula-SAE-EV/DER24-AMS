@@ -65,7 +65,6 @@ extern TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN EV */
 #endif
 // TODO: cut these out if needed
-extern TIM_HandleTypeDef htim5;
 extern TIM_HandleTypeDef htim2;
 /* USER CODE END EV */
 
@@ -204,11 +203,14 @@ void USART2_IRQHandler(void)
 void TIM5_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM5_IRQn 0 */
-
+	extern app_data_t app;
+	TIM_HandleTypeDef *htim5 = app.board.imd.htim;
+#if 0
   /* USER CODE END TIM5_IRQn 0 */
   HAL_TIM_IRQHandler(&htim5);
   /* USER CODE BEGIN TIM5_IRQn 1 */
-
+#endif
+  HAL_TIM_IRQHandler(htim5);
   /* USER CODE END TIM5_IRQn 1 */
 }
 
@@ -259,5 +261,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 		ret = HAL_UART_Receive_IT(cli->huart, &cli->c, 1);
 		app.cli_fault = (ret != HAL_OK);
 	}
+}
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+	extern app_data_t app;
+	imd_t *imd = &app.board.imd;
+    if(htim->Instance == imd->htim->Instance && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) imd_read(imd);
 }
 /* USER CODE END 1 */

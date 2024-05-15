@@ -25,8 +25,10 @@ int cli_handle_cmd(int argc, char *argv[]);
 int cmd_not_found(int argc, char *argv[]);
 
 int help(int argc, char *argv[]);
+int id(int argc, char *argv[]);
 int get_faults(int argc, char *argv[]);
-int get_version(int argc, char *argv[]);
+int get_stat(int argc, char *argv[]);
+int get_fans(int argc, char *argv[]);
 int get_current(int argc, char *argv[]);
 
 char outline[CLI_LINESZ];
@@ -35,15 +37,17 @@ cli_device_t *cli;
 command_t cmds[] =
 {
 	{"help", &help, "print help menu"},
+	{"id", &id, "identifies system"},
 	{"fault", &get_faults, "gets the faults of the system"},
-	{"ver", &get_version, "gets the firmware version"}
+	{"stat", &get_stat, "prints out min and max stats from accumulator"},
+	{"fans", &get_fans, "prints out the status of the fans"}
 	{"current", &get_current, "prints reading from current sensor"}
 };
 
 TaskHandle_t cli_task_start(app_data_t *data)
 {
    TaskHandle_t handle;
-   xTaskCreate(cli_task_fn, "CLI task", 256, (void *)data, 14, &handle);
+   xTaskCreate(cli_task_fn, "CLI task", 256, (void *)data, CLI_PRIO, &handle);
    return handle;
 }
 
@@ -57,9 +61,8 @@ void cli_task_fn(void *arg)
     int n;
     int ret = 0;
 	
-    snprintf(outline, CLI_LINESZ, "~~~~~~~~~~ DER AMS FW V%d.%d ~~~~~~~~~~", VER_MAJOR, VER_MINOR);
-	cli_printline(cli, outline);
-	cli_printline(cli, "Type 'help' for list of commands");
+    cli_printline(cli, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    cli_printline(cli, "Type 'help' for list of commands");
 
 	for(;;)
 	{
@@ -82,6 +85,7 @@ void cli_task_fn(void *arg)
 
 int cli_handle_cmd(int argc, char *argv[])
 {
+	cli_device_t *cli = &data->board.cli;
 	int i;
 	int ret = 0;
 	bool cmd_found = false;
@@ -127,6 +131,13 @@ int help(int argc, char *argv[])
 	return ret;
 }
 
+int id(int argc, char *argv[])
+{
+    snprintf(outline, CLI_LINESZ, "DER AMS FW V%d.%d.%d", VER_MAJOR, VER_MINOR, VER_BUG);
+	cli_printline(cli, outline);
+	return 0;
+}
+
 int get_faults(int argc, char *argv[])
 {
 	int ret = 0;
@@ -135,21 +146,38 @@ int get_faults(int argc, char *argv[])
 	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "soft:   %d", data->soft_fault);
 	ret |= cli_printline(cli, outline);
-	snprintf(outline, CLI_LINESZ, "  cli:   %d", data->cli_fault);
+	snprintf(outline, CLI_LINESZ, "  cli:    %d", data->cli_fault);
 	ret |= cli_printline(cli, outline);
-	snprintf(outline, CLI_LINESZ, "  fan:   %d", data->fan_fault);
+	snprintf(outline, CLI_LINESZ, "  fan:    %d", data->fan_fault);
+	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "  canbus: %d", data->canbus_fault);
 	ret |= cli_printline(cli, outline);
 	return ret;
 }
 
-int get_version(int argc, char *argv[])
+int get_stat(int argc, char *argv[])
 {
 	int ret = 0;
-	snprintf(outline, CLI_LINESZ, "v%d.%d", VER_MAJOR, VER_MINOR);
+	snprintf(outline, CLI_LINESZ, "total voltage: %f", data->total_voltage);
+	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "max cell voltage: %f", data->max_voltage);
+	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "min cell voltage: %f", data->min_voltage);
+	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "max segment temp: %f", data->max_temp);
 	ret |= cli_printline(cli, outline);
 	return ret;
 }
 
+int get_fans(int argc, char *argv[])
+{
+	int ret = 0;
+	snprintf(outline, CLI_LINESZ, "fan status: %s", data->fan_state ? "ON" : "OFF");
+	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "max segment temp: %f", data->max_temp);
+	ret |= cli_printline(cli, outline);
+	return ret;
+}
 
 int get_current(int argc, char *argv[])
 {

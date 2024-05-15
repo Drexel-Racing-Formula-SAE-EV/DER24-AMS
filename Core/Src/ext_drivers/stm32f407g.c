@@ -25,7 +25,8 @@ extern UART_HandleTypeDef huart2;
 void stm32f407g_init(stm32f407g_t * dev)
 {
 	dev->hadc1 = hadc1;
-	dev->hadc1 = hadc2;
+	dev->hadc2 = hadc2;
+
 	dev->hcan1 = hcan1;
 
 	dev->hspi1 = hspi1;
@@ -33,7 +34,7 @@ void stm32f407g_init(stm32f407g_t * dev)
 
 	dev->htim1 = htim1;
 	dev->htim3 = htim3;
-	dev->htim4 = htim3;
+	dev->htim4 = htim4;
 	dev->htim5 = htim5;
 
 	dev->huart2 = huart2;

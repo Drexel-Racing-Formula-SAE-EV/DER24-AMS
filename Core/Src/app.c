@@ -10,7 +10,11 @@
 #include "cmsis_os.h"
 #include "tasks/fan_task.h"
 #include "tasks/cli_task.h"
+#include "tasks/canbus_task.h"
+#include "tasks/air_task.h"
+#include "tasks/imd_task.h"
 #include "tasks/current_task.h"
+#include "tasks/ltc_task.h"
 
 app_data_t app = {0};
 
@@ -20,12 +24,13 @@ void app_create()
 	app.soft_fault = false;
 	app.fan_fault = false;
 	app.cli_fault = false;
+	app.canbus_fault = false;
 
-	// TODO: revise app data struct
+	app.air_state = false;
+	app.imd_ok = true;
+	app.imd_status = IMD_NORMAL;
 
-	app.IMD_fault = false;
-	app.IMD_freq = 0.0;
-	app.IMD_duty = 0.0;
+	app.fan_state = false;
 
 	app.state = STATE_START;
 
@@ -35,19 +40,33 @@ void app_create()
 	app.min_voltage = 0.0;
 	app.current = 0.0;
 
+	app.bms_state = false;
+
 	board_init(&app.board);
-	accumulator_init(&app.accumulator);
+	accumulator_init(&app.acc,
+					 &app.board.stm32f407g.hspi1,
+					 &app.board.stm32f407g.hspi3,
+					 STRINGA_CS_GPIO_Port,
+					 STRINGB_CS_GPIO_Port,
+					 STRINGA_CS_Pin,
+					 STRINGB_CS_Pin
+					);
 
 	HAL_UART_Receive_IT(app.board.cli.huart, &app.board.cli.c, 1);
 
-	set_bms(1);
-
 	assert(app.cli_task = cli_task_start(&app));
+	assert(app.canbus_task = canbus_task_start(&app));
 	assert(app.fan_task = fan_task_start(&app));
+	assert(app.air_task = air_task_start(&app));
+	assert(app.imd_task = imd_task_start(&app));
 	assert(app.current_task = current_task_start(&app));
+	assert(app.ltc_task = ltc_task_start(&app));
+
+	set_bms(1);
 }
 
 void set_bms(bool state)
 {
+	app.bms_state = state;
 	HAL_GPIO_WritePin(BMS_SAFETY_OUT_GPIO_Port, BMS_SAFETY_OUT_Pin, state);
 }

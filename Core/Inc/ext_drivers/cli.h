@@ -17,7 +17,7 @@
 
 #include "stm32f4xx_hal.h"
 
-#define CLI_LINESZ 128
+#define CLI_LINESZ 256
 #define MAXTOKS (CLI_LINESZ / 2)
 
 typedef struct {
