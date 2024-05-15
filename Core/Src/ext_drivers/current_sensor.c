@@ -11,8 +11,8 @@
 #define VREF 3.3
 #define UC 	 5.0
 #define U0 	 2.5
-#define SL   2.5
-#define SH   40.0
+#define SL   40.0
+#define SH   2.5
 
 void current_sensor_init(current_sensor_t *dev, ADC_HandleTypeDef *hadc_low,ADC_HandleTypeDef *hadc_high, uint32_t channel_low,uint32_t channel_high )
 {
@@ -37,12 +37,7 @@ float current_sensor_convert(current_sensor_t *dev)
 	dev->current_low  = ((5 / UC) * dev->voltage_low - U0) * 1000.0 / SL;
 	dev->current_high = ((5 / UC) * dev->voltage_high - U0) * 1000.0 / SH;
 
-	if(dev->current_low > 50.0){
-		dev->current = dev->current_high;
-		return dev->current_high;
-	}
-	else{
-		dev->current = dev->current_low;
-		return dev->current_low;
-	}
+	if(dev->current_low > 50.0 || dev->current_low < -50.0) dev->current = dev->current_high;
+	else dev->current = dev->current_low;
+	return dev->current;
 }

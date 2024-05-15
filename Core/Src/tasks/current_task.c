@@ -34,6 +34,6 @@ void current_task_fn(void *argument)
 
 		app_data->current = current_sensor->current;
 
-		osDelayUntil(entry + (1000 / CURRENT_FREQ));
+		osDelayUntil(entry + (1000 / CURR_FREQ));
 	}
 }

@@ -40,7 +40,7 @@ command_t cmds[] =
 	{"id", &id, "identifies system"},
 	{"fault", &get_faults, "gets the faults of the system"},
 	{"stat", &get_stat, "prints out min and max stats from accumulator"},
-	{"fans", &get_fans, "prints out the status of the fans"}
+	{"fans", &get_fans, "prints out the status of the fans"},
 	{"current", &get_current, "prints reading from current sensor"}
 };
 
@@ -182,7 +182,7 @@ int get_fans(int argc, char *argv[])
 int get_current(int argc, char *argv[])
 {
 	int ret = 0;
-	snprintf(outline, CLI_LINEZ, "Current Value: %.3f amps", data->current);
+	snprintf(outline, CLI_LINESZ, "Current Value: %.3f amps", data->current);
 	ret |= cli_printline(cli,outline);
 	return ret;
 }
