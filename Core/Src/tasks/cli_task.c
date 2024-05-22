@@ -30,6 +30,7 @@ int get_faults(int argc, char *argv[]);
 int get_stat(int argc, char *argv[]);
 int get_fans(int argc, char *argv[]);
 int get_current(int argc, char *argv[]);
+int imd_status(int argc, char *argv[]);
 
 char outline[CLI_LINESZ];
 app_data_t *data;
@@ -41,7 +42,8 @@ command_t cmds[] =
 	{"fault", &get_faults, "gets the faults of the system"},
 	{"stat", &get_stat, "prints out min and max stats from accumulator"},
 	{"fans", &get_fans, "prints out the status of the fans"},
-	{"current", &get_current, "prints reading from current sensor"}
+	{"current", &get_current, "prints reading from current sensor"},
+	{"imd", &imd_status, "prints status of IMD for short detection"}
 };
 
 TaskHandle_t cli_task_start(app_data_t *data)
@@ -184,5 +186,15 @@ int get_current(int argc, char *argv[])
 	int ret = 0;
 	snprintf(outline, CLI_LINESZ, "Current Value: %.3f amps", data->current);
 	ret |= cli_printline(cli,outline);
+	return ret;
+}
+
+int imd_status(int argc, char *argv[])
+{
+	int ret = 0;
+	snprintf(outline, CLI_LINESZ, "IMD Status: %d", data->imd_status);
+	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "IMD OK: %d", data->imd_ok);
+	ret |= cli_printline(cli, outline);
 	return ret;
 }
