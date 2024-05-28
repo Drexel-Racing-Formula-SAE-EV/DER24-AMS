@@ -13,9 +13,10 @@
 
 #define NSEGS 1
 #define NCELLS 14
-#define NTEMPS 16
+#define NTEMPS 24
 #define MUX_ADDR7_00 0x4C
 #define MUX_ADDR7_01 0x4D
+#define MUX_ADDR7_02 0x4E
 #define VNTC 5.0
 
 typedef struct
