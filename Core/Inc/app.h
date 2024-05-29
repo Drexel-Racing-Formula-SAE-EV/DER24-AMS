@@ -24,7 +24,7 @@
 #define IMD_FREQ 5
 #define CURR_FREQ 5
 #define FAN_FREQ 5
-#define LTC_FREQ 1
+#define LTC_FREQ 2
 #define CAN_FREQ 2
 
 #define LTC_PRIO  9
@@ -62,7 +62,6 @@ typedef struct
 	float max_voltage;
 	float min_voltage;
 	float max_temp;
-	float avg_temp;
 	float current;
 
 	bool hard_fault;

@@ -35,7 +35,6 @@ void app_create()
 	app.state = STATE_START;
 
 	app.max_temp = 0.0;
-	app.avg_temp = 0.0;
 	app.max_voltage = 0.0;
 	app.min_voltage = 0.0;
 	app.current = 0.0;

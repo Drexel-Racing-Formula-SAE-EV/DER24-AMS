@@ -31,7 +31,7 @@ void ltc_task_fn(void *argument)
         data->total_voltage = acc->total_volt;
         data->max_voltage = acc->max_volt;
         data->min_voltage = acc->min_volt;
-        accumulator_read_temp(acc, channel);
+        //accumulator_read_temp(acc, channel);
         if(++channel >= NTEMPCHS) channel = 0;
         data->max_temp = acc->max_temp;
         osDelayUntil(entry + (1000 / LTC_FREQ));

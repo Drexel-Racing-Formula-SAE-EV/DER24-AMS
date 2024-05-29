@@ -42,6 +42,8 @@
     Library for LTC681x Multi-cell Battery Monitor
 */
 
+#include "cmsis_os.h"
+
 #include <stdint.h>
 #include "ext_drivers/LTC681x.h"
 
@@ -101,7 +103,7 @@ void write_68(ltc681x_driver_t *dev, // device driver
 	uint16_t cmd_pec;
 	uint8_t cmd_index;
 
-	cmd = (uint8_t *)malloc(CMD_LEN*sizeof(uint8_t));
+	cmd = (uint8_t *)pvPortMalloc(CMD_LEN*sizeof(uint8_t));
 	cmd[0] = tx_cmd[0];
 	cmd[1] = tx_cmd[1];
 	cmd_pec = pec15_calc(2, cmd);
@@ -125,7 +127,7 @@ void write_68(ltc681x_driver_t *dev, // device driver
 
 	spi_write_array(dev, CMD_LEN, cmd, 1);
 
-	free(cmd);
+	vPortFree(cmd);
 }
 
 /* Generic function to write 68xx commands and read data. Function calculated PEC for tx_cmd data */
