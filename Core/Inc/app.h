@@ -24,7 +24,7 @@
 #define IMD_FREQ 5
 #define CURR_FREQ 5
 #define FAN_FREQ 5
-#define LTC_FREQ 2
+#define LTC_FREQ 1
 #define CAN_FREQ 2
 
 #define LTC_PRIO  9

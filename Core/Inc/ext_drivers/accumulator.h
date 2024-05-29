@@ -14,6 +14,7 @@
 #define NSEGS 5
 #define NCELLS 14
 #define NTEMPS 24
+#define NTEMPCHS 8
 #define MUX_ADDR7_00 0x4C
 #define MUX_ADDR7_01 0x4D
 #define MUX_ADDR7_02 0x4E
@@ -39,7 +40,7 @@ void accumulator_init(accumulator_t *dev,
 					  uint16_t cs_pin_b
 					  );
 int accumulator_read_volt(accumulator_t *dev);
-int accumulator_read_temp(accumulator_t *dev);
+int accumulator_read_temp(accumulator_t *dev, uint8_t channel);
 int accumulator_convert_volt(accumulator_t *dev);
 int accumulator_convert_temp(accumulator_t *dev, int channel);
 int accumulator_set_temp_ch(accumulator_t *dev, uint8_t channel);
