@@ -82,6 +82,8 @@ void accumulator_init(accumulator_t *dev,
 	LTC6813_wrcfgb(ltc); // write config b
 	LTC6813_reset_crc_count(ltc);
 	LTC6813_init_reg_limits(ltc);
+	accumulator_set_temp_ch(dev, 0);
+	HAL_Delay(50);
 }
 
 int accumulator_read_volt(accumulator_t *dev)
@@ -269,8 +271,8 @@ int accumulator_set_mux_ch(accumulator_t *dev, uint8_t channel, uint8_t addr7)
 
 float NXFT15XV103FEAB050_convert(float ratio)
 {
-	// TODO: Verify
-	double a = 104.517;
-	double b = 0.221876;
-	return a * pow(b, ratio);
+	double a = 100.575;
+	double b = 0.31;
+	double c = 0.1;
+	return a * pow(b, ratio + c);
 }
