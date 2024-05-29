@@ -19,18 +19,18 @@
 #define VER_MINOR 1
 #define VER_BUG   0
 
-#define CLI_FREQ 20
+#define CLI_FREQ 10
 #define AIR_FREQ 10
-#define LTC_FREQ 10
 #define IMD_FREQ 5
 #define CURR_FREQ 5
 #define FAN_FREQ 5
+#define LTC_FREQ 2
 #define CAN_FREQ 2
 
-#define CLI_PRIO  9
-#define CAN_PRIO  8
-#define AIR_PRIO  7
-#define LTC_PRIO  6
+#define LTC_PRIO  9
+#define CLI_PRIO  8
+#define CAN_PRIO  7
+#define AIR_PRIO  6
 #define CURR_PRIO 5
 #define FAN_PRIO  4
 #define IMD_PRIO  3
