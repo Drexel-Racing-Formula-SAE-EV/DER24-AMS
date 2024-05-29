@@ -107,12 +107,12 @@ typedef struct
 /*! Cell variable structure */
 typedef struct
 {
+  float total_volt;
   float min_volt;
   float max_volt;
   float max_temp;
   float voltage[18];
-  float temp[18];
-  float total_volt;
+  float temp[24];
   ic_register config;
   ic_register configb;
   cv cells;

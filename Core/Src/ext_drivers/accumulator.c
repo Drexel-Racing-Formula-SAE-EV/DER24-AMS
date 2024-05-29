@@ -82,6 +82,8 @@ void accumulator_init(accumulator_t *dev,
 	LTC6813_wrcfgb(ltc); // write config b
 	LTC6813_reset_crc_count(ltc);
 	LTC6813_init_reg_limits(ltc);
+	accumulator_set_temp_ch(dev, 0);
+	HAL_Delay(50);
 }
 
 int accumulator_read_volt(accumulator_t *dev)
@@ -162,22 +164,28 @@ int accumulator_convert_volt(accumulator_t *dev)
 int accumulator_convert_temp(accumulator_t *dev, int channel)
 {
 	int seg;
-	float temp[2] = {0};
-	float volt[2] = {0};
-	float ratio[2] = {0};
+	float temp[3] = {0};
+	float volt[3] = {0};
+	float ratio[3] = {0};
 
 	for(seg = 0; seg < NSEGS; seg++)
 	{
+		// TODO replace with a loop once verified
 		volt[0] = (float)dev->arr[seg].aux.a_codes[0] * 0.0001;
 		volt[1] = (float)dev->arr[seg].aux.a_codes[1] * 0.0001;
+		volt[2] = (float)dev->arr[seg].aux.a_codes[2] * 0.0001;
 		ratio[0] = (5.0 / volt[0]) - 1;
 		ratio[1] = (5.0 / volt[1]) - 1;
+		ratio[2] = (5.0 / volt[2]) - 1;
 		temp[0] = NXFT15XV103FEAB050_convert(ratio[0]);
 		temp[1] = NXFT15XV103FEAB050_convert(ratio[1]);
+		temp[2] = NXFT15XV103FEAB050_convert(ratio[2]);
 		//temp[0] = volt[0];
 		//temp[1] = volt[1];
-		dev->arr[seg].temp[channel]     = temp[0];
-		dev->arr[seg].temp[channel + 8] = temp[1];
+		//temp[2] = volt[2];
+		dev->arr[seg].temp[channel]      = temp[0];
+		dev->arr[seg].temp[channel + 8]  = temp[1];
+		dev->arr[seg].temp[channel + 16] = temp[2];
 	}
 	return 0;
 }
@@ -209,6 +217,7 @@ int accumulator_set_temp_ch(accumulator_t *dev, uint8_t channel)
 	int error = 0;
 	error |= accumulator_set_mux_ch(dev, channel, MUX_ADDR7_00);
 	error |= accumulator_set_mux_ch(dev, channel, MUX_ADDR7_01);
+	error |= accumulator_set_mux_ch(dev, channel, MUX_ADDR7_02);
     return error;
 }
 
@@ -262,8 +271,8 @@ int accumulator_set_mux_ch(accumulator_t *dev, uint8_t channel, uint8_t addr7)
 
 float NXFT15XV103FEAB050_convert(float ratio)
 {
-	// TODO: Verify
-	double a = 104.517;
-	double b = 0.221876;
-	return a * pow(b, ratio);
+	double a = 100.575;
+	double b = 0.31;
+	double c = 0.1;
+	return a * pow(b, ratio + c);
 }
