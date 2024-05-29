@@ -96,7 +96,7 @@ void null_task_fn(void *argument);
   * @retval int
   */
 int main(void)
-{  float total_volt;
+{
 
   /* USER CODE BEGIN 1 */
   /* USER CODE END 1 */
