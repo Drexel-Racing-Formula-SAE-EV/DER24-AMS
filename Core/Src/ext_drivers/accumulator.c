@@ -106,22 +106,19 @@ int accumulator_read_volt(accumulator_t *dev)
     return ret;
 }
 
-int accumulator_read_temp(accumulator_t *dev)
+int accumulator_read_temp(accumulator_t *dev, uint8_t channel)
 {
 	ltc6813_driver_t *ltc = &dev->ltc;
 	int error = 0;
 	uint32_t conv = 0;
 
-	for(int channel = 0; channel < 8; channel++)
-	{
-		accumulator_set_temp_ch(dev, channel);
-		wakeup_sleep(ltc);
-		LTC6813_adax(ltc, MD_7KHZ_3KHZ, AUX_CH_ALL);
-		conv = LTC6813_pollAdc(ltc);
-		wakeup_sleep(ltc);
-		error = LTC6813_rdaux(ltc, REG_ALL); // Set to read back all aux registers
-		error |= accumulator_convert_temp(dev, channel);
-	}
+	accumulator_set_temp_ch(dev, channel);
+	wakeup_sleep(ltc);
+	LTC6813_adax(ltc, MD_7KHZ_3KHZ, AUX_CH_ALL);
+	conv = LTC6813_pollAdc(ltc);
+	wakeup_sleep(ltc);
+	error = LTC6813_rdaux(ltc, REG_ALL); // Set to read back all aux registers
+	error |= accumulator_convert_temp(dev, channel);
 	error |= accumulator_stat_temp(dev);
 	return error;
 }
