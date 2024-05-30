@@ -13,7 +13,7 @@ void ltc_task_fn(void *argument);
 TaskHandle_t ltc_task_start(app_data_t *data)
 {
 	TaskHandle_t handle;
-	xTaskCreate(ltc_task_fn, "ltc task", 128, (void *)data, 9, &handle);
+	xTaskCreate(ltc_task_fn, "ltc task", 128, (void *)data, LTC_PRIO, &handle);
 	return handle;
 }
 
