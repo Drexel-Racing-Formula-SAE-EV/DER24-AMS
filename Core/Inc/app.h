@@ -24,7 +24,7 @@
 #define IMD_FREQ 5
 #define CURR_FREQ 5
 #define FAN_FREQ 5
-#define LTC_FREQ 2
+#define LTC_FREQ 4
 #define CAN_FREQ 2
 
 #define LTC_PRIO  9
@@ -41,6 +41,7 @@
 #define TO_MSB16(x) ((((uint16_t)x & 0xff00) >> 8) & 0xff)
 
 // TODO: check temp thresholds
+#define TEMP_THRESH_C 60.0
 #define TEMP_THRESH_H 50.0
 #define TEMP_THRESH_L 40.0
 #define OVERVOLT 4.2

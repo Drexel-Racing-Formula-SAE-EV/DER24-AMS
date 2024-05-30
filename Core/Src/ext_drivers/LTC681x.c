@@ -65,9 +65,11 @@ void wakeup_sleep(ltc681x_driver_t *dev)
 	{
 		// TODO: check delays. original was 300uS and 10uS
 		LTC681x_set_cs(dev, 0);
-		for(int j = 0; j < 5000; j++);
+		//for(int j = 0; j < 5000; j++);
+		HAL_Delay(1);
 		LTC681x_set_cs(dev, 1);
-		for(int j = 0; j < 5000; j++);
+		//for(int j = 0; j < 5000; j++);
+		HAL_Delay(1);
 	}
 }
 

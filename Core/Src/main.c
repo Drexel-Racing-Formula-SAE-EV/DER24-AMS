@@ -60,7 +60,7 @@ UART_HandleTypeDef huart2;
 osThreadId_t null_taskHandle;
 const osThreadAttr_t null_task_attributes = {
   .name = "null_task",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* USER CODE BEGIN PV */
