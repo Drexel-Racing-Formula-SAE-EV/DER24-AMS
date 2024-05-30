@@ -269,4 +269,37 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 	imd_t *imd = &app.board.imd;
     if(htim->Instance == imd->htim->Instance && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) imd_read(imd);
 }
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+	//BaseType_t task = 0;
+	extern app_data_t app;
+	canbus_device_t *canbus = &app.board.canbus;
+	canbus_packet_t *rx_packet = &canbus->rx_packet;
+	CAN_RxHeaderTypeDef rx_header;
+	charger_t *ccs = &app.board.charger;
+	uint16_t voltage;
+	uint16_t current;
+	uint8_t flags;
+
+	for (uint8_t i = 0; i < 8; i++) rx_packet->data[i] = 0x00;
+	HAL_CAN_GetRxMessage(canbus->hcan, CAN_RX_FIFO0, &rx_header, rx_packet->data);
+	rx_packet->id = rx_header.StdId;
+
+	if(rx_packet->id == BCA_CANBUS_ID)
+	{
+		voltage = ((uint16_t)rx_packet->data[0] << 8) | (rx_packet->data[1] & 0xFF);
+		current = ((uint16_t)rx_packet->data[2] << 8) | (rx_packet->data[3] & 0xFF);
+		flags = rx_packet->data[4];
+
+		ccs->read_voltage = (float)voltage / 10.0;
+		ccs->read_current = (float)current / 10.0;
+		ccs->hardware_fail =      flags & (0x1 << 0);
+		ccs->overtemp_fail =      flags & (0x1 << 1);
+		ccs->input_volt_fail =    flags & (0x1 << 2);
+		ccs->voltage_sense_fail = flags & (0x1 << 3);
+		ccs->communication_fail = flags & (0x1 << 4);
+		ccs->flags = flags;
+		ccs->rx_count++;
+	}
+}
 /* USER CODE END 1 */

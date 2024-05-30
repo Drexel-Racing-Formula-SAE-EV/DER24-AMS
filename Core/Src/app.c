@@ -32,7 +32,7 @@ void app_create()
 
 	app.fan_state = false;
 
-	app.state = STATE_START;
+	app.state = STATE_DISCHARGE;
 
 	app.max_temp = 0.0;
 	app.max_voltage = 0.0;

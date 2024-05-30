@@ -28,59 +28,89 @@ TaskHandle_t canbus_task_start(app_data_t *data) {
 void canbus_task_fn(void *arg)
 {
     app_data_t *data = (app_data_t *)arg;
-
+    charger_t *ccs = &data->board.charger;
     canbus_device_t *canbus = &data->board.canbus;
     CAN_TxHeaderTypeDef *tx_header = &canbus->tx_header;
     HAL_StatusTypeDef ret;
     uint32_t entry;
     uint16_t packet;
     uint8_t can_data[8] = {0};
+    uint16_t voltage = CHARGE_MAX_VOLTAGE;
+    uint16_t current = CHARGE_MAX_CURRENT;
+    bool disable_charge = 0;
 
-    tx_header->StdId = ECU_CANBUS_ID;
+    if(data->state == STATE_DISCHARGE)
+    {
+        tx_header->StdId = ECU_CANBUS_ID;
+    }
+    else if(data->state == STATE_CHARGE)
+    {
+    	tx_header->StdId = CCS_CANBUS_ID;
+    	HAL_CAN_ActivateNotification(canbus->hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+    }
 
     for(;;)
     {
     	entry = osKernelGetTickCount();
-    	// TODO: turn into huge packet index like ECU
-    	ret = 0;
-    	packet = 0;
-    	can_data[0] = TO_MSB16(packet);
-    	can_data[1] = TO_LSB16(packet);
-    	can_data[2] = TO_MSB16(data->state);
-    	can_data[3] = TO_LSB16(data->state);
-    	can_data[4] = TO_MSB16(data->air_state);
-    	can_data[5] = TO_LSB16(data->air_state);
-    	can_data[6] = TO_MSB16((int16_t)(data->current * 10.0));
-    	can_data[7] = TO_LSB16((int16_t)(data->current * 10.0));
-    	ret = HAL_CAN_AddTxMessage(canbus->hcan, tx_header, can_data, &canbus->tx_mailbox);
-    	data->canbus_fault = ret;
+    	if(data->state == STATE_DISCHARGE)
+    	{
+			// TODO: turn into huge packet index like ECU
+			ret = 0;
+			packet = 0;
+			can_data[0] = TO_MSB16(packet);
+			can_data[1] = TO_LSB16(packet);
+			can_data[2] = TO_MSB16(data->state);
+			can_data[3] = TO_LSB16(data->state);
+			can_data[4] = TO_MSB16(data->air_state);
+			can_data[5] = TO_LSB16(data->air_state);
+			can_data[6] = TO_MSB16((int16_t)(data->current * 10.0));
+			can_data[7] = TO_LSB16((int16_t)(data->current * 10.0));
+			ret = HAL_CAN_AddTxMessage(canbus->hcan, tx_header, can_data, &canbus->tx_mailbox);
+			data->canbus_fault = ret;
 
-    	packet = 1;
-    	can_data[0] = TO_MSB16(packet);
-    	can_data[1] = TO_LSB16(packet);
-    	can_data[2] = TO_MSB16(data->imd_ok);
-    	can_data[3] = TO_LSB16(data->imd_ok);
-    	can_data[4] = TO_MSB16(data->imd_status);
-    	can_data[5] = TO_LSB16(data->imd_status);
-    	can_data[6] = TO_MSB16((int16_t)(data->board.imd.duty * 10.0));
-    	can_data[7] = TO_LSB16((int16_t)(data->board.imd.duty * 10.0));
-    	ret = HAL_CAN_AddTxMessage(canbus->hcan, tx_header, can_data, &canbus->tx_mailbox);
-    	data->canbus_fault = ret;
+			packet = 1;
+			can_data[0] = TO_MSB16(packet);
+			can_data[1] = TO_LSB16(packet);
+			can_data[2] = TO_MSB16(data->imd_ok);
+			can_data[3] = TO_LSB16(data->imd_ok);
+			can_data[4] = TO_MSB16(data->imd_status);
+			can_data[5] = TO_LSB16(data->imd_status);
+			can_data[6] = TO_MSB16((int16_t)(data->board.imd.duty * 10.0));
+			can_data[7] = TO_LSB16((int16_t)(data->board.imd.duty * 10.0));
+			ret = HAL_CAN_AddTxMessage(canbus->hcan, tx_header, can_data, &canbus->tx_mailbox);
+			data->canbus_fault = ret;
 
-    	packet = 2;
-		can_data[0] = TO_MSB16(packet);
-		can_data[1] = TO_LSB16(packet);
-		can_data[2] = TO_MSB16((int16_t)(data->max_temp * 10.0));
-		can_data[3] = TO_LSB16((int16_t)(data->max_temp * 10.0));
-		can_data[4] = TO_MSB16((int16_t)(data->min_voltage * 10.0));
-		can_data[5] = TO_LSB16((int16_t)(data->min_voltage * 10.0));
-		can_data[6] = TO_MSB16((int16_t)(data->max_voltage * 10.0));
-		can_data[7] = TO_LSB16((int16_t)(data->max_voltage * 10.0));
-		ret = HAL_CAN_AddTxMessage(canbus->hcan, tx_header, can_data, &canbus->tx_mailbox);
-		data->canbus_fault = ret;
+			packet = 2;
+			can_data[0] = TO_MSB16(packet);
+			can_data[1] = TO_LSB16(packet);
+			can_data[2] = TO_MSB16((int16_t)(data->max_temp * 10.0));
+			can_data[3] = TO_LSB16((int16_t)(data->max_temp * 10.0));
+			can_data[4] = TO_MSB16((int16_t)(data->min_voltage * 10.0));
+			can_data[5] = TO_LSB16((int16_t)(data->min_voltage * 10.0));
+			can_data[6] = TO_MSB16((int16_t)(data->max_voltage * 10.0));
+			can_data[7] = TO_LSB16((int16_t)(data->max_voltage * 10.0));
+			ret = HAL_CAN_AddTxMessage(canbus->hcan, tx_header, can_data, &canbus->tx_mailbox);
+			data->canbus_fault = ret;
 
-    	// TODO: write out all the other packets!
-        osDelayUntil(entry + (1000 / CAN_FREQ));
+	        osDelayUntil(entry + (1000 / CAN_FREQ));
+    	}
+    	else if(data->state == STATE_CHARGE)
+    	{
+    		if(ccs->flags)
+    		{
+    			disable_charge = 1;
+    			set_bms(0);
+    		}
+    		can_data[0] = TO_MSB16(voltage * 10);
+    		can_data[1] = TO_LSB16(voltage * 10);
+    		can_data[2] = TO_MSB16(current * 10);
+    		can_data[3] = TO_LSB16(current * 10);
+    		can_data[4] = disable_charge;
+    		ret = HAL_CAN_AddTxMessage(canbus->hcan, tx_header, can_data, &canbus->tx_mailbox);
+    		ccs->tx_count++;
+
+            osDelayUntil(entry + 1000);
+    	}
     }
 }
 
