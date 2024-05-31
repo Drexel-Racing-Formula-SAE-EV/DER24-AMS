@@ -26,7 +26,9 @@
 #define FAN_FREQ 5
 #define LTC_FREQ 4
 #define CAN_FREQ 2
+#define ERR_FREQ 10
 
+#define ERR_PRIO  10
 #define LTC_PRIO  9
 #define CLI_PRIO  8
 #define CAN_PRIO  7
@@ -46,13 +48,14 @@
 #define TEMP_THRESH_L 40.0
 #define OVERVOLT 4.2
 #define UNDERVOLT 2.5
+#define OVERCURR 10.0
 
 typedef enum
 {
 	STATE_NULL,
 	STATE_START,
 	STATE_CHARGE,
-	STATE_DISCARGE,
+	STATE_DISCHARGE,
 	STATE_BALANCE,
 	STATE_ERROR
 } state_t;
@@ -92,6 +95,7 @@ typedef struct
 	TaskHandle_t imd_task;
 	TaskHandle_t current_task;
 	TaskHandle_t ltc_task;
+	TaskHandle_t error_task;
 } app_data_t;
 
 void app_create();
