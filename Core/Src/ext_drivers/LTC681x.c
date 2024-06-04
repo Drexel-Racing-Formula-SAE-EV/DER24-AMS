@@ -2218,10 +2218,11 @@ int LTC681x_init(ltc681x_driver_t *dev,
 	dev->ic_arr = ic_arr;
 	HAL_GPIO_WritePin(cs_port_a, cs_pin_a, 1);
 	HAL_GPIO_WritePin(cs_port_b, cs_pin_b, 1);
-
-	// TODO: delete test
-	//uint8_t d = 104;
-	//spi_write_array(dev, 1, &d);
+	for(int i = 0; i < num_ics; i++)
+	{
+		for(int j = 0; j < 18; j++) dev->ic_arr[i].voltage[j] = 0.0;
+		for(int j = 0; j < 24; j++) dev->ic_arr[j].temp[j] = 0.0;
+	}
 	// TODO: determine if other config is needed
 	return ret;
 }
