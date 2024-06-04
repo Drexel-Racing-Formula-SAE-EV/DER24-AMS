@@ -15,6 +15,7 @@
 #include "tasks/imd_task.h"
 #include "tasks/current_task.h"
 #include "tasks/ltc_task.h"
+#include "tasks/error_task.h"
 
 app_data_t app = {0};
 
@@ -61,8 +62,7 @@ void app_create()
 	assert(app.current_task = current_task_start(&app));
 	assert(app.fan_task = fan_task_start(&app));
 	assert(app.imd_task = imd_task_start(&app));
-
-	set_bms(1);
+	assert(app.error_task = error_task_start(&app));
 }
 
 void set_bms(bool state)
