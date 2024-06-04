@@ -92,9 +92,9 @@ int accumulator_read_volt(accumulator_t *dev)
 	uint32_t conv = 0;
 
 	wakeup_sleep(ltc);
-	// call MUTE
+	LTC6813_mute(ltc);
 	LTC6813_adcv(ltc, MD_7KHZ_3KHZ, DCP_DISABLED, CELL_CH_ALL);
-	// call UNMUTE
+	LTC6813_unmute(ltc);
 	conv = LTC6813_pollAdc(ltc);
     wakeup_sleep(ltc);
     do{
