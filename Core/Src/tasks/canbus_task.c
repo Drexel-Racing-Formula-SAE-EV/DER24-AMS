@@ -35,8 +35,8 @@ void canbus_task_fn(void *arg)
     uint32_t entry;
     uint16_t packet;
     uint8_t can_data[8] = {0};
-    uint16_t voltage = CHARGE_MAX_VOLTAGE;
-    uint16_t current = CHARGE_MAX_CURRENT;
+    uint16_t voltage10x = (CHARGE_MAX_VOLTAGE * 10.0);
+    uint16_t current10x = (CHARGE_MAX_CURRENT * 10.0);
     bool disable_charge = 0;
 
     if(data->state == STATE_DISCHARGE)
@@ -45,7 +45,9 @@ void canbus_task_fn(void *arg)
     }
     else if(data->state == STATE_CHARGE)
     {
-    	tx_header->StdId = CCS_CANBUS_ID;
+    	tx_header->IDE = CAN_ID_EXT;
+    	tx_header->ExtId = 0x1806E5F4;
+    	//tx_header->StdId = CCS_CANBUS_ID;
     	HAL_CAN_ActivateNotification(canbus->hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
     }
 
@@ -101,15 +103,15 @@ void canbus_task_fn(void *arg)
     			disable_charge = 1;
     			set_bms(0);
     		}
-    		can_data[0] = TO_MSB16(voltage * 10);
-    		can_data[1] = TO_LSB16(voltage * 10);
-    		can_data[2] = TO_MSB16(current * 10);
-    		can_data[3] = TO_LSB16(current * 10);
+    		can_data[0] = TO_MSB16(voltage10x);
+    		can_data[1] = TO_LSB16(voltage10x);
+    		can_data[2] = TO_MSB16(current10x);
+    		can_data[3] = TO_LSB16(current10x);
     		can_data[4] = disable_charge;
     		ret = HAL_CAN_AddTxMessage(canbus->hcan, tx_header, can_data, &canbus->tx_mailbox);
     		ccs->tx_count++;
 
-            osDelayUntil(entry + 1000);
+            osDelayUntil(entry + 750);
     	}
     }
 }

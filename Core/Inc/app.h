@@ -39,8 +39,8 @@
 #define CCS_CANBUS_ID 0xE5
 #define BCA_CANBUS_ID 0x50
 
-#define CHARGE_MAX_VOLTAGE 294
-#define CHARGE_MAX_CURRENT 10
+#define CHARGE_MAX_VOLTAGE 115.0
+#define CHARGE_MAX_CURRENT 10.0
 
 #define TO_LSB16(x) ((uint16_t)x & 0xff)
 #define TO_MSB16(x) ((((uint16_t)x & 0xff00) >> 8) & 0xff)

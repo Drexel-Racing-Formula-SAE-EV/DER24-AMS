@@ -13,7 +13,7 @@
 #include <stdbool.h>
 #include "ext_drivers/LTC6813.h"
 
-#define NSEGS 5
+#define NSEGS 1
 #define NCELLS 14
 #define NTEMPS 24
 #define NTEMPCHS 8
