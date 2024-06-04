@@ -39,23 +39,14 @@ void canbus_task_fn(void *arg)
     uint16_t current10x = (CHARGE_MAX_CURRENT * 10.0);
     bool disable_charge = 0;
 
-    if(data->state == STATE_DISCHARGE)
-    {
-        tx_header->StdId = ECU_CANBUS_ID;
-    }
-    else if(data->state == STATE_CHARGE)
-    {
-    	tx_header->IDE = CAN_ID_EXT;
-    	tx_header->ExtId = 0x1806E5F4;
-    	//tx_header->StdId = CCS_CANBUS_ID;
-    	HAL_CAN_ActivateNotification(canbus->hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
-    }
-
     for(;;)
     {
     	entry = osKernelGetTickCount();
     	if(data->state == STATE_DISCHARGE)
     	{
+    		tx_header->StdId = ECU_CANBUS_ID;
+    		tx_header->IDE = CAN_ID_STD;
+    		HAL_CAN_DeactivateNotification(canbus->hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 			// TODO: turn into huge packet index like ECU
 			ret = 0;
 			packet = 0;
@@ -98,6 +89,9 @@ void canbus_task_fn(void *arg)
     	}
     	else if(data->state == STATE_CHARGE)
     	{
+        	tx_header->IDE = CAN_ID_EXT;
+        	tx_header->ExtId = 0x1806E5F4;
+        	HAL_CAN_ActivateNotification(canbus->hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
     		if(ccs->flags)
     		{
     			disable_charge = 1;

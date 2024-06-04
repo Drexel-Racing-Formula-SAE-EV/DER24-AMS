@@ -283,9 +283,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 
 	for (uint8_t i = 0; i < 8; i++) rx_packet->data[i] = 0x00;
 	HAL_CAN_GetRxMessage(canbus->hcan, CAN_RX_FIFO0, &rx_header, rx_packet->data);
-	rx_packet->id = rx_header.StdId;
 
-	if(rx_packet->id == BCA_CANBUS_ID)
+	if(rx_header.IDE == CAN_ID_EXT && rx_header.ExtId == BCA_CANBUS_ID)
 	{
 		voltage = ((uint16_t)rx_packet->data[0] << 8) | (rx_packet->data[1] & 0xFF);
 		current = ((uint16_t)rx_packet->data[2] << 8) | (rx_packet->data[3] & 0xFF);
