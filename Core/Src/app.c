@@ -11,7 +11,6 @@
 #include "tasks/fan_task.h"
 #include "tasks/cli_task.h"
 #include "tasks/canbus_task.h"
-#include "tasks/air_task.h"
 #include "tasks/imd_task.h"
 #include "tasks/current_task.h"
 #include "tasks/ltc_task.h"
@@ -56,7 +55,6 @@ void app_create()
 
 	assert(app.cli_task = cli_task_start(&app));
 	assert(app.canbus_task = canbus_task_start(&app));
-	assert(app.air_task = air_task_start(&app));
 	assert(app.ltc_task = ltc_task_start(&app));
 	assert(app.current_task = current_task_start(&app));
 	assert(app.fan_task = fan_task_start(&app));

@@ -38,6 +38,8 @@ void error_task_fn(void *argument)
 	{
 		entry = osKernelGetTickCount();
 
+		data->air_state = HAL_GPIO_ReadPin(AIR_CONTROL_MCU_GPIO_Port, AIR_CONTROL_MCU_Pin);
+
 		errors = 0;
 		errors += check_current(data);
 		errors += check_volt(data);

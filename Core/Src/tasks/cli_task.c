@@ -243,4 +243,5 @@ int set_state(int argc, char *argv[])
 		cli_printline(cli, "Usage: state [charge|discharge|balance]");
 		return 1;
 	}
+	return 0;
 }

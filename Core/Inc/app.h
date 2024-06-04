@@ -21,7 +21,6 @@
 
 #define ERR_FREQ 10
 #define CLI_FREQ 10
-#define AIR_FREQ 10
 #define IMD_FREQ 5
 #define CURR_FREQ 5
 #define FAN_FREQ 5
@@ -29,11 +28,10 @@
 #define CAN_FREQ 2
 
 
-#define ERR_PRIO  10
-#define LTC_PRIO  9
-#define CLI_PRIO  8
-#define CAN_PRIO  7
-#define AIR_PRIO  6
+#define ERR_PRIO  9
+#define LTC_PRIO  8
+#define CLI_PRIO  7
+#define CAN_PRIO  6
 #define CURR_PRIO 5
 #define FAN_PRIO  4
 #define IMD_PRIO  3
@@ -51,7 +49,7 @@
 // TODO: check temp thresholds
 #define TEMP_THRESH_C 60.0
 #define TEMP_THRESH_H 50.0
-#define TEMP_THRESH_L 40.0
+#define TEMP_THRESH_L 45.0
 #define OVERVOLT 4.2
 #define UNDERVOLT 2.5
 #define OVERCURR 10.0
@@ -97,7 +95,6 @@ typedef struct
 	TaskHandle_t fan_task;
 	TaskHandle_t cli_task;
 	TaskHandle_t canbus_task;
-	TaskHandle_t air_task;
 	TaskHandle_t imd_task;
 	TaskHandle_t current_task;
 	TaskHandle_t ltc_task;
