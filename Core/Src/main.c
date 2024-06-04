@@ -341,14 +341,14 @@ static void MX_CAN1_Init(void)
 {
 
   /* USER CODE BEGIN CAN1_Init 0 */
-
+	CAN_FilterTypeDef canfil;
   /* USER CODE END CAN1_Init 0 */
 
   /* USER CODE BEGIN CAN1_Init 1 */
 
   /* USER CODE END CAN1_Init 1 */
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 6;
+  hcan1.Init.Prescaler = 12;
   hcan1.Init.Mode = CAN_MODE_NORMAL;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan1.Init.TimeSeg1 = CAN_BS1_11TQ;
@@ -364,7 +364,18 @@ static void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
+  canfil.FilterBank = 0;
+  canfil.FilterMode = CAN_FILTERMODE_IDMASK;
+  canfil.FilterFIFOAssignment = CAN_RX_FIFO0;
+  canfil.FilterIdHigh = 0;
+  canfil.FilterIdLow = 0;
+  canfil.FilterMaskIdHigh = 0;
+  canfil.FilterMaskIdLow = 0;
+  canfil.FilterScale = CAN_FILTERSCALE_32BIT;
+  canfil.FilterActivation = ENABLE;
+  canfil.SlaveStartFilterBank = 14;
 
+  HAL_CAN_ConfigFilter(&hcan1, &canfil); // Initialize CAN Filter
   /* USER CODE END CAN1_Init 2 */
 
 }

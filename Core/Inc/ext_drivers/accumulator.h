@@ -8,6 +8,8 @@
 #ifndef INC_EXT_DRIVERS_ACCUMULATOR_H_
 #define INC_EXT_DRIVERS_ACCUMULATOR_H_
 
+#include <stm32f4xx_hal.h>
+
 #include <stdbool.h>
 #include "ext_drivers/LTC6813.h"
 

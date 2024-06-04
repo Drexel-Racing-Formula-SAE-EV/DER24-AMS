@@ -30,6 +30,7 @@ int get_faults(int argc, char *argv[]);
 int get_stat(int argc, char *argv[]);
 int get_fans(int argc, char *argv[]);
 int get_current(int argc, char *argv[]);
+int set_state(int argc, char *argv[]);
 
 char outline[CLI_LINESZ];
 app_data_t *data;
@@ -41,13 +42,23 @@ command_t cmds[] =
 	{"fault", &get_faults, "gets the faults of the system"},
 	{"stat", &get_stat, "prints out min and max stats from accumulator"},
 	{"fans", &get_fans, "prints out the status of the fans"},
-	{"current", &get_current, "prints reading from current sensor"}
+	{"current", &get_current, "prints reading from current sensor"},
+	{"state", &set_state, "changes the state of the AMS"}
+};
+char *state_str[] =
+{
+		"NULL",
+		"start",
+		"charge",
+		"discharge",
+		"balance",
+		"error"
 };
 
 TaskHandle_t cli_task_start(app_data_t *data)
 {
    TaskHandle_t handle;
-   xTaskCreate(cli_task_fn, "CLI task", 256, (void *)data, CLI_PRIO, &handle);
+   xTaskCreate(cli_task_fn, "CLI task", 512, (void *)data, CLI_PRIO, &handle);
    return handle;
 }
 
@@ -158,6 +169,19 @@ int get_faults(int argc, char *argv[])
 int get_stat(int argc, char *argv[])
 {
 	int ret = 0;
+	snprintf(outline, CLI_LINESZ, "AMS State: %s", state_str[data->state]);
+	ret |= cli_printline(cli, outline);
+	if(data->state == STATE_CHARGE)
+	{
+		ret |= cli_printline(cli, "Charging Stats:");
+		ret |= cli_printline(cli, "Target / Actual");
+		snprintf(outline, CLI_LINESZ, " %5.1f / %5.1f Volts", data->board.charger.target_voltage, data->board.charger.read_voltage);
+		ret |= cli_printline(cli, outline);
+		snprintf(outline, CLI_LINESZ, " %5.1f / %5.1f Amps", data->board.charger.target_current, data->board.charger.read_current);
+		ret |= cli_printline(cli, outline);
+		snprintf(outline, CLI_LINESZ, "Flag value: %d", data->board.charger.flags);
+		ret |= cli_printline(cli, outline);
+	}
 	snprintf(outline, CLI_LINESZ, "total voltage: %f", data->total_voltage);
 	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "max cell voltage: %f", data->max_voltage);
@@ -183,6 +207,40 @@ int get_current(int argc, char *argv[])
 {
 	int ret = 0;
 	snprintf(outline, CLI_LINESZ, "Current Value: %.3f amps", data->current);
-	ret |= cli_printline(cli,outline);
+	ret |= cli_printline(cli, outline);
 	return ret;
+}
+
+int set_state(int argc, char *argv[])
+{
+	int ret = 0;
+
+	if(argc == 1)
+	{
+		snprintf(outline, CLI_LINESZ, "AMS State: %s", state_str[data->state]);
+		ret |= cli_printline(cli, outline);
+	}
+	else if(argc == 2)
+	{
+		if(!strcmp(argv[1], "charge")) data->state = STATE_CHARGE;
+		else if(!strcmp(argv[1], "discharge")) data->state = STATE_DISCHARGE;
+		else if(!strcmp(argv[1], "balance")) data->state = STATE_BALANCE;
+		else
+		{
+			snprintf(outline, CLI_LINESZ, "ERROR: unrecognized state: %s", argv[1]);
+			cli_printline(cli, outline);
+			cli_printline(cli, "Usage: state [charge|discharge|balance]");
+			return 1;
+		}
+		snprintf(outline, CLI_LINESZ, "AMS State: %s", state_str[data->state]);
+		ret |= cli_printline(cli, outline);
+		if(data->state == STATE_CHARGE) HAL_CAN_ActivateNotification(data->board.canbus.hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+		else HAL_CAN_DeactivateNotification(data->board.canbus.hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+	}
+	else
+	{
+		cli_printline(cli, "ERROR: too many arguments. use no arguments to query state, or 1 argument to set state");
+		cli_printline(cli, "Usage: state [charge|discharge|balance]");
+		return 1;
+	}
 }

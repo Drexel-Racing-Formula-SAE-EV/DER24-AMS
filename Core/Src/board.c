@@ -39,5 +39,7 @@ void board_init(board_t *board)
 
 	imd_init(&board->imd, 84000000, &board->stm32f407g.htim5, TIM5, TIM_CHANNEL_2, TIM_CHANNEL_1, IMD_STATUS_MCU_GPIO_Port, IMD_STATUS_MCU_Pin);
 
+	charger_init(&board->charger, &board->canbus);
+
 	return;
 }
