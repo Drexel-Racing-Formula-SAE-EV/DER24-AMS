@@ -46,7 +46,8 @@ void canbus_task_fn(void *arg)
     	{
     		tx_header->StdId = ECU_CANBUS_ID;
     		tx_header->IDE = CAN_ID_STD;
-    		HAL_CAN_DeactivateNotification(canbus->hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+        	ccs->target_voltage = 0.0;
+        	ccs->target_current = 0.0;
 			// TODO: turn into huge packet index like ECU
 			ret = 0;
 			packet = 0;
@@ -91,6 +92,8 @@ void canbus_task_fn(void *arg)
     	{
         	tx_header->IDE = CAN_ID_EXT;
         	tx_header->ExtId = 0x1806E5F4;
+        	ccs->target_voltage = CHARGE_MAX_VOLTAGE;
+        	ccs->target_current = CHARGE_MAX_CURRENT;
         	HAL_CAN_ActivateNotification(canbus->hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
     		if(ccs->flags)
     		{
