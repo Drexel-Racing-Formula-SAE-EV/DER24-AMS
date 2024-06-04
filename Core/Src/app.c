@@ -53,7 +53,6 @@ void app_create()
 					);
 
 	HAL_UART_Receive_IT(app.board.cli.huart, &app.board.cli.c, 1);
-	HAL_CAN_ActivateNotification(app.board.canbus.hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 
 	assert(app.cli_task = cli_task_start(&app));
 	assert(app.canbus_task = canbus_task_start(&app));
