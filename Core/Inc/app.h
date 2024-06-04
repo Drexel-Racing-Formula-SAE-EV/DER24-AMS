@@ -26,6 +26,7 @@
 #define FAN_FREQ 5
 #define LTC_FREQ 4
 #define CAN_FREQ 2
+#define CELL_FREQ 2
 
 #define LTC_PRIO  9
 #define CLI_PRIO  8
@@ -34,6 +35,7 @@
 #define CURR_PRIO 5
 #define FAN_PRIO  4
 #define IMD_PRIO  3
+#define CELL_PRIO 2
 
 #define ECU_CANBUS_ID 0x420
 
