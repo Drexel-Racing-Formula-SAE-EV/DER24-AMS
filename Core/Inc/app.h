@@ -19,6 +19,7 @@
 #define VER_MINOR 1
 #define VER_BUG   0
 
+#define ERR_FREQ 10
 #define CLI_FREQ 10
 #define AIR_FREQ 10
 #define IMD_FREQ 5
@@ -26,7 +27,7 @@
 #define FAN_FREQ 5
 #define LTC_FREQ 4
 #define CAN_FREQ 2
-#define ERR_FREQ 10
+
 
 #define ERR_PRIO  10
 #define LTC_PRIO  9

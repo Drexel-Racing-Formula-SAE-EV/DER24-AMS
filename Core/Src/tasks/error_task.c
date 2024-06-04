@@ -1,7 +1,7 @@
 /*
  * error_task.c
  *
- *  Created on: May 30, 2024
+ *  Created on: June 04, 2024
  *      Author: Cassius Garcia
  */
 
@@ -27,64 +27,55 @@ void error_task_fn(void *argument)
 {
 	app_data_t *data = (app_data_t *) argument;
 	uint32_t entry;
+	int errors;
+
+	while(data->total_voltage == 0
+		  || data->max_voltage > 6.5
+		  || data->max_temp > 110.0
+		 ) osDelay(50);
 
 	for(;;)
 	{
 		entry = osKernelGetTickCount();
 
-		int errors;
-		errors = errors + check_current(data);
-		errors = errors + check_volt(data);
-		errors = errors + check_temp(data);
+		errors = 0;
+		errors += check_current(data);
+		errors += check_volt(data);
+		errors += check_temp(data);
 
-		if ( errors > 0 ) {
-			data->hard_fault = true;
-		}
+		if(errors > 0) data->hard_fault = true;
+		data->soft_fault = check_soft_fault(data);
 
-		if ( check_soft_fault(data) ) {
-			data->soft_fault = true;
-		}
-
-		if ( data->hard_fault ) {
-			set_bms(0);
-		}
+		set_bms(!data->hard_fault);
 
 		osDelayUntil(entry + (1000 / ERR_FREQ));
 	}
 }
 
-int check_current(app_data_t *data){
-	if ( data->state == STATE_DISCHARGE ){
-		if ( data->current >= OVERCURR ) return 1;
-	}
-	else if( data->state == STATE_CHARGE) {
-		if ( data->current <= ( -1.0 * OVERCURR ) ) return 1;
-	}
-
+int check_current(app_data_t *data)
+{
+	if(data->state == STATE_DISCHARGE) return data->current >= OVERCURR;
+	else if( data->state == STATE_CHARGE) return data->current <= (-1.0 * OVERCURR);
 	return 0;
 }
 
-int check_volt(app_data_t *data){
-	if ( data->max_voltage >= OVERVOLT || data->min_voltage <= UNDERVOLT){
-		return 1;
-	}
-	return 0;
+int check_volt(app_data_t *data)
+{
+	return data->max_voltage >= OVERVOLT || data->min_voltage <= UNDERVOLT;
 }
 
-int check_temp(app_data_t *data){
-	if ( data->max_temp >= TEMP_THRESH_C ){
-		return 1;
-	}
-	return 0;
+int check_temp(app_data_t *data)
+{
+	return data->max_temp >= TEMP_THRESH_C;
 }
 
-int check_soft_fault(app_data_t *data){
-	if ( data->canbus_fault
-				|| data->current_fault
-				|| data->fan_fault
-				|| data->cli_fault ){
-		return 1;
-	}
+int check_soft_fault(app_data_t *data)
+{
+	if(data->canbus_fault
+	   || data->current_fault
+	   || data->fan_fault
+	   || data->cli_fault
+	  ) return 1;
 	return 0;
 }
 
