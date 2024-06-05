@@ -1651,10 +1651,10 @@ void LTC681x_clear_discharge(ltc681x_driver_t *dev)
 {
 	for (int i=0; i<dev->num_ics; i++)
 	{
-	   dev->ic_arr[i].config.tx_data[4] = 0;
-	   dev->ic_arr[i].config.tx_data[5] = dev->ic_arr[i].config.tx_data[5]&(0xF0);
-	   dev->ic_arr[i].configb.tx_data[0]= dev->ic_arr[i].configb.tx_data[0]&(0x0F);
-	   dev->ic_arr[i].configb.tx_data[1]= dev->ic_arr[i].configb.tx_data[1]&(0xF0);
+	   dev->ic_arr[i].config.tx_data[4]  = 0;
+	   dev->ic_arr[i].config.tx_data[5]  = dev->ic_arr[i].config.tx_data[5] & (0xF0);
+	   dev->ic_arr[i].configb.tx_data[0] = dev->ic_arr[i].configb.tx_data[0] & (0x0F);
+	   dev->ic_arr[i].configb.tx_data[1] = dev->ic_arr[i].configb.tx_data[1] & (0xF0);
 	}
 }
 
