@@ -48,6 +48,8 @@ void canbus_task_fn(void *arg)
     		tx_header->IDE = CAN_ID_STD;
         	ccs->target_voltage = 0.0;
         	ccs->target_current = 0.0;
+        	ccs->read_voltage = 0.0;
+        	ccs->read_current = 0.0;
 			// TODO: turn into huge packet index like ECU
 			ret = 0;
 			packet = 0;
@@ -91,11 +93,10 @@ void canbus_task_fn(void *arg)
     	else if(data->state == STATE_CHARGE)
     	{
         	tx_header->IDE = CAN_ID_EXT;
-        	tx_header->ExtId = 0x1806E5F4;
+        	tx_header->ExtId = CCS_CANBUS_ID;
         	ccs->target_voltage = CHARGE_MAX_VOLTAGE;
         	ccs->target_current = CHARGE_MAX_CURRENT;
-        	HAL_CAN_ActivateNotification(canbus->hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
-    		if(ccs->flags)
+    		if(ccs->hardware_fail || ccs->overtemp_fail)
     		{
     			disable_charge = 1;
     			set_bms(0);

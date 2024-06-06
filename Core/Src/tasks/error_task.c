@@ -27,28 +27,33 @@ void error_task_fn(void *argument)
 {
 	app_data_t *data = (app_data_t *) argument;
 	uint32_t entry;
+	bool prev_air = false;
 	int errors;
-
-	while(data->total_voltage == 0
-		  || data->max_voltage > 6.5
-		  || data->max_temp > 110.0
-		 ) osDelay(50);
 
 	for(;;)
 	{
 		entry = osKernelGetTickCount();
 
+		prev_air = data->air_state;
 		data->air_state = HAL_GPIO_ReadPin(AIR_CONTROL_MCU_GPIO_Port, AIR_CONTROL_MCU_Pin);
+		if(prev_air && !data->air_state)
+		{
+			set_bms(0);
+			osDelay(100);
+		}
 
-		errors = 0;
-		errors += check_current(data);
-		errors += check_volt(data);
-		errors += check_temp(data);
+		if(data->total_voltage != 0 && data->max_voltage < 6.5 && data->max_temp < 110.0)
+		{
+			errors = 0;
+			errors += check_current(data);
+			errors += check_volt(data);
+			errors += check_temp(data);
 
-		if(errors > 0) data->hard_fault = true;
-		data->soft_fault = check_soft_fault(data);
+			if(errors > 0) data->hard_fault = true;
+			data->soft_fault = check_soft_fault(data);
 
-		set_bms(!data->hard_fault);
+			set_bms(!data->hard_fault);
+		}
 
 		osDelayUntil(entry + (1000 / ERR_FREQ));
 	}

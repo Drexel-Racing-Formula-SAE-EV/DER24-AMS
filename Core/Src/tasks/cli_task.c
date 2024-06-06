@@ -171,6 +171,10 @@ int get_stat(int argc, char *argv[])
 	int ret = 0;
 	snprintf(outline, CLI_LINESZ, "AMS State: %s", state_str[data->state]);
 	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "AIR Status: %s", data->air_state ? "Closed" : "Open");
+	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "BMS OK: %d", data->bms_state);
+	ret |= cli_printline(cli, outline);
 	if(data->state == STATE_CHARGE)
 	{
 		ret |= cli_printline(cli, "Charging Stats:");
