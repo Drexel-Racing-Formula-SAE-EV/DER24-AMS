@@ -15,6 +15,7 @@
 #include "tasks/imd_task.h"
 #include "tasks/current_task.h"
 #include "tasks/ltc_task.h"
+#include "tasks/cell_task.h"
 
 app_data_t app = {0};
 
@@ -25,6 +26,7 @@ void app_create()
 	app.fan_fault = false;
 	app.cli_fault = false;
 	app.canbus_fault = false;
+	app.cell_fault = false;
 
 	app.air_state = false;
 	app.imd_ok = true;
@@ -60,6 +62,7 @@ void app_create()
 	assert(app.current_task = current_task_start(&app));
 	assert(app.fan_task = fan_task_start(&app));
 	assert(app.imd_task = imd_task_start(&app));
+	assert(app.cell_task = cell_task_start(&app));
 
 	set_bms(1);
 }

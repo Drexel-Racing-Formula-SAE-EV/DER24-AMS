@@ -74,6 +74,7 @@ typedef struct
 	bool cli_fault;
 	bool canbus_fault;
 	bool current_fault;
+	bool cell_fault;
 
 	bool air_state;
 	bool imd_ok;
@@ -94,6 +95,7 @@ typedef struct
 	TaskHandle_t imd_task;
 	TaskHandle_t current_task;
 	TaskHandle_t ltc_task;
+	TaskHandle_t cell_task;
 } app_data_t;
 
 void app_create();
