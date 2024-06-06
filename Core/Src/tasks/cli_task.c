@@ -30,6 +30,8 @@ int get_faults(int argc, char *argv[]);
 int get_stat(int argc, char *argv[]);
 int get_fans(int argc, char *argv[]);
 int get_current(int argc, char *argv[]);
+int set_balance_on(int argc, char *argv[]);
+int set_balance_off(int argc, char *argv[]);
 
 char outline[CLI_LINESZ];
 app_data_t *data;
@@ -41,7 +43,9 @@ command_t cmds[] =
 	{"fault", &get_faults, "gets the faults of the system"},
 	{"stat", &get_stat, "prints out min and max stats from accumulator"},
 	{"fans", &get_fans, "prints out the status of the fans"},
-	{"current", &get_current, "prints reading from current sensor"}
+	{"current", &get_current, "prints reading from current sensor"},
+	{"balance_cells", &set_balance_on, "starts balancing the cells"},
+	{"stop_balancing", &set_balance_off, "stops balancing the cells"}
 };
 
 TaskHandle_t cli_task_start(app_data_t *data)
@@ -185,4 +189,14 @@ int get_current(int argc, char *argv[])
 	snprintf(outline, CLI_LINESZ, "Current Value: %.3f amps", data->current);
 	ret |= cli_printline(cli,outline);
 	return ret;
+}
+
+int set_balance_on(int argc, char *argv[]){
+	data->state = STATE_BALANCE;
+	return 0;
+}
+
+int set_balance_off(int argc, char *argv[]){
+	data->state = STATE_CHARGE;
+	return 0;
 }
