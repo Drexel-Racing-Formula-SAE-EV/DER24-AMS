@@ -11,11 +11,10 @@
 #include "tasks/fan_task.h"
 #include "tasks/cli_task.h"
 #include "tasks/canbus_task.h"
-#include "tasks/air_task.h"
 #include "tasks/imd_task.h"
 #include "tasks/current_task.h"
 #include "tasks/ltc_task.h"
-#include "tasks/cell_task.h"
+#include "tasks/error_task.h"
 
 app_data_t app = {0};
 
@@ -34,7 +33,7 @@ void app_create()
 
 	app.fan_state = false;
 
-	app.state = STATE_START;
+	app.state = STATE_DISCHARGE;
 
 	app.max_temp = 0.0;
 	app.max_voltage = 0.0;
@@ -57,14 +56,11 @@ void app_create()
 
 	assert(app.cli_task = cli_task_start(&app));
 	assert(app.canbus_task = canbus_task_start(&app));
-	assert(app.air_task = air_task_start(&app));
 	assert(app.ltc_task = ltc_task_start(&app));
 	assert(app.current_task = current_task_start(&app));
 	assert(app.fan_task = fan_task_start(&app));
 	assert(app.imd_task = imd_task_start(&app));
-	assert(app.cell_task = cell_task_start(&app));
-
-	set_bms(1);
+	assert(app.error_task = error_task_start(&app));
 }
 
 void set_bms(bool state)

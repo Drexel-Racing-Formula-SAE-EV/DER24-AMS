@@ -5,7 +5,6 @@
  *      Author: Cassius Garcia
  */
 #include "tasks/fan_task.h"
-//#include "main.h"
 
 void fan_task_fn(void *argument);
 

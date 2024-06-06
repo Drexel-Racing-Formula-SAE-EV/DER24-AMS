@@ -10,7 +10,7 @@
 
 #define VREF 3.3
 #define UC 	 5.0
-#define U0 	 2.5
+#define U0 	 1.65
 #define SL   40.0
 #define SH   2.5
 
