@@ -22,13 +22,12 @@
 typedef struct
 {
 	stm32f407g_t stm32f407g;
-	// todo: change actual fan struct org. this is a demo
+	charger_t charger;
+	current_sensor_t current_sensor;
 	fan_t fans[NFANS];
 	imd_t imd;
 	cli_device_t cli;
 	canbus_device_t canbus;
-	current_sensor_t current_sensor;
-	charger_t charger;
 } board_t;
 
 void board_init(board_t *board);

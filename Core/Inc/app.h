@@ -17,7 +17,7 @@
 
 #define VER_MAJOR 1
 #define VER_MINOR 0
-#define VER_BUG   0
+#define VER_BUG   1
 
 #define ERR_FREQ 10
 #define CLI_FREQ 10
@@ -26,12 +26,10 @@
 #define FAN_FREQ 5
 #define LTC_FREQ 4
 #define CAN_FREQ 2
-#define CELL_FREQ 2
 
-
-#define ERR_PRIO  8
-#define LTC_PRIO  7
-#define CLI_PRIO  9
+#define ERR_PRIO  9
+#define LTC_PRIO  8
+#define CLI_PRIO  7
 #define CAN_PRIO  6
 #define CURR_PRIO 5
 #define FAN_PRIO  4
@@ -82,7 +80,6 @@ typedef struct
 	bool cli_fault;
 	bool canbus_fault;
 	bool current_fault;
-	bool cell_fault;
 
 	bool air_state;
 	bool imd_ok;

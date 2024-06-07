@@ -244,7 +244,11 @@ int set_state(int argc, char *argv[])
 		snprintf(outline, CLI_LINESZ, "AMS State: %s", state_str[data->state]);
 		ret |= cli_printline(cli, outline);
 
-		if(data->state == STATE_CHARGE) HAL_CAN_ActivateNotification(data->board.canbus.hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+		if(data->state == STATE_CHARGE)
+		{
+			HAL_CAN_ActivateNotification(data->board.canbus.hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+			if(!data->air_state) ret |= cli_printline(cli, "AIRs are open. Try pressing SSA");
+		}
 		else HAL_CAN_DeactivateNotification(data->board.canbus.hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 
 		if(data->state != STATE_BALANCE) data->acc.stop_balance = true;

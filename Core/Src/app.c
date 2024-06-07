@@ -25,7 +25,6 @@ void app_create()
 	app.fan_fault = false;
 	app.cli_fault = false;
 	app.canbus_fault = false;
-	app.cell_fault = false;
 
 	app.air_state = false;
 	app.imd_ok = true;
