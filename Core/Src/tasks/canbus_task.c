@@ -111,6 +111,7 @@ void canbus_task_fn(void *arg)
 
             osDelayUntil(entry + 750);
     	}
+    	else osDelayUntil(entry + (1000 / CAN_FREQ));
     }
 }
 

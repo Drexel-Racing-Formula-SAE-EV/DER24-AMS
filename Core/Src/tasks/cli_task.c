@@ -186,6 +186,11 @@ int get_stat(int argc, char *argv[])
 		snprintf(outline, CLI_LINESZ, "Flag value: %d", data->board.charger.flags);
 		ret |= cli_printline(cli, outline);
 	}
+	else if(data->state == STATE_BALANCE)
+	{
+		snprintf(outline, CLI_LINESZ, "Balancing %d cell(s), threshold = %d mV", data->acc.balance_cnt, (int)(BALANCE_THRESH * 1000.0));
+		ret |= cli_printline(cli, outline);
+	}
 	snprintf(outline, CLI_LINESZ, "total voltage: %f", data->total_voltage);
 	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "max cell voltage: %f", data->max_voltage);
@@ -238,8 +243,11 @@ int set_state(int argc, char *argv[])
 		}
 		snprintf(outline, CLI_LINESZ, "AMS State: %s", state_str[data->state]);
 		ret |= cli_printline(cli, outline);
+
 		if(data->state == STATE_CHARGE) HAL_CAN_ActivateNotification(data->board.canbus.hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 		else HAL_CAN_DeactivateNotification(data->board.canbus.hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+
+		if(data->state != STATE_BALANCE) data->acc.stop_balance = true;
 	}
 	else
 	{

@@ -15,8 +15,8 @@
 #include "board.h"
 #include "ext_drivers/accumulator.h"
 
-#define VER_MAJOR 0
-#define VER_MINOR 1
+#define VER_MAJOR 1
+#define VER_MINOR 0
 #define VER_BUG   0
 
 #define ERR_FREQ 10
@@ -29,9 +29,9 @@
 #define CELL_FREQ 2
 
 
-#define ERR_PRIO  9
-#define LTC_PRIO  8
-#define CLI_PRIO  7
+#define ERR_PRIO  8
+#define LTC_PRIO  7
+#define CLI_PRIO  9
 #define CAN_PRIO  6
 #define CURR_PRIO 5
 #define FAN_PRIO  4
@@ -44,6 +44,7 @@
 
 #define CHARGE_MAX_VOLTAGE 294.0
 #define CHARGE_MAX_CURRENT 10.0
+#define BALANCE_THRESH 0.025
 
 #define TO_LSB16(x) ((uint16_t)x & 0xff)
 #define TO_MSB16(x) ((((uint16_t)x & 0xff00) >> 8) & 0xff)

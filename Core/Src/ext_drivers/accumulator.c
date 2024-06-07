@@ -18,6 +18,11 @@ void accumulator_init(accumulator_t *dev,
 					 )
 {
 	dev->total_volt = 0;
+	dev->max_volt = 0.0;
+	dev->min_volt = 0.0;
+	dev->max_temp = 0.0;
+	dev->balance_cnt = 0;
+	dev->stop_balance = false;
 
 	dev->cfg.OV_THRESHOLD = 0;
 

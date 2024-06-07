@@ -9,6 +9,7 @@
 #include "ext_drivers/LTC6813.h"
 
 void ltc_task_fn(void *argument);
+void check_balance(app_data_t *data);
 
 TaskHandle_t ltc_task_start(app_data_t *data)
 {
@@ -27,6 +28,7 @@ void ltc_task_fn(void *argument)
 	for(;;)
 	{
         entry = osKernelGetTickCount();
+
         accumulator_read_volt(acc);
         data->total_voltage = acc->total_volt;
         data->max_voltage = acc->max_volt;
@@ -34,9 +36,52 @@ void ltc_task_fn(void *argument)
         accumulator_read_temp(acc, channel);
         if(++channel >= NTEMPCHS) channel = 0;
         data->max_temp = acc->max_temp;
+        check_balance(data);
+
         osDelayUntil(entry + (1000 / LTC_FREQ));
 	}
 }
 
+void check_balance(app_data_t *data)
+{
+	accumulator_t *acc = &data->acc;
+	ltc6813_driver_t *ltc = &acc->ltc;
+	float min = data->min_voltage;
+	acc->balance_cnt = 0;
 
+	LTC6813_clear_discharge(ltc);
+	if(data->state == STATE_BALANCE)
+	{
+		for(int seg = 0; seg < NSEGS; seg++)
+		{
+			ltc->ic_arr[seg].balance_cnt = 0;
+			for(int cell = 0; cell < NCELLS; cell++)
+			{
+				if(ltc->ic_arr[seg].voltage[cell] - min > BALANCE_THRESH)
+				{
+					LTC6813_set_discharge_per_segment(ltc, cell, seg);
+					acc->balance_cnt++;
+					ltc->ic_arr[seg].balance_cnt++;
+				}
+			}
+		}
+		if(acc->balance_cnt == 0)
+		{
+			data->state = STATE_DISCHARGE;
+			cli_printline(&data->board.cli, "Balancing Complete. Switching to Discharge Mode");
+		}
+		wakeup_sleep(ltc);
+		LTC6813_wrcfg(ltc);
+		LTC6813_wrcfgb(ltc);
+	}
+	else if(acc->stop_balance)
+	{
+		acc->stop_balance = false;
+		wakeup_sleep(ltc);
+		LTC6813_wrcfg(ltc);
+		LTC6813_wrcfgb(ltc);
+	}
+
+	return;
+}
 

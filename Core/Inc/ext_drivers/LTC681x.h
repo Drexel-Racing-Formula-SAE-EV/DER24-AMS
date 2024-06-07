@@ -108,11 +108,12 @@ typedef struct
 typedef struct
 {
   float total_volt;
-  float min_volt;
   float max_volt;
+  float min_volt;
   float max_temp;
   float voltage[18];
   float temp[24];
+  int balance_cnt;
   ic_register config;
   ic_register configb;
   cv cells;

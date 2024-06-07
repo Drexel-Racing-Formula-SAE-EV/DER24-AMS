@@ -25,12 +25,14 @@
 typedef struct
 {
 	float total_volt;
-	float max_temp;
 	float max_volt;
 	float min_volt;
+	float max_temp;
+	int balance_cnt;
 	ltc6813_driver_t ltc;
 	cell_asic arr[NSEGS];
 	ltc681x_conf_t cfg;
+	bool stop_balance;
 } accumulator_t;
 
 void accumulator_init(accumulator_t *dev,
