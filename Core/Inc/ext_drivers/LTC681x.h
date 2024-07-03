@@ -199,6 +199,7 @@ typedef struct
 	uint16_t cs_pin[2];
 	uint8_t num_ics;
 	cell_asic *ic_arr;
+	TIM_HandleTypeDef *htim;
 } ltc681x_driver_t;
 
 typedef struct
@@ -811,7 +812,10 @@ int LTC681x_init(ltc681x_driver_t *dev,
 				 uint16_t cs_pin_a,
 				 uint16_t cs_pin_b,
 				 uint8_t num_ics,
-				 cell_asic *ic_arr
+				 cell_asic *ic_arr,
+				 TIM_HandleTypeDef *htim
 				);
+
+void u_sleep(ltc681x_driver_t *dev, uint16_t microseconds);
 
 #endif

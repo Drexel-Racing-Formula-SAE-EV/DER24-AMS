@@ -19,6 +19,7 @@ extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim5;
+extern TIM_HandleTypeDef htim8;
 
 extern UART_HandleTypeDef huart2;
 
@@ -36,6 +37,7 @@ void stm32f407g_init(stm32f407g_t * dev)
 	dev->htim3 = htim3;
 	dev->htim4 = htim4;
 	dev->htim5 = htim5;
+	dev->htim8 = htim8;
 
 	dev->huart2 = huart2;
 }

@@ -48,7 +48,8 @@ void app_create()
 					 STRINGA_CS_GPIO_Port,
 					 STRINGB_CS_GPIO_Port,
 					 STRINGA_CS_Pin,
-					 STRINGB_CS_Pin
+					 STRINGB_CS_Pin,
+					 &app.board.stm32f407g.htim8
 					);
 
 	HAL_UART_Receive_IT(app.board.cli.huart, &app.board.cli.c, 1);

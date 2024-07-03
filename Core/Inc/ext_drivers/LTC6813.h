@@ -636,7 +636,8 @@ int LTC6813_init(ltc6813_driver_t *dev,
 				 uint16_t cs_pin_a,
 				 uint16_t cs_pin_b,
 				 uint8_t num_ics,
-				 cell_asic *ic_arr
+				 cell_asic *ic_arr,
+				 TIM_HandleTypeDef *htim
 				);
 
 #endif

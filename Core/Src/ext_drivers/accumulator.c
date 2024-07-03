@@ -14,7 +14,8 @@ void accumulator_init(accumulator_t *dev,
 					  GPIO_TypeDef *cs_port_a,
 					  GPIO_TypeDef *cs_port_b,
 					  uint16_t cs_pin_a,
-					  uint16_t cs_pin_b
+					  uint16_t cs_pin_b,
+					  TIM_HandleTypeDef *htim
 					 )
 {
 	dev->total_volt = 0;
@@ -58,7 +59,8 @@ void accumulator_init(accumulator_t *dev,
 				 cs_pin_a,
 				 cs_pin_b,
 				 NSEGS,
-				 dev->arr
+				 dev->arr,
+				 htim
 				);
 	wakeup_sleep(ltc);
 	LTC6813_init_cfg(ltc); // to set all zeros
@@ -228,6 +230,7 @@ int accumulator_set_mux_ch(accumulator_t *dev, uint8_t channel, uint8_t addr7)
 	uint8_t icom[3] = {0};
 	uint8_t fcom[3] = {0};
 	uint8_t com[6] = {0};
+	ltc6813_driver_t *ltc = &dev->ltc;
 
 	if(channel > 7) return 1;
 
@@ -255,17 +258,17 @@ int accumulator_set_mux_ch(accumulator_t *dev, uint8_t channel, uint8_t addr7)
 		com[byte * 2 + 1] = (data[byte] << 4) | (fcom[byte] & 0xF);
 	}
 
-    for (uint8_t current_ic = 0; current_ic < dev->ltc.num_ics; current_ic++)
+    for (uint8_t current_ic = 0; current_ic < ltc->num_ics; current_ic++)
     {
     	for(uint8_t byte = 0; byte < 8; byte++)
     	{
-    		dev->ltc.ic_arr[current_ic].com.tx_data[byte]= com[byte];
+    		ltc->ic_arr[current_ic].com.tx_data[byte]= com[byte];
     	}
     }
-    wakeup_sleep(&dev->ltc);
-    LTC6813_wrcomm(&dev->ltc);
-    wakeup_idle(&dev->ltc);
-    LTC6813_stcomm(&dev->ltc, 3);
+    wakeup_sleep(ltc);
+    LTC6813_wrcomm(ltc);
+    wakeup_idle(ltc);
+    LTC6813_stcomm(ltc, 3);
     return error;
 }
 

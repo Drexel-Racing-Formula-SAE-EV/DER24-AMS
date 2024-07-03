@@ -818,9 +818,10 @@ int LTC6813_init(ltc6813_driver_t *dev,
 				 uint16_t cs_pin_a,
 				 uint16_t cs_pin_b,
 				 uint8_t num_ics,
-				 cell_asic *ic_arr
+				 cell_asic *ic_arr,
+				 TIM_HandleTypeDef *htim
 				)
 {
 	// TODO: determie if specific ltc6813 config is needed
-	return LTC681x_init(dev, hspi_a, hspi_b, cs_port_a, cs_port_b, cs_pin_a, cs_pin_b, num_ics, ic_arr);
+	return LTC681x_init(dev, hspi_a, hspi_b, cs_port_a, cs_port_b, cs_pin_a, cs_pin_b, num_ics, ic_arr, htim);
 }

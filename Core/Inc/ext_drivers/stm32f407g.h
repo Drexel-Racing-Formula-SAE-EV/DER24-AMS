@@ -25,6 +25,7 @@ typedef struct
 	TIM_HandleTypeDef htim3;
 	TIM_HandleTypeDef htim4;
 	TIM_HandleTypeDef htim5;
+	TIM_HandleTypeDef htim8;
 
 	UART_HandleTypeDef huart2;
 } stm32f407g_t;

@@ -65,11 +65,9 @@ void wakeup_sleep(ltc681x_driver_t *dev)
 	{
 		// TODO: check delays. original was 300uS and 10uS
 		LTC681x_set_cs(dev, 0);
-		//for(int j = 0; j < 5000; j++);
-		HAL_Delay(1);
+		u_sleep(dev, 300);
 		LTC681x_set_cs(dev, 1);
-		//for(int j = 0; j < 5000; j++);
-		HAL_Delay(1);
+		u_sleep(dev, 10);
 	}
 }
 
@@ -2203,7 +2201,8 @@ int LTC681x_init(ltc681x_driver_t *dev,
 				 uint16_t cs_pin_a,
 				 uint16_t cs_pin_b,
 				 uint8_t num_ics,
-				 cell_asic *ic_arr
+				 cell_asic *ic_arr,
+				 TIM_HandleTypeDef *htim
 				)
 {
 	int ret = 0;
@@ -2216,6 +2215,7 @@ int LTC681x_init(ltc681x_driver_t *dev,
 	dev->cs_pin[1] = cs_pin_b;
 	dev->num_ics = num_ics;
 	dev->ic_arr = ic_arr;
+	dev->htim = htim;
 	HAL_GPIO_WritePin(cs_port_a, cs_pin_a, 1);
 	HAL_GPIO_WritePin(cs_port_b, cs_pin_b, 1);
 	for(int i = 0; i < num_ics; i++)
@@ -2225,4 +2225,15 @@ int LTC681x_init(ltc681x_driver_t *dev,
 	}
 	// TODO: determine if other config is needed
 	return ret;
+}
+
+void u_sleep(ltc681x_driver_t *dev, uint16_t microseconds)
+{
+	uint32_t val = 0;
+	dev->htim->Instance->CNT = 0;
+	do val = dev->htim->Instance->CNT;
+	while(val < microseconds);
+	return;
+	//__HAL_TIM_SET_COUNTER(dev->htim, 0);  // set the counter value a 0
+	//while (__HAL_TIM_GET_COUNTER(dev->htim) < microseconds);
 }

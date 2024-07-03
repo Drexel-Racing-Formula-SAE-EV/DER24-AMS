@@ -13,7 +13,7 @@
 #include <stdbool.h>
 #include "ext_drivers/LTC6813.h"
 
-#define NSEGS 5
+#define NSEGS 3
 #define NCELLS 14
 #define NTEMPS 24
 #define NTEMPCHS 8
@@ -41,7 +41,8 @@ void accumulator_init(accumulator_t *dev,
 					  GPIO_TypeDef *cs_port_a,
 					  GPIO_TypeDef *cs_port_b,
 					  uint16_t cs_pin_a,
-					  uint16_t cs_pin_b
+					  uint16_t cs_pin_b,
+					  TIM_HandleTypeDef *htim
 					  );
 int accumulator_read_volt(accumulator_t *dev);
 int accumulator_read_temp(accumulator_t *dev, uint8_t channel);
