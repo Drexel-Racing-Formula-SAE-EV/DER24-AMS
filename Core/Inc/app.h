@@ -80,6 +80,7 @@ typedef struct
 	bool cli_fault;
 	bool canbus_fault;
 	bool current_fault;
+	bool ltc_fault;
 
 	bool air_state;
 	bool imd_ok;

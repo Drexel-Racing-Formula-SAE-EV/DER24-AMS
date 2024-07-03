@@ -25,6 +25,7 @@ void app_create()
 	app.fan_fault = false;
 	app.cli_fault = false;
 	app.canbus_fault = false;
+	app.ltc_fault = true;
 
 	app.air_state = false;
 	app.imd_ok = true;
@@ -53,6 +54,7 @@ void app_create()
 					);
 
 	HAL_UART_Receive_IT(app.board.cli.huart, &app.board.cli.c, 1);
+	set_bms(0);
 
 	assert(app.cli_task = cli_task_start(&app));
 	assert(app.canbus_task = canbus_task_start(&app));

@@ -39,10 +39,10 @@ void error_task_fn(void *argument)
 		if(prev_air && !data->air_state)
 		{
 			set_bms(0);
-			osDelay(100);
+			osDelay(50);
 		}
 
-		if(data->total_voltage != 0 && data->max_voltage < 6.5 && data->max_temp < 110.0)
+		if(!data->ltc_fault)
 		{
 			errors = 0;
 			errors += check_current(data);
@@ -54,6 +54,7 @@ void error_task_fn(void *argument)
 
 			set_bms(!data->hard_fault);
 		}
+		else set_bms(0);
 
 		osDelayUntil(entry + (1000 / ERR_FREQ));
 	}

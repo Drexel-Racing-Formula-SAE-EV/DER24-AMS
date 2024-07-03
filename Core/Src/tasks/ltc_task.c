@@ -38,6 +38,8 @@ void ltc_task_fn(void *argument)
         data->max_temp = acc->max_temp;
         check_balance(data);
 
+        data->ltc_fault = !(data->total_voltage != 0 && data->max_voltage < 6.5 && data->max_temp < 110.0);
+
         osDelayUntil(entry + (1000 / LTC_FREQ));
 	}
 }
