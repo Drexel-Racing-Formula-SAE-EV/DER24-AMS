@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include "ext_drivers/cli.h"
 
+#define NEWLINE cli_printline(cli, "");
+
 /**
 * @brief Actual CLI task function
 *
@@ -123,6 +125,7 @@ int cmd_not_found(int argc, char *argv[])
 	snprintf(outline, CLI_LINESZ, "Command not found: \'%s\'", argv[0]);
 	ret |= cli_printline(cli, outline);
 	ret |= cli_printline(cli, "Type 'help' for list of commands");
+	ret |= NEWLINE;
 	return ret;
 }
 
@@ -139,14 +142,17 @@ int help(int argc, char *argv[])
 		snprintf(outline, CLI_LINESZ, "%s - %s", cmds[i].name, cmds[i].desc);
 		ret |= cli_printline(cli, outline);
 	}
+	ret |= NEWLINE;
 	return ret;
 }
 
 int id(int argc, char *argv[])
 {
+	int ret = 0;
     snprintf(outline, CLI_LINESZ, "DER AMS FW V%d.%d.%d", VER_MAJOR, VER_MINOR, VER_BUG);
-	cli_printline(cli, outline);
-	return 0;
+	ret |= cli_printline(cli, outline);
+	ret |= NEWLINE;
+	return ret;
 }
 
 int get_faults(int argc, char *argv[])
@@ -157,12 +163,15 @@ int get_faults(int argc, char *argv[])
 	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "soft:   %d", data->soft_fault);
 	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "  ltc:    %d", data->ltc_fault);
+	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "  cli:    %d", data->cli_fault);
 	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "  fan:    %d", data->fan_fault);
 	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "  canbus: %d", data->canbus_fault);
 	ret |= cli_printline(cli, outline);
+	ret |= NEWLINE;
 	return ret;
 }
 
@@ -199,6 +208,9 @@ int get_stat(int argc, char *argv[])
 	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "max segment temp: %f", data->max_temp);
 	ret |= cli_printline(cli, outline);
+	snprintf(outline, CLI_LINESZ, "Current Value: %.3f amps", data->current);
+	ret |= cli_printline(cli, outline);
+	ret |= NEWLINE;
 	return ret;
 }
 
@@ -209,6 +221,7 @@ int get_fans(int argc, char *argv[])
 	ret |= cli_printline(cli, outline);
 	snprintf(outline, CLI_LINESZ, "max segment temp: %f", data->max_temp);
 	ret |= cli_printline(cli, outline);
+	ret |= NEWLINE;
 	return ret;
 }
 
@@ -217,6 +230,7 @@ int get_current(int argc, char *argv[])
 	int ret = 0;
 	snprintf(outline, CLI_LINESZ, "Current Value: %.3f amps", data->current);
 	ret |= cli_printline(cli, outline);
+	ret |= NEWLINE;
 	return ret;
 }
 
@@ -239,6 +253,7 @@ int set_state(int argc, char *argv[])
 			snprintf(outline, CLI_LINESZ, "ERROR: unrecognized state: %s", argv[1]);
 			cli_printline(cli, outline);
 			cli_printline(cli, "Usage: state [charge|discharge|balance]");
+			ret |= NEWLINE;
 			return 1;
 		}
 		snprintf(outline, CLI_LINESZ, "AMS State: %s", state_str[data->state]);
@@ -257,7 +272,9 @@ int set_state(int argc, char *argv[])
 	{
 		cli_printline(cli, "ERROR: too many arguments. use no arguments to query state, or 1 argument to set state");
 		cli_printline(cli, "Usage: state [charge|discharge|balance]");
+		ret |= NEWLINE;
 		return 1;
 	}
+	ret |= NEWLINE;
 	return 0;
 }
