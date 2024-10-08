@@ -48,6 +48,7 @@ void error_task_fn(void *argument)
 			errors += check_current(data);
 			errors += check_volt(data);
 			errors += check_temp(data);
+			errors += data->charger_fault;
 
 			if(errors > 0) data->hard_fault = true;
 			data->soft_fault = check_soft_fault(data);

@@ -17,7 +17,7 @@
 
 #define VER_MAJOR 1
 #define VER_MINOR 0
-#define VER_BUG   1
+#define VER_BUG   2
 
 #define ERR_FREQ 10
 #define CLI_FREQ 10
@@ -81,6 +81,7 @@ typedef struct
 	bool canbus_fault;
 	bool current_fault;
 	bool ltc_fault;
+	bool charger_fault;
 
 	bool air_state;
 	bool imd_ok;

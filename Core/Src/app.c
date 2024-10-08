@@ -26,6 +26,7 @@ void app_create()
 	app.cli_fault = false;
 	app.canbus_fault = false;
 	app.ltc_fault = true;
+	app.charger_fault = false;
 
 	app.air_state = false;
 	app.imd_ok = true;

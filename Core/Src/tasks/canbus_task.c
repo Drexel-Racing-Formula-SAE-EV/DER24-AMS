@@ -99,6 +99,7 @@ void canbus_task_fn(void *arg)
     		if(ccs->hardware_fail || ccs->overtemp_fail)
     		{
     			disable_charge = 1;
+    			data->charger_fault = true;
     			set_bms(0);
     		}
     		can_data[0] = TO_MSB16(voltage10x);
