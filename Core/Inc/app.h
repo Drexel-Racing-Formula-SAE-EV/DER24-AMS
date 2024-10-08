@@ -17,7 +17,7 @@
 
 #define VER_MAJOR 1
 #define VER_MINOR 0
-#define VER_BUG   2
+#define VER_BUG   3
 
 #define ERR_FREQ 10
 #define CLI_FREQ 10
