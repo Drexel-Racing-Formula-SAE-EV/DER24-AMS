@@ -31,7 +31,12 @@ void imd_init(imd_t *dev, uint32_t clock_freq, TIM_HandleTypeDef *htim, TIM_Type
 	HAL_TIM_IC_Start(htim, high_channel);
 }
 
-int imd_read(imd_t *dev)
+void imd_read_ok(imd_t *dev)
+{
+	dev->OK_HS = HAL_GPIO_ReadPin(dev->status_port, dev->status_pin);
+}
+
+int imd_read_freq(imd_t *dev)
 {
 	dev->OK_HS = HAL_GPIO_ReadPin(dev->status_port, dev->status_pin);
 	dev->total_count = HAL_TIM_ReadCapturedValue(dev->htim, dev->total_channel);

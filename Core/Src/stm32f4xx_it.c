@@ -285,7 +285,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 	extern app_data_t app;
 	imd_t *imd = &app.board.imd;
-    if(htim->Instance == imd->htim->Instance && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) imd_read(imd);
+    if(htim->Instance == imd->htim->Instance && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) imd_read_freq(imd);
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {

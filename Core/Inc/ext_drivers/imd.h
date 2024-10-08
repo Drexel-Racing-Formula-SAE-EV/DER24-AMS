@@ -77,6 +77,7 @@ typedef struct
 */
 void imd_init(imd_t *dev, uint32_t clock_freq, TIM_HandleTypeDef *htim, TIM_TypeDef *tim, HAL_TIM_ActiveChannel high_channel, HAL_TIM_ActiveChannel total_channel, GPIO_TypeDef *status_port, uint16_t status_pin);
 
-int imd_read(imd_t *dev);
+void imd_read_ok(imd_t *dev);
+int imd_read_freq(imd_t *dev);
 
 #endif

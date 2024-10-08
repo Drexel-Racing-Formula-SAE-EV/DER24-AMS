@@ -40,6 +40,7 @@ void imd_task_fn(void *argument){
     for(;;)
     {
     	entry = osKernelGetTickCount();
+    	imd_read_ok(imd);
     	data->imd_status = imd->status;
     	data->imd_ok = imd->OK_HS;
     	osDelayUntil(entry + (1000 / IMD_FREQ));
