@@ -29,7 +29,7 @@ void canbus_task_fn(void *arg)
 {
     app_data_t *data = (app_data_t *)arg;
     charger_t *ccs = &data->board.charger;
-    canbus_device_t *canbus = &data->board.canbus;
+    canbus_t *canbus = &data->board.canbus;
     CAN_TxHeaderTypeDef *tx_header = &canbus->tx_header;
     HAL_StatusTypeDef ret;
     uint32_t entry;

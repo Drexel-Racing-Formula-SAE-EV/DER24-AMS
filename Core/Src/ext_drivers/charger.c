@@ -7,7 +7,7 @@
 
 #include "ext_drivers/charger.h"
 
-void charger_init(charger_t *dev, canbus_device_t *canbus)
+void charger_init(charger_t *dev, canbus_t *canbus)
 {
 	dev->target_voltage = 0.0;
 	dev->target_current = 0.0;

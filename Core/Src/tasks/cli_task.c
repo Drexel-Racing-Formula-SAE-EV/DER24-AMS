@@ -36,7 +36,7 @@ int set_state(int argc, char *argv[]);
 
 char outline[CLI_LINESZ];
 app_data_t *data;
-cli_device_t *cli;
+cli_t *cli;
 command_t cmds[] =
 {
 	{"help", &help, "print help menu"},
@@ -98,7 +98,7 @@ void cli_task_fn(void *arg)
 
 int cli_handle_cmd(int argc, char *argv[])
 {
-	cli_device_t *cli = &data->board.cli;
+	cli_t *cli = &data->board.cli;
 	int i;
 	int ret = 0;
 	bool cmd_found = false;

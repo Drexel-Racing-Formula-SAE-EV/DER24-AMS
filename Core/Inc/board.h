@@ -26,8 +26,8 @@ typedef struct
 	current_sensor_t current_sensor;
 	fan_t fans[NFANS];
 	imd_t imd;
-	cli_device_t cli;
-	canbus_device_t canbus;
+	cli_t cli;
+	canbus_t canbus;
 } board_t;
 
 void board_init(board_t *board);

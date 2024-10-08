@@ -24,12 +24,12 @@ typedef struct
 	bool input_volt_fail;
 	bool voltage_sense_fail;
 	bool communication_fail;
-	canbus_device_t *canbus;
+	canbus_t *canbus;
 	uint32_t tx_count;
 	uint32_t rx_count;
 	uint8_t flags;
 } charger_t;
 
-void charger_init(charger_t *dev, canbus_device_t *canbus);
+void charger_init(charger_t *dev, canbus_t *canbus);
 
 #endif /* _CHARGER_H__ */

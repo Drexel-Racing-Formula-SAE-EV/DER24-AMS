@@ -11,7 +11,7 @@
 
 #include "ext_drivers/canbus.h"
 
-void canbus_device_init(canbus_device_t *dev, CAN_HandleTypeDef *hcan)
+void canbus_device_init(canbus_t *dev, CAN_HandleTypeDef *hcan)
 {
     dev->hcan = hcan;
 

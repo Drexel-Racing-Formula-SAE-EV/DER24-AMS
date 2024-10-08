@@ -235,7 +235,7 @@ void TIM5_IRQHandler(void)
 /* USER CODE BEGIN 1 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	extern app_data_t app;
-	cli_device_t *cli = &app.board.cli;
+	cli_t *cli = &app.board.cli;
 	char endl[] = "\r\n";
 	HAL_StatusTypeDef ret = 0;
 
@@ -291,7 +291,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 	//BaseType_t task = 0;
 	extern app_data_t app;
-	canbus_device_t *canbus = &app.board.canbus;
+	canbus_t *canbus = &app.board.canbus;
 	canbus_packet_t *rx_packet = &canbus->rx_packet;
 	CAN_RxHeaderTypeDef rx_header;
 	charger_t *ccs = &app.board.charger;
