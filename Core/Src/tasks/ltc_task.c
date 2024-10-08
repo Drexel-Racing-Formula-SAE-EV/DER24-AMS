@@ -57,7 +57,7 @@ void check_balance(app_data_t *data)
 		for(int seg = 0; seg < NSEGS; seg++)
 		{
 			ltc->ic_arr[seg].balance_cnt = 0;
-			for(int cell = 0; cell < NCELLS; cell++)
+			for(int cell = 0 + acc->balance_odds; cell < NCELLS; cell += 2)
 			{
 				if(ltc->ic_arr[seg].voltage[cell] - min > BALANCE_THRESH)
 				{
@@ -69,8 +69,13 @@ void check_balance(app_data_t *data)
 		}
 		if(acc->balance_cnt == 0)
 		{
-			data->state = STATE_DISCHARGE;
-			cli_printline(&data->board.cli, "Balancing Complete. Switching to Discharge Mode");
+			if(!acc->balance_odds) acc->balance_odds = true;
+			else
+			{
+				acc->balance_odds = false;
+				data->state = STATE_DISCHARGE;
+				cli_printline(&data->board.cli, "Balancing Complete. Switching to Discharge Mode");
+			}
 		}
 		wakeup_sleep(ltc);
 		LTC6813_wrcfg(ltc);

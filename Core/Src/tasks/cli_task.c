@@ -254,6 +254,7 @@ int set_state(int argc, char *argv[])
 			cli_printline(cli, outline);
 			cli_printline(cli, "Usage: state [charge|discharge|balance]");
 			ret |= NEWLINE;
+			data->acc.balance_odds = false;
 			return 1;
 		}
 		snprintf(outline, CLI_LINESZ, "AMS State: %s", state_str[data->state]);

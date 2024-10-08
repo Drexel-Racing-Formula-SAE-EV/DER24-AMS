@@ -33,6 +33,7 @@ typedef struct
 	cell_asic arr[NSEGS];
 	ltc681x_conf_t cfg;
 	bool stop_balance;
+	bool balance_odds;
 } accumulator_t;
 
 void accumulator_init(accumulator_t *dev,

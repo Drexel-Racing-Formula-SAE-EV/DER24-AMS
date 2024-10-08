@@ -24,6 +24,7 @@ void accumulator_init(accumulator_t *dev,
 	dev->max_temp = 0.0;
 	dev->balance_cnt = 0;
 	dev->stop_balance = false;
+	dev->balance_odds = false;
 
 	dev->cfg.OV_THRESHOLD = 0;
 
