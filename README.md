@@ -1,4 +1,4 @@
-# DER 2024 AMS Firmware v1.0.2
+# DER 2024 AMS Firmware v1.0.3
 
 Designed and writen by Cole Bardin (cab572)
 
@@ -29,6 +29,8 @@ The `app_data_t` type contains highest priority data such as fault flags, total 
 The `board_t` type contains representations of physical devices on the ECU board such as the STM32F4, fans, IMD, CANBus transceiver, etc. These devices are represented with their own custom typedef'd data structures.
 
 The `stm32f407g_t` type contain the interfaces for the STM HAL. It holds all the handles, mutexes, and other data types used to interface with the MCU hardware.
+
+There is also an `accumulator_t` structure that lives in the `board_t` instance. This data structure tracks the overall statistics for the accumulator read back by the LTC chips and the current sensor. It also tracks metrics for cell balancing. There is also an array of `cell_asic` data structures. These are a modified version of the data structure provided in Analog Devices' original LTC681x library. There is 1 `cell_asic` struct per segment and they represent the LTC6813 ASIC on the BMBs. They have copies of all the internal registers and statistics for each segment. Inside the `accumulator_t` instance, there is also a custom `ltc6813_driver_t` instance. This utilizes the array of `cell_asic` structures to perform communication and write commands to the segments.
 
 Data structures like the `poten_t` and `canbus_t` are wrappers around the physical devices on the board. Instances of these structs are stored in the `board` struct for conventient and reliable access.
 
@@ -110,5 +112,7 @@ The voltage reading is pretty straight forward. There is a command for the LTC68
 
 Temperature reading is a bit more complicated. There is no built in temperature monitoring available in the LTC. Instead we use 24 NTCs on the Battery Management Bords (BMBs) that go into 3 8 to 1 analog multiplexors. The multiplexor outputs are read as GPIO analog inputs on the LTC chips. So there are 3 out of the 9 GPIOs are used to read temperatures. Two more of the GPIOs are used as an I2C controller. The analog multiplexors are driven by I2C. So the AMS can tell the LTC chips to send arbitrary I2C signals. Temperature reading goes as following: select channel mux, poll GPIO pins with ADCs, read auxiliary registers from LTC (the actual voltages read by the GPIO pins), convert to temperatures, determine next channel to read.
 
-To perform cell balancing, every task iteration, the AMS checks to see if it is in balancing mode. If so, it determines which cells need to be balanced and sets the discharge bits accordingly. On each iteration, it clears the discharge bits for all cells so that once a cell is done balancing, it will stop discharging. If no cells are found that need balancing, it will exit balance mode.
+To perform cell balancing, every task iteration, the AMS checks to see if it is in balancing mode. If so, it determines which cells need to be balanced and sets the discharge bits accordingly. On each iteration, it clears the discharge bits for all cells so that once a cell is done balancing, it will stop discharging. If no cells are found that need balancing, it will exit balance mode. 
+
+Note that not all cells are balanced simultaneously. To reduce the heat that is induced to the board at once, every other cell is checked for balancing. This is because during testing, all cells would be balanced that need it. This made the top BMB PCB way too hot. In an effort to reduce the heat generated at once, every other cell is balanced. It starts off by balancing every even numbered cell, 0, 2, 4, 6, 8, 10, 12. After all even cells are balanced across all the segments, it begins balancing for the odd numbered cells, 1, 3, 5, 7, 9, 11, 13. Once there are no more odd cells to balance, cell balancing is completed and the AMS returns to discharge mode.
 
