@@ -36,7 +36,7 @@
 #define IMD_PRIO  3
 #define CELL_PRIO 2
 
-#define ECU_CANBUS_ID 0x420
+#define ECU_CANBUS_ID 0x69
 #define CCS_CANBUS_ID 0x1806E5F4
 #define BCA_CANBUS_ID 0x18FF50E5
 

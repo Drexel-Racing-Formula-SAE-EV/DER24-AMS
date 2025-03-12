@@ -36,11 +36,12 @@ void error_task_fn(void *argument)
 
 		prev_air = data->air_state;
 		data->air_state = HAL_GPIO_ReadPin(AIR_CONTROL_MCU_GPIO_Port, AIR_CONTROL_MCU_Pin);
+		/*
 		if(prev_air && !data->air_state)
 		{
 			set_bms(0);
 			osDelay(50);
-		}
+		}*/
 
 		if(!data->ltc_fault)
 		{
